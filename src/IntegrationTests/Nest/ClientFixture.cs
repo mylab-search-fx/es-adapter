@@ -57,7 +57,7 @@ namespace IntegrationTests.Nest
 
         async Task<string> CreateIndex(Func<CreateIndexDescriptor, ICreateIndexRequest> selector)
         {
-            var indexName = Guid.NewGuid().ToString("N");
+            var indexName = "test-" + Guid.NewGuid().ToString("N");
 
             var res = await EsClient.Indices.CreateAsync(
                 indexName, selector);
