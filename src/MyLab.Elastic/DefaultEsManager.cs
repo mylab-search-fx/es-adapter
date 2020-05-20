@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using Elasticsearch.Net;
 using Microsoft.Extensions.Options;
 using Nest;
@@ -9,7 +8,9 @@ namespace MyLab.Elastic
     class DefaultEsManager : IEsManager, IDisposable
     {
         private readonly IConnectionPool _connectionPool;
-        private ElasticClient _client;
+        public ElasticClient Client { get; }
+
+        public ElasticSearchOptions Options { get; }
 
         public DefaultEsManager(IOptions<ElasticSearchOptions> options)
             :this(options.Value)
@@ -18,31 +19,16 @@ namespace MyLab.Elastic
         }
 
         public DefaultEsManager(ElasticSearchOptions options)
-            :this(new SingleNodeConnectionPool(new Uri(options.Url)))
         {
-
-        }
-
-        public DefaultEsManager(IConnectionPool connectionPool)
-        {
-            _connectionPool = connectionPool;
+            Options = options;
+            _connectionPool = new SingleNodeConnectionPool(new Uri(options.Url));
             var settings = new ConnectionSettings(_connectionPool);
-            _client = new ElasticClient(settings);
+            Client = new ElasticClient(settings);
         }
 
         public void Dispose()
         {
             _connectionPool.Dispose();
-        }
-
-        public Task IndexAsync<TDoc>(TDoc document) where TDoc : class
-        {
-            return Task.CompletedTask;
-        }
-
-        public Task<TDoc> SearchAsync<TDoc>(Func<SearchDescriptor<TDoc>, ISearchRequest> query, Func<HighlightDescriptor<TDoc>, IHighlight> highlightSelector = null) where TDoc : class
-        {
-            return Task.FromResult(default(TDoc));
         }
     }
 }

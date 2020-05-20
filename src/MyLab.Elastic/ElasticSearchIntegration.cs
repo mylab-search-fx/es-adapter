@@ -12,7 +12,7 @@ namespace MyLab.Elastic
         /// <summary>
         /// Adds ES tools services
         /// </summary>
-        public static IServiceCollection AddElasticSearch(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddEsTools(this IServiceCollection services, IConfiguration configuration)
         {
             if (services == null) throw new ArgumentNullException(nameof(services));
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
