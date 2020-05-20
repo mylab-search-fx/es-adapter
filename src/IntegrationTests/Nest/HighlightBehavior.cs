@@ -33,8 +33,8 @@ namespace IntegrationTests.Nest
             {
                 var indexResponse = await _clFx.EsClient.IndexManyAsync(
                     new[] {
-                        new TestEntity { Id = 10, Value = "some foo text here" },
-                        new TestEntity { Id = 1, Value = "some bar string here" }
+                        new TestEntity { Id = 10, Value = "some foo text here. id=10" },
+                        new TestEntity { Id = 1, Value = "some bar string here. id=1" }
                     },
                     indNm);
 
@@ -55,7 +55,12 @@ namespace IntegrationTests.Nest
                                 .PreTags("<b>")
                                 .PostTags("</b>")
                                 .Encoder(HighlighterEncoder.Html)
-                                .Fields(d => d.Field(entity => entity.Value))));
+                                .Fields(d => 
+                                    d.Field(entity => entity.Value)
+                                        .HighlightQuery(qd => 
+                                            qd.Match(qdm => qdm
+                                                .Field(entity => entity.Value)
+                                                .Query("foo text 10"))))));
 
                     hit = sr.Hits.First();
                     highlight = hit.Highlight.First();
@@ -71,7 +76,7 @@ namespace IntegrationTests.Nest
             //Assert
             Assert.Equal("val", highlight.Key);
             Assert.Equal(1, highlight.Value.Count);
-            Assert.Contains("some <b>foo</b> <b>text</b> here", highlight.Value);
+            Assert.Contains("some <b>foo</b> <b>text</b> here. id=<b>10</b>", highlight.Value);
         }
     }
 }
