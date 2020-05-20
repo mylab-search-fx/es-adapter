@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using IntegrationTests.Stuff;
 using Nest;
 using Xunit;
 

@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
+using IntegrationTests.Stuff;
 using Nest;
 using Newtonsoft.Json;
 using Xunit;

@@ -1,7 +1,7 @@
 ﻿using System;
 using Elasticsearch.Net;
 
-namespace IntegrationTests.Nest
+namespace IntegrationTests.Stuff
 {
     static class TestConnection
     {

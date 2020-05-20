@@ -32,26 +32,15 @@ namespace MyLab.Elastic
 
             if (!string.IsNullOrEmpty(config.Value))
             {
-                services.Configure<ElasticSearchOptions>(opt =>
+                services.Configure<ElasticsearchOptions>(opt =>
                 {
                     opt.Url = config.Value;
                 });
             }
             else
             {
-                services.Configure<ElasticSearchOptions>(config);
+                services.Configure<ElasticsearchOptions>(config);
             }
         }
-    }
-
-    /// <summary>
-    /// Contains options parameters for ES tools
-    /// </summary>
-    public class ElasticSearchOptions
-    {
-        /// <summary>
-        /// Base address
-        /// </summary>
-        public string Url { get; set; }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Nest;
 
-namespace IntegrationTests.Nest
+namespace IntegrationTests.Stuff
 {
     [ElasticsearchType(IdProperty = nameof(Id))]
     class TestEntity

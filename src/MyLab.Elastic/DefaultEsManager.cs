@@ -10,15 +10,15 @@ namespace MyLab.Elastic
         private readonly IConnectionPool _connectionPool;
         public ElasticClient Client { get; }
 
-        public ElasticSearchOptions Options { get; }
+        public ElasticsearchOptions Options { get; }
 
-        public DefaultEsManager(IOptions<ElasticSearchOptions> options)
+        public DefaultEsManager(IOptions<ElasticsearchOptions> options)
             :this(options.Value)
         {
             
         }
 
-        public DefaultEsManager(ElasticSearchOptions options)
+        public DefaultEsManager(ElasticsearchOptions options)
         {
             Options = options;
             _connectionPool = new SingleNodeConnectionPool(new Uri(options.Url));

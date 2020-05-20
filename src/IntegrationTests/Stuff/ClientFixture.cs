@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Elasticsearch.Net;
 using Nest;
 
-namespace IntegrationTests.Nest
+namespace IntegrationTests.Stuff
 {
     public class ClientFixture : IDisposable
     {
