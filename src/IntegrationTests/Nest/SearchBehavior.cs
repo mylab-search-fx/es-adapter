@@ -22,6 +22,7 @@ namespace IntegrationTests.Nest
         [Fact]
         public async Task ShouldFindById()
         {
+            //Arrange 
             IHit<TestEntity> hit = null;
 
             await _clFx.UseTmpIndexWithMap(async indNm =>
@@ -39,6 +40,7 @@ namespace IntegrationTests.Nest
 
                 if (indexResponse.IsValid)
                 {
+                    //Act
                     var sr = await _clFx.EsClient.SearchAsync<TestEntity>(sd => 
                         sd.Index(indNm)
                             .Query(q => q
@@ -66,6 +68,7 @@ namespace IntegrationTests.Nest
         [Fact]
         public async Task ShouldFindByField()
         {
+            //Arrange
             IHit<TestEntity> hit = null;
             int hitCount = 0;
 
@@ -84,6 +87,7 @@ namespace IntegrationTests.Nest
 
                 if (indexResponse.IsValid)
                 {
+                    //Act
                     var sr = await _clFx.EsClient.SearchAsync<TestEntity>(sd =>
                         sd.Index(indNm)
                             .Query(q => q
@@ -114,6 +118,7 @@ namespace IntegrationTests.Nest
         [Fact]
         public async Task ShouldFindByFullText()
         {
+            //Arrange
             IHit<TestEntity> hit = null;
             int hitCount = 0;
 
@@ -132,6 +137,7 @@ namespace IntegrationTests.Nest
 
                 if (indexResponse.IsValid)
                 {
+                    //Act
                     var sr = await _clFx.EsClient.SearchAsync<TestEntity>(sd =>
                         sd.Index(indNm)
                             .Query(q => q
