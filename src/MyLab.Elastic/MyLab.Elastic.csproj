@@ -2,6 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Copyright>Copyright (c) 2019 Andrey Osintsev &lt;ozzy.ext@gmail.com&gt;</Copyright>
+    <Authors>Andrey O.</Authors>
+    <Company>Andrey O.</Company>
+    <RepositoryUrl>https://github.com/ozzy-ext-mylab/elastic.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/ozzy-ext-mylab/elastic</PackageProjectUrl>
+    <AssemblyVersion>1.0.0.2105</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
