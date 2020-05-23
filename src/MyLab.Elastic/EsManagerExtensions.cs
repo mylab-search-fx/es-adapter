@@ -1,71 +1,75 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using Nest;
 
 namespace MyLab.Elastic
 {
     /// <summary>
-    /// Extensions for 
+    /// Extensions for <see cref="IEsManager"/>
     /// </summary>
     public static class EsManagerExtensions
     {
+        /// <summary>
+        /// Index document batch in specified index
+        /// </summary>
         public static async Task IndexManyAsync<TDoc>(this IEsManager mgr, string indexName, IEnumerable<TDoc> documents)
             where TDoc : class
         {
-            if (documents == null) throw new ArgumentNullException(nameof(documents));
-            var resIndexName = indexName ?? typeof(TDoc).GetCustomAttribute<ElasticsearchIndexAttribute>()?.IndexName;
+            if (mgr == null) throw new ArgumentNullException(nameof(mgr));
 
-            var indexResponse = await mgr.Client.IndexManyAsync(documents, resIndexName);
-            if (!indexResponse.IsValid)
-                throw new EsIndexManyException(indexResponse);
+            await new EsLogic<TDoc>(mgr.Client)
+                .IndexManyAsync(indexName, documents);
         }
 
+        /// <summary>
+        /// Index document batch in index which bound to document model
+        /// </summary>
         public static Task IndexManyAsync<TDoc>(this IEsManager mgr, IEnumerable<TDoc> documents)
             where TDoc : class
         {
             return IndexManyAsync(mgr, null, documents);
         }
 
+        /// <summary>
+        /// Index document in specified index
+        /// </summary>
         public static async Task IndexAsync<TDoc>(this IEsManager mgr, string indexName, TDoc document)
             where TDoc : class
         {
-            if (document == null) throw new ArgumentNullException(nameof(document));
-            var resIndexName = indexName ?? typeof(TDoc).GetCustomAttribute<ElasticsearchIndexAttribute>()?.IndexName;
+            if (mgr == null) throw new ArgumentNullException(nameof(mgr));
 
-            var indexResponse = await mgr.Client.IndexAsync(document, iDesc => iDesc.Index(resIndexName));
-            if (!indexResponse.IsValid)
-                throw new EsIndexException(indexResponse);
+            await new EsLogic<TDoc>(mgr.Client)
+                .IndexAsync(indexName, document);
         }
 
+        /// <summary>
+        /// Index document in index which bound to document model
+        /// </summary>
         public static Task IndexAsync<TDoc>(this IEsManager mgr, TDoc document)
             where TDoc : class
         {
             return IndexAsync(mgr, null, document);
         }
 
+        /// <summary>
+        /// Search documents in specified index
+        /// </summary>
         public static async Task<IReadOnlyCollection<TDoc>> SearchAsync<TDoc>(
             this IEsManager mgr, 
             string indexName,
             Func<QueryContainerDescriptor<TDoc>, QueryContainer> query)
             where TDoc : class
         {
-            if (query == null) throw new ArgumentNullException(nameof(query));
+            if (mgr == null) throw new ArgumentNullException(nameof(mgr));
 
-            var resIndexName = indexName ?? typeof(TDoc).GetCustomAttribute<ElasticsearchIndexAttribute>()?.IndexName;
-
-            var sr = await mgr.Client.SearchAsync<TDoc>(sd => sd
-                .Index(resIndexName)
-                .Query(query));
-
-            if (!sr.IsValid)
-                throw new EsSearchException<TDoc>(sr);
-
-            return sr.Documents;
+            return await new EsLogic<TDoc>(mgr.Client)
+                .SearchAsync(indexName, query);
         }
 
+        /// <summary>
+        /// Search documents in index which bound to document model
+        /// </summary>
         public static Task<IReadOnlyCollection<TDoc>> SearchAsync<TDoc>(
             this IEsManager mgr,
             Func<QueryContainerDescriptor<TDoc>, QueryContainer> query)
@@ -74,6 +78,9 @@ namespace MyLab.Elastic
             return SearchAsync(mgr, null, query);
         }
 
+        /// <summary>
+        /// Search documents with highlighting in specified index
+        /// </summary>
         public static async Task<IReadOnlyCollection<HighLightedDocument<TDoc>>> SearchAsync<TDoc>(
             this IEsManager mgr,
             string indexName,
@@ -81,32 +88,15 @@ namespace MyLab.Elastic
             Func<HighlightDescriptor<TDoc>, IHighlight> highlightSelector)
             where TDoc : class
         {
-            if (query == null) throw new ArgumentNullException(nameof(query));
-            if (highlightSelector == null) throw new ArgumentNullException(nameof(highlightSelector));
+            if (mgr == null) throw new ArgumentNullException(nameof(mgr));
 
-            var resIndexName = indexName ?? typeof(TDoc).GetCustomAttribute<ElasticsearchIndexAttribute>()?.IndexName;
-
-            var sr = await mgr.Client.SearchAsync<TDoc>(sd => sd
-                .Index(resIndexName)
-                .Query(query)
-                .Highlight(highlightSelector));
-
-            if (!sr.IsValid)
-                throw new EsSearchException<TDoc>(sr);
-
-            var foundDocs = sr.Hits.Select(h => 
-                new HighLightedDocument<TDoc>(
-                    h.Source, 
-                    h.Highlight
-                        .Values
-                        .FirstOrDefault()?
-                        .FirstOrDefault()
-                    )
-            );
-
-            return foundDocs.ToList().AsReadOnly();
+            return await new EsLogic<TDoc>(mgr.Client)
+                .SearchAsync(indexName, query, highlightSelector);
         }
 
+        /// <summary>
+        /// Search documents with highlighting in index which bound to document model
+        /// </summary>
         public static Task<IReadOnlyCollection<HighLightedDocument<TDoc>>> SearchAsync<TDoc>(
             this IEsManager mgr,
             Func<QueryContainerDescriptor<TDoc>, QueryContainer> query,
@@ -114,6 +104,17 @@ namespace MyLab.Elastic
             where TDoc : class
         {
             return SearchAsync(mgr, null, query, highlightSelector);
+        }
+
+        /// <summary>
+        /// Create index specific manager
+        /// </summary>
+        public static IIndexSpecificEsManager ForIndex(this IEsManager mgr, string indexName)
+        {
+            if (indexName == null) throw new ArgumentNullException(nameof(indexName));
+            if (mgr == null) throw new ArgumentNullException(nameof(mgr));
+
+            return new DefaultIndexSpecificEsManager(indexName, mgr.Client);
         }
     }
 }
