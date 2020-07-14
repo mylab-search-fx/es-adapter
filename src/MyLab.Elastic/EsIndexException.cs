@@ -1,4 +1,5 @@
 ﻿using System;
+using MyLab.Logging;
 using Nest;
 
 namespace MyLab.Elastic
@@ -34,6 +35,8 @@ namespace MyLab.Elastic
             : base(msg, resp.OriginalException)
         {
             Response = resp;
+            this.AndFactIs(resp.ApiCall);
+            this.AndFactIs("server-error", resp.ServerError.ToString());
         }
     }
 
