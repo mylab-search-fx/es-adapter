@@ -20,7 +20,7 @@ namespace MyLab.Elastic
             if (!response.IsValid)
                 throw new ResponseException(msg, response)
                     .AndFactIs(response.ApiCall)
-                    .AndFactIs("server-error", response.ServerError.ToString()); 
+                    .AndFactIs("server-error", response.ServerError?.ToString() ?? "[null]"); 
         }
 
         /// <summary>
