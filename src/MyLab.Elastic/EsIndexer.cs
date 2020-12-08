@@ -8,10 +8,12 @@ namespace MyLab.Elastic
     class EsIndexer<TDoc> : IEsIndexer<TDoc> 
         where TDoc : class
     {
+        private readonly IIndexNameProvider _indexNameProvider;
         private readonly ElasticClient _client;
 
-        public EsIndexer(IEsClientProvider clientProvider)
+        public EsIndexer(IEsClientProvider clientProvider, IIndexNameProvider indexNameProvider)
         {
+            _indexNameProvider = indexNameProvider;
             _client = clientProvider.Provide();
         }
 
@@ -22,7 +24,7 @@ namespace MyLab.Elastic
 
         public Task IndexManyAsync(IEnumerable<TDoc> documents)
         {
-            return IndexManyAsync(null, documents);
+            return IndexManyAsync(_indexNameProvider.Provide<TDoc>(), documents);
         }
 
         public Task IndexAsync(string indexName, TDoc document)
@@ -32,7 +34,7 @@ namespace MyLab.Elastic
 
         public Task IndexAsync(TDoc document)
         {
-            return IndexAsync(null, document);
+            return IndexAsync(_indexNameProvider.Provide<TDoc>(), document);
         }
 
         public IIndexSpecificEsIndexer<TDoc> ForIndex(string indexName)

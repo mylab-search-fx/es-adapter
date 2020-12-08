@@ -15,21 +15,18 @@ namespace MyLab.Elastic.SearchEngine
         private readonly IEsSearchEngineStrategy<TDoc> _strategy;
         private readonly IEsSearcher<TDoc> _searcher;
 
-        /// <summary>
-        /// Registered filter map
-        /// </summary>
-        public IDictionary<string, IEsSearchFilter<TDoc>> RegisteredFilters { get; set; }
-        /// <summary>
-        /// Registered sorts map
-        /// </summary>
-        public IDictionary<string, IEsSearchSort<TDoc>> RegisteredSorts { get; set; }
+        private readonly IDictionary<string, IEsSearchFilter<TDoc>> _registeredFilters =
+            new Dictionary<string, IEsSearchFilter<TDoc>>();
+
+        private readonly IDictionary<string, IEsSearchSort<TDoc>> _registeredSorts 
+            = new Dictionary<string, IEsSearchSort<TDoc>>();
 
         /// <summary>
         /// Initializes a new instance of <see cref="SearchEngine"/>
         /// </summary>
-        public EsSearchEngine(string indexName, IEsSearcher<TDoc> searcher, IEsSearchEngineStrategy<TDoc> strategy)
+        public EsSearchEngine(IIndexNameProvider indexNameProvider, IEsSearcher<TDoc> searcher, IEsSearchEngineStrategy<TDoc> strategy)
         {
-            _indexName = indexName;
+            _indexName = indexNameProvider.Provide<TDoc>();
             _strategy = strategy ?? throw new ArgumentNullException(nameof(strategy));
             _searcher = searcher ?? throw new ArgumentNullException(nameof(searcher));
         }
@@ -46,6 +43,30 @@ namespace MyLab.Elastic.SearchEngine
             };
 
             return await _searcher.ForIndex(_indexName).SearchAsync(sp);
+        }
+
+        /// <summary>
+        /// Registers filter with specified key
+        /// </summary>
+        protected void RegisterFilter(string key, IEsSearchFilter<TDoc> filter)
+        {
+            if (filter == null) throw new ArgumentNullException(nameof(filter));
+            if (string.IsNullOrWhiteSpace(key))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(key));
+
+            _registeredFilters.Add(key, filter);
+        }
+
+        /// <summary>
+        /// Registers sort with specified key
+        /// </summary>
+        protected void RegisterSort(string key, IEsSearchSort<TDoc> sort)
+        {
+            if (sort == null) throw new ArgumentNullException(nameof(sort));
+            if (string.IsNullOrWhiteSpace(key))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(key));
+
+            _registeredSorts.Add(key, sort);
         }
 
         private QueryContainer CreateSearchQuery(QueryContainerDescriptor<TDoc> d, string queryStr, string filterKey)
@@ -113,7 +134,7 @@ namespace MyLab.Elastic.SearchEngine
 
         private Func<SortDescriptor<TDoc>, IPromise<IList<ISort>>> GetSort(string sortKey)
         {
-            if (sortKey == null || RegisteredSorts == null || !RegisteredSorts.TryGetValue(sortKey, out var foundSort))
+            if (sortKey == null || _registeredSorts == null || !_registeredSorts.TryGetValue(sortKey, out var foundSort))
                 return null;
 
             return foundSort.Sort;
@@ -121,7 +142,7 @@ namespace MyLab.Elastic.SearchEngine
 
         private Func<QueryContainerDescriptor<TDoc>, QueryContainer> GetFilter(string filterKey)
         {
-            if (filterKey == null || RegisteredFilters == null || !RegisteredFilters.TryGetValue(filterKey, out var foundFilter))
+            if (filterKey == null || _registeredFilters == null || !_registeredFilters.TryGetValue(filterKey, out var foundFilter))
                 return null;
 
             return foundFilter.Filter;

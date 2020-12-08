@@ -16,7 +16,7 @@ namespace IntegrationTests
         {
             _clFx = clFx;
             _output = output;
-            _indexer = new EsIndexer<TestEntity>(new SingleEsClientProvider(_clFx.EsClient));
+            _indexer = new EsIndexer<TestEntity>(new SingleEsClientProvider(_clFx.EsClient), null);
         }
 
         [Fact]

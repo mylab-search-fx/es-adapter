@@ -9,41 +9,24 @@ namespace MyLab.Elastic
     /// </summary>
     public static class ElasticSearchIntegration
     {
+        public const string DefaultConfigSectionName = "Elasticsearch";
+
         /// <summary>
         /// Adds ES tools services
         /// </summary>
-        public static IServiceCollection AddEsTools(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddEsTools(this IServiceCollection services, IConfiguration configuration, string sectionName = DefaultConfigSectionName)
         {
             if (services == null) throw new ArgumentNullException(nameof(services));
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
 
-            Configure(services, configuration);
-
             services.AddSingleton<IEsClientProvider, EsClientProvider>();
             services.AddSingleton<IEsManager, EsManager>();
+            services.AddSingleton<IIndexNameProvider, IndexNameProvider>();
             services.AddSingleton(typeof(IEsSearcher<>), typeof(EsSearcher<>));
             services.AddSingleton(typeof(IEsIndexer<>), typeof(EsIndexer<>));
+            services.Configure<ElasticsearchOptions>(configuration.GetSection(sectionName));
 
             return services;
-        }
-
-        private static void Configure(IServiceCollection services, IConfiguration configuration)
-        {
-            var config = configuration.GetSection("ElasticSearch");
-            if(!config.Exists())
-                throw new InvalidOperationException("Configuration section 'ElasticSearch' not found");
-
-            if (!string.IsNullOrEmpty(config.Value))
-            {
-                services.Configure<ElasticsearchOptions>(opt =>
-                {
-                    opt.Url = config.Value;
-                });
-            }
-            else
-            {
-                services.Configure<ElasticsearchOptions>(config);
-            }
         }
     }
 }

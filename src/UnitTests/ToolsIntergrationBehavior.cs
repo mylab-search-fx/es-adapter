@@ -14,15 +14,12 @@ namespace UnitTests
         public async Task ShouldIntegrate()
         {
             //Arrange
-            var config = new ConfigurationBuilder()
-                .AddInMemoryCollection(new []
-            {
-                new KeyValuePair<string, string>("ElasticSearch", "http://localhost:10115" )
-            }).Build();
+            var config = new ConfigurationBuilder().Build();
 
             //Act
             var serviceProvider = new ServiceCollection()
                 .AddEsTools(config)
+                .Configure<ElasticsearchOptions>(opt => opt.Url = "http://localhost:10115")
                 .BuildServiceProvider();
 
             var testService = ActivatorUtilities.CreateInstance<TestService>(serviceProvider);

@@ -6,8 +6,13 @@
     public class ElasticsearchOptions
     {
         /// <summary>
-        /// Base address
+        /// ES address
         /// </summary>
         public string Url { get; set; }
+
+        /// <summary>
+        /// Index name which will be used when no index specified for model
+        /// </summary>
+        public string DefaultIndex { get; set; }
     }
 }

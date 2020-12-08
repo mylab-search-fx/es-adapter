@@ -6,10 +6,12 @@ namespace MyLab.Elastic
     class EsSearcher<TDoc> : IEsSearcher<TDoc>
         where TDoc : class
     {
+        private readonly IIndexNameProvider _indexNameProvider;
         private readonly ElasticClient _client;
 
-        public EsSearcher(IEsClientProvider clientProvider)
+        public EsSearcher(IEsClientProvider clientProvider, IIndexNameProvider indexNameProvider)
         {
+            _indexNameProvider = indexNameProvider;
             _client = clientProvider.Provide();
         }
 
@@ -20,7 +22,7 @@ namespace MyLab.Elastic
 
         public Task<EsFound<TDoc>> SearchAsync(SearchParams<TDoc> searchParams)
         {
-            return SearchAsync(null, searchParams);
+            return SearchAsync(_indexNameProvider.Provide<TDoc>(), searchParams);
         }
 
         public Task<EsHlFound<TDoc>> SearchAsync(string indexName, SearchParams<TDoc> searchParams, EsHlSelector<TDoc> hlSelector)
@@ -30,7 +32,7 @@ namespace MyLab.Elastic
 
         public Task<EsHlFound<TDoc>> SearchAsync(SearchParams<TDoc> searchParams, EsHlSelector<TDoc> hlSelector)
         {
-            return SearchAsync(null, searchParams, hlSelector);
+            return SearchAsync(_indexNameProvider.Provide<TDoc>(), searchParams, hlSelector);
         }
 
         public IIndexSpecificEsSearcher<TDoc> ForIndex(string indexName)
