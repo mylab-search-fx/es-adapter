@@ -99,7 +99,7 @@ namespace IntegrationTests
 
 
             //Act
-            var found = await InvokeTest<SimpleSearchEngine>(engine => engine.SearchAsync("", "single-digit"));
+            var found = await InvokeTest<SimpleSearchEngine>(engine => engine.SearchAsync("", filterKey: "single-digit"));
 
             //Assert
             Assert.NotNull(found);

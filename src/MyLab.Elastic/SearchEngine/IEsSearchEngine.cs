@@ -10,6 +10,11 @@ namespace MyLab.Elastic.SearchEngine
         /// <summary>
         /// Performs searching
         /// </summary>
-        Task<EsFound<TDoc>> SearchAsync(string queryStr, string filterKey = null, string sortKey = null, EsPaging paging = null);
+        Task<EsFound<TDoc>> SearchAsync(
+            string queryStr, 
+            IEsSearchEngineStrategy<TDoc> strategy = null, 
+            string filterKey = null, 
+            string sortKey = null, 
+            EsPaging paging = null);
     }
 }
