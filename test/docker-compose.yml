@@ -1,0 +1,23 @@
+version: '2.2'
+services:
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
+    container_name: mylab-es-tests-es
+    environment:
+      - discovery.type=single-node
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - mylab-es-tests:/usr/share/elasticsearch/data
+    ports:
+      - 10115:9200
+    networks:
+      - mylab-es-tests
+
+volumes:
+  mylab-es-tests:
+
+networks:
+  mylab-es-tests:
