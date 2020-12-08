@@ -15,19 +15,12 @@ namespace MyLab.Elastic
         {
             _cl = cl;
         }
-
-        string RetrieveIndexName(string specifiedName)
-        {
-            return specifiedName ?? typeof(TDoc).GetCustomAttribute<ElasticsearchIndexAttribute>()?.IndexName;
-        }
         
         public async Task IndexManyAsync(string indexName, IEnumerable<TDoc> documents)
         {
             if (documents == null) throw new ArgumentNullException(nameof(documents));
 
-            var resIndexName = RetrieveIndexName(indexName);
-
-            var indexResponse = await _cl.IndexManyAsync(documents, resIndexName);
+            var indexResponse = await _cl.IndexManyAsync(documents, indexName);
             if (!indexResponse.IsValid)
                 throw new EsIndexManyException(indexResponse);
         }
@@ -36,9 +29,8 @@ namespace MyLab.Elastic
             
         {
             if (document == null) throw new ArgumentNullException(nameof(document));
-            var resIndexName = RetrieveIndexName(indexName);
 
-            var indexResponse = await _cl.IndexAsync(document, iDesc => iDesc.Index(resIndexName));
+            var indexResponse = await _cl.IndexAsync(document, iDesc => iDesc.Index(indexName));
             if (!indexResponse.IsValid)
                 throw new EsIndexException(indexResponse);
         }
@@ -47,9 +39,7 @@ namespace MyLab.Elastic
         {
             if (searchParams == null) throw new ArgumentNullException(nameof(searchParams));
 
-            var resIndexName = RetrieveIndexName(indexName);
-
-            var sr = await _cl.SearchAsync(GetSearchFunc(resIndexName, searchParams));
+            var sr = await _cl.SearchAsync(GetSearchFunc(indexName, searchParams));
 
             if (!sr.IsValid)
                 throw new EsSearchException<TDoc>(sr);
@@ -65,9 +55,7 @@ namespace MyLab.Elastic
             if (searchParams == null) throw new ArgumentNullException(nameof(searchParams));
             if (highlight == null) throw new ArgumentNullException(nameof(highlight));
 
-            var resIndexName = RetrieveIndexName(indexName);
-
-            var sr = await _cl.SearchAsync(GetSearchFunc(resIndexName, searchParams, highlight));
+            var sr = await _cl.SearchAsync(GetSearchFunc(indexName, searchParams, highlight));
 
             if (!sr.IsValid)
                 throw new EsSearchException<TDoc>(sr);

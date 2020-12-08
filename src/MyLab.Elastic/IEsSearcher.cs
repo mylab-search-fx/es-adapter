@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace MyLab.Elastic
 {
@@ -28,7 +27,7 @@ namespace MyLab.Elastic
         /// <summary>
         /// Search documents with highlighting in index which bound to document model
         /// </summary>
-        Task<EsHlFound<TDoc>> SearchAsync(SearchParams<TDoc> searchParams, EsHlSelector<TDoc> hlSelector);
+        Task<EsHlFound<TDoc>> SearchAsync(SearchParams<TDoc> searchParams, EsHlSelector<TDoc> hlSelector);  
 
         /// <summary>
         /// Create index specific manager
