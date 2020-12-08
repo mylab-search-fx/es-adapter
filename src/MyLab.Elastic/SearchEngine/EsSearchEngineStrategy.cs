@@ -14,6 +14,7 @@ namespace MyLab.Elastic.SearchEngine
         readonly List<IEsSearchFilter<TDoc>> _filters = new List<IEsSearchFilter<TDoc>>();
         readonly List<Expression<Func<TDoc, string>>> _termProps = new List<Expression<Func<TDoc, string>>>();
         readonly List<Expression<Func<TDoc, string>>> _textProps = new List<Expression<Func<TDoc, string>>>();
+        readonly List<Expression<Func<TDoc, long>>> _numProps = new List<Expression<Func<TDoc, long>>>();
         readonly List<IEsSearchQueryFilterExtractor<TDoc>> _filterExtractors = new List<IEsSearchQueryFilterExtractor<TDoc>>();
 
         /// <summary>
@@ -47,6 +48,16 @@ namespace MyLab.Elastic.SearchEngine
         }
 
         /// <summary>
+        /// Registers numeric model property for inclusion search
+        /// </summary>
+        protected void AddNumProperty(Expression<Func<TDoc, long>> propProvider)
+        {
+            if (propProvider == null) throw new ArgumentNullException(nameof(propProvider));
+
+            _numProps.Add(propProvider);
+        }
+
+        /// <summary>
         /// Registers filter extractors
         /// </summary>
         protected void AddFilterExtractor(IEsSearchQueryFilterExtractor<TDoc> filterExtractor)
@@ -65,6 +76,11 @@ namespace MyLab.Elastic.SearchEngine
             return _filterExtractors
                 .SelectMany(e => e.CreateEsSearchFilters(queryStr))
                 .Where(f => f != null);
+        }
+
+        public IEnumerable<Expression<Func<TDoc, long>>> GetNumProperties()
+        {
+            return _numProps.ToArray();
         }
 
         public IEnumerable<Expression<Func<TDoc, string>>> GetTermProperties()

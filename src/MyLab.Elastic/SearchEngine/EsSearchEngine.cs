@@ -113,10 +113,22 @@ namespace MyLab.Elastic.SearchEngine
                     d.MultiMatch(mm =>
                         mm.Fields(termProps).Query(queryStr)));
 
-                var words = queryStr?.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                var words = queryStr.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
                 foreach (var word in words)
                 {
+                    if(long.TryParse(word, out var longWord))
+                    {
+                        foreach (var numProperty in strategy.GetNumProperties())
+                        {
+                            searchFuncs.Add(d =>
+                                d.Term(p =>
+                                    p.Field(numProperty).Value(longWord)
+                                )
+                            );
+                        }
+                    }
+
                     foreach (var termProperty in strategy.GetTermProperties())
                     {
                         searchFuncs.Add(d =>

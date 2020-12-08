@@ -98,7 +98,7 @@ namespace IntegrationTests
         public class TestModel
         {
             [Number(NumberType.Integer, Name = "uid")]
-            public int Id { get; set; }
+            public long Id { get; set; }
 
             [Keyword(Name = "trm")] public string Term { get; set; }
             [Text(Name = "txt")] public string Text { get; set; }
@@ -108,6 +108,7 @@ namespace IntegrationTests
         {
             public WithPredefinedFilterSearchStrategy()
             {
+                AddNumProperty(entity => entity.Id);
                 AddTermProperty(entity => entity.Term);
                 AddTextProperty(entity => entity.Text);
                 AddPredefinedFilter(new SingleDigitTermFilter());
@@ -128,6 +129,7 @@ namespace IntegrationTests
         {
             public SimpleSearchStrategy()
             {
+                AddNumProperty(entity => entity.Id);
                 AddTermProperty(entity => entity.Term);
                 AddTextProperty(entity => entity.Text);
                 AddFilterExtractor(new NumberExcludeFilterFilterExtractor());

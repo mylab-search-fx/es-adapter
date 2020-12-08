@@ -49,6 +49,22 @@ namespace IntegrationTests
         }
 
         [Fact]
+        public async Task ShouldFoundByNum()
+        {
+            //Arrange
+
+
+            //Act
+            var found = await InvokeTest<SimpleSearchEngine>(engine => engine.SearchAsync("14"));
+
+            //Assert
+            Assert.NotNull(found);
+            Assert.Single(found);
+
+            Assert.Equal(14, found.First().Id);
+        }
+
+        [Fact]
         public async Task ShouldFoundByTextStart()
         {
             //Arrange
