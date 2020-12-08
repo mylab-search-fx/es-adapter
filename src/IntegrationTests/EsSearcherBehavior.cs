@@ -203,7 +203,10 @@ namespace IntegrationTests
                         q =>
                             q.Match(m => m.Field("val").Query("foo"))
 
-                        ));
+                        )
+                    {
+                        Sort = sd => sd.Field("uid", SortOrder.Ascending)
+                    });
                     found = foundColl.ToArray();
 
                 });
@@ -220,6 +223,57 @@ namespace IntegrationTests
             Assert.Equal("foo 1", found[1].Value);
             Assert.Equal("foo 2", found[2].Value);
             Assert.Equal("foo 3", found[3].Value);
+        }
+
+        [Fact]
+        public async Task ShouldPage()
+        {
+            //Arrange 
+            TestEntity[] found = null;
+            var testEntList = new[]
+            {
+                new TestEntity{Id = 4, Value = "foo 3"},
+                new TestEntity{Id = 3, Value = "foo 2"},
+                new TestEntity{Id = 1, Value = "foo"},
+                new TestEntity{Id = 2, Value = "foo 1"},
+            };
+
+            try
+            {
+                await _clFx.UseTmpIndexWithMap(async indNm =>
+                {
+                    await _indexer.IndexManyAsync(indNm, testEntList);
+                    await Task.Delay(1000);
+
+                    //Act
+                    var foundColl = await _searcher.SearchAsync(indNm, new SearchParams<TestEntity>(
+
+                        q =>
+                            q.Match(m => m.Field("val").Query("foo"))
+
+                    )
+                    {
+                        Sort = sd => sd.Field("uid", SortOrder.Ascending),
+                        Page = new EsPaging
+                        {
+                            From = 1,
+                            Size = 2
+                        }
+                    });
+                    found = foundColl.ToArray();
+
+                });
+            }
+            catch (EsSearchException<TestEntity> e)
+            {
+                _output.WriteLine(e.Response.DebugInformation);
+            }
+
+            //Assert
+            Assert.NotNull(found);
+            Assert.Equal(2, found.Length);
+            Assert.Equal("foo 1", found[0].Value);
+            Assert.Equal("foo 2", found[1].Value);
         }
     }
 }
