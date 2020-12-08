@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MyLab.Elastic;
@@ -10,13 +11,13 @@ namespace UnitTests
     public class ToolsIntegrationBehavior
     {
         [Fact]
-        public void ShouldIntegrate()
+        public async Task ShouldIntegrate()
         {
             //Arrange
             var config = new ConfigurationBuilder()
                 .AddInMemoryCollection(new []
             {
-                new KeyValuePair<string, string>("ElasticSearch", "http://foo.com" )
+                new KeyValuePair<string, string>("ElasticSearch", "http://localhost:10115" )
             }).Build();
 
             //Act
@@ -25,10 +26,10 @@ namespace UnitTests
                 .BuildServiceProvider();
 
             var testService = ActivatorUtilities.CreateInstance<TestService>(serviceProvider);
-            var url = testService.GetUrl();
+            var hasPing = await testService.HasPing();
 
             //Assert
-            Assert.Equal("http://foo.com", url);
+            Assert.True(hasPing);
         }
 
         class TestService
@@ -40,9 +41,9 @@ namespace UnitTests
                 _es = es;
             }
 
-            public string GetUrl()
+            public Task<bool> HasPing()
             {
-                return ((DefaultEsManager) _es).Options.Url;
+                return _es.PingAsync();
             }
         }
     }

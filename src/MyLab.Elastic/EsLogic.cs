@@ -43,38 +43,31 @@ namespace MyLab.Elastic
                 throw new EsIndexException(indexResponse);
         }
 
-        public async Task<IReadOnlyCollection<TDoc>> SearchAsync(
-            string indexName,
-            Func<QueryContainerDescriptor<TDoc>, QueryContainer> query)
+        public async Task<EsFound<TDoc>> SearchAsync(string indexName, SearchParams<TDoc> searchParams)
         {
-            if (query == null) throw new ArgumentNullException(nameof(query));
+            if (searchParams == null) throw new ArgumentNullException(nameof(searchParams));
 
             var resIndexName = RetrieveIndexName(indexName);
 
-            var sr = await _cl.SearchAsync<TDoc>(sd => sd
-                .Index(resIndexName)
-                .Query(query));
+            var sr = await _cl.SearchAsync(GetSearchFunc(resIndexName, searchParams));
 
             if (!sr.IsValid)
                 throw new EsSearchException<TDoc>(sr);
 
-            return sr.Documents;
+            return new EsFound<TDoc>(sr.Documents.ToList());
         }
 
-        public async Task<IReadOnlyCollection<HighLightedDocument<TDoc>>> SearchAsync(
-            string indexName,
-            Func<QueryContainerDescriptor<TDoc>, QueryContainer> query,
-            Func<HighlightDescriptor<TDoc>, IHighlight> highlightSelector)
+        public async Task<EsHlFound<TDoc>> SearchAsync(
+            string indexName, 
+            SearchParams<TDoc> searchParams,
+            EsHlSelector<TDoc> highlight)
         {
-            if (query == null) throw new ArgumentNullException(nameof(query));
-            if (highlightSelector == null) throw new ArgumentNullException(nameof(highlightSelector));
+            if (searchParams == null) throw new ArgumentNullException(nameof(searchParams));
+            if (highlight == null) throw new ArgumentNullException(nameof(highlight));
 
             var resIndexName = RetrieveIndexName(indexName);
 
-            var sr = await _cl.SearchAsync<TDoc>(sd => sd
-                .Index(resIndexName)
-                .Query(query)
-                .Highlight(highlightSelector));
+            var sr = await _cl.SearchAsync(GetSearchFunc(resIndexName, searchParams, highlight));
 
             if (!sr.IsValid)
                 throw new EsSearchException<TDoc>(sr);
@@ -89,7 +82,24 @@ namespace MyLab.Elastic
                     )
             );
 
-            return foundDocs.ToList().AsReadOnly();
+            return new EsHlFound<TDoc>(foundDocs.ToList());
+        }
+
+        Func<SearchDescriptor<TDoc>, ISearchRequest> GetSearchFunc(string indexName, SearchParams<TDoc> searchParams, EsHlSelector<TDoc> highlight = null)
+        {
+            return sd =>
+            {
+                var s = sd.Index(indexName).Query(searchParams.Query);
+
+                if (searchParams.Sort != null)
+                    s = s.Sort(searchParams.Sort);
+                if (searchParams.Page != null)
+                    s = s.From(searchParams.Page.From).Size(searchParams.Page.Size);
+                if (highlight != null)
+                    s = s.Highlight(d => highlight(d));
+
+                return s;
+            };
         }
     }
 }

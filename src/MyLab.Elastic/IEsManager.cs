@@ -1,16 +1,30 @@
-﻿using Nest;
+﻿using System.Threading.Tasks;
+using Nest;
 
 namespace MyLab.Elastic
 {
     /// <summary>
-    /// Provides ElasticSearch NEST client
+    /// Provides manager ES functions
     /// </summary>
-
     public interface IEsManager
     {
-        /// <summary>
-        /// ES NEST client
-        /// </summary>
-        ElasticClient Client { get; }
+        Task<bool> PingAsync();
+    }
+
+    class EsManager : IEsManager
+    {
+        private readonly ElasticClient _client;
+
+        public EsManager(IEsClientProvider clientProvider)
+        {
+            _client = clientProvider.Provide();
+        }
+
+        public async Task<bool> PingAsync()
+        {
+            var resp = await _client.PingAsync();
+
+            return resp.IsValid;
+        }
     }
 }

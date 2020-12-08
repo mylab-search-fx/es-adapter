@@ -19,7 +19,10 @@ namespace MyLab.Elastic
 
             Configure(services, configuration);
 
-            services.AddSingleton<IEsManager, DefaultEsManager>();
+            services.AddSingleton<IEsClientProvider, EsClientProvider>();
+            services.AddSingleton<IEsManager, EsManager>();
+            services.AddSingleton(typeof(IEsSearcher<>), typeof(EsSearcher<>));
+            services.AddSingleton(typeof(IEsIndexer<>), typeof(EsIndexer<>));
 
             return services;
         }

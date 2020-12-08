@@ -1,59 +1,30 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using IntegrationTests.Stuff;
 using MyLab.Elastic;
 using Nest;
-using Newtonsoft.Json;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace IntegrationTests
 {
-    public class EsManagerExtensionsBehavior : IClassFixture<ClientFixture>
+    public class EsSearcherBehavior : IClassFixture<ClientFixture>
     {
         private readonly ClientFixture _clFx;
         private readonly ITestOutputHelper _output;
-        private readonly IEsManager _mgr;
+        private readonly IEsSearcher<TestEntity> _searcher;
+        private readonly IEsIndexer<TestEntity> _indexer;
 
-        public EsManagerExtensionsBehavior(ClientFixture clFx, ITestOutputHelper output)
+        public EsSearcherBehavior(ClientFixture clFx, ITestOutputHelper output)
         {
             _clFx = clFx;
             _output = output;
-            _mgr = new TestEsManager(_clFx.EsClient);
+            _searcher = new EsSearcher<TestEntity>(new SingleEsClientProvider(_clFx.EsClient));
+            _indexer = new EsIndexer<TestEntity>(new SingleEsClientProvider(_clFx.EsClient));
         }
 
-        [Fact]
-        public async Task ShouldIndexDocument()
-        {
-            //Arrange
-            var document = new TestEntity
-            {
-                Id = 10,
-                Value = "foo"
-            };
-
-            //Act & Assert
-            await _clFx.UseTmpIndexWithMap(async indNm =>
-            {
-                await _mgr.IndexAsync(indNm,document);
-            });
-        }
-
-        [Fact]
-        public async Task ShouldNotIndexDocumentWhenIndexDoesNotExists()
-        {
-            //Arrange
-            var document = new TestEntity
-            {
-                Id = 10,
-                Value = "foo"
-            };
-
-            //Act & Assert
-            await Assert.ThrowsAsync<EsIndexException>(() => _mgr.IndexAsync(" absent-index", document));
-        }
+        
 
         [Fact]
         public async Task ShouldFindById()
@@ -66,12 +37,15 @@ namespace IntegrationTests
             {
                 await _clFx.UseTmpIndexWithMap(async indNm =>
                 {
-                    await _mgr.IndexAsync(indNm, testEnt);
+                    await _indexer.IndexAsync(indNm, testEnt);
                     await Task.Delay(1000);
 
                     //Act
-                    var res = await _mgr.SearchAsync<TestEntity>(indNm, q =>
-                        q.Ids(s => s.Values(10)));
+                    var res = await _searcher.SearchAsync(indNm, new SearchParams<TestEntity>(
+                        
+                        q =>
+                                q.Ids(s => s.Values(10)))
+                    );
                     found = res.FirstOrDefault();
                 });
             }
@@ -96,17 +70,18 @@ namespace IntegrationTests
 
             await _clFx.UseTmpIndexWithMap(async indNm =>
             {
-                Func<QueryContainerDescriptor<TestEntity>, QueryContainer> query = q => q
-                    .Ids(s => s.Values(10));
-
-                await _mgr.IndexAsync(indNm, testEnt);
+                await _indexer.IndexAsync(indNm, testEnt);
                 await Task.Delay(1000);
 
                 //Act
-                var res = await _mgr.SearchAsync<TestEntity>(indNm, q =>
-                    q.Range(r =>
-                        r.Field(ent => ent.Id)
-                            .GreaterThan(2)));
+                var res = await _searcher.SearchAsync(indNm, new SearchParams<TestEntity>(
+
+                    q =>
+                        q.Range(r =>
+                            r.Field(ent => ent.Id)
+                                .GreaterThan(2))
+
+                    ));
                 found = res.FirstOrDefault();
                 foundCount = res.Count;
             });
@@ -132,14 +107,18 @@ namespace IntegrationTests
 
             await _clFx.UseTmpIndexWithMap(async indNm =>
             {
-                await _mgr.IndexManyAsync(indNm, testEnts);
+                await _indexer.IndexManyAsync(indNm, testEnts);
                 await Task.Delay(1000);
 
                 //Act
-                var res = await _mgr.SearchAsync<TestEntity>(indNm, q => q
-                    .Match(r =>
-                        r.Field(ent => ent.Value)
-                            .Query("foo text")));
+                var res = await _searcher.SearchAsync(indNm, new SearchParams<TestEntity>(
+
+                    q => q
+                        .Match(r =>
+                            r.Field(ent => ent.Value)
+                                .Query("foo text"))
+
+                    ));
                 found = res.FirstOrDefault();
                 foundCount = res.Count;
             });
@@ -165,14 +144,18 @@ namespace IntegrationTests
 
             await _clFx.UseTmpIndexWithMap(async indNm =>
             {
-                await _mgr.IndexManyAsync(indNm, items);
+                await _indexer.IndexManyAsync(indNm, items);
                 await Task.Delay(1000);
 
                 //Act
-                var res = await _mgr.SearchAsync<TestEntity>(indNm, q => q
-                    .Match(r =>
-                        r.Field(ent => ent.Value)
-                            .Query("foo text")),
+                var res = await _searcher.SearchAsync(indNm, new SearchParams<TestEntity>(
+
+                        q => q
+                            .Match(r =>
+                                r.Field(ent => ent.Value)
+                                    .Query("foo text"))
+
+                        ),
                     h => h
                         .PreTags("<b>")
                         .PostTags("</b>")
@@ -192,6 +175,51 @@ namespace IntegrationTests
             //Assert
             Assert.Equal(1, highlightCount);
             Assert.Contains("some <b>foo</b> <b>text</b> here. id=<b>10</b>", doc.Highlight);
+        }
+
+        [Fact]
+        public async Task ShouldSort()
+        {
+            //Arrange 
+            TestEntity[] found = null;
+            var testEntList = new []
+            {
+                new TestEntity{Id = 4, Value = "foo 3"},
+                new TestEntity{Id = 3, Value = "foo 2"},
+                new TestEntity{Id = 1, Value = "foo"}, 
+                new TestEntity{Id = 2, Value = "foo 1"},
+            };
+
+            try
+            {
+                await _clFx.UseTmpIndexWithMap(async indNm =>
+                {
+                    await _indexer.IndexManyAsync(indNm, testEntList);
+                    await Task.Delay(1000);
+
+                    //Act
+                    var foundColl = await _searcher.SearchAsync(indNm, new SearchParams<TestEntity>(
+
+                        q =>
+                            q.Match(m => m.Field("val").Query("foo"))
+
+                        ));
+                    found = foundColl.ToArray();
+
+                });
+            }
+            catch (EsSearchException<TestEntity> e)
+            {
+                _output.WriteLine(e.Response.DebugInformation);
+            }
+
+            //Assert
+            Assert.NotNull(found);
+            Assert.Equal(testEntList.Length, found.Length);
+            Assert.Equal("foo", found[0].Value);
+            Assert.Equal("foo 1", found[1].Value);
+            Assert.Equal("foo 2", found[2].Value);
+            Assert.Equal("foo 3", found[3].Value);
         }
     }
 }
