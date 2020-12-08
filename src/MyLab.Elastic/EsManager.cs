@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Nest;
 
 namespace MyLab.Elastic
 {
-    class EsManager : IEsManager
+    public class EsManager : IEsManager
     {
         private readonly ElasticsearchOptions _options;
         private readonly ElasticClient _client;
@@ -47,6 +48,13 @@ namespace MyLab.Elastic
         public async Task DeleteIndexAsync(string indexName)
         {
             await _client.Indices.DeleteAsync(indexName);
+        }
+
+        public async Task<bool> IsIndexExistsAsync(string indexName)
+        {
+            var res =await _client.Indices.GetAsync(indexName);
+
+            return res.Indices.ContainsKey(indexName);
         }
 
         class IndexDeleter : IAsyncDisposable

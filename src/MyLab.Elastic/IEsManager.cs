@@ -25,5 +25,10 @@ namespace MyLab.Elastic
         /// Delete index
         /// </summary>
         Task DeleteIndexAsync(string indexName);
+
+        /// <summary>
+        /// True if spcified index exists
+        /// </summary>
+        Task<bool> IsIndexExistsAsync(string indexName);
     }
 }

@@ -5,7 +5,7 @@ using Nest;
 namespace MyLab.Elastic
 {
 
-    class EsIndexer<TDoc> : IEsIndexer<TDoc> 
+    public class EsIndexer<TDoc> : IEsIndexer<TDoc> 
         where TDoc : class
     {
         private readonly IIndexNameProvider _indexNameProvider;
@@ -39,15 +39,15 @@ namespace MyLab.Elastic
 
         public IIndexSpecificEsIndexer<TDoc> ForIndex(string indexName)
         {
-            return new indexSpecificIndexer(indexName, _client);
+            return new IndexSpecificIndexer(indexName, _client);
         }
 
-        class indexSpecificIndexer : IIndexSpecificEsIndexer<TDoc>
+        class IndexSpecificIndexer : IIndexSpecificEsIndexer<TDoc>
         {
             private readonly ElasticClient _client;
             public string IndexName { get; set; }
 
-            public indexSpecificIndexer(string indexName, ElasticClient client)
+            public IndexSpecificIndexer(string indexName, ElasticClient client)
             {
                 IndexName = indexName;
                 _client = client;

@@ -3,7 +3,7 @@ using Nest;
 
 namespace MyLab.Elastic
 {
-    class EsSearcher<TDoc> : IEsSearcher<TDoc>
+    public class EsSearcher<TDoc> : IEsSearcher<TDoc>
         where TDoc : class
     {
         private readonly IIndexNameProvider _indexNameProvider;
