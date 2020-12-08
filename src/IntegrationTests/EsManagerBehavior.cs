@@ -12,7 +12,7 @@ namespace IntegrationTests
 
         public EsManagerBehavior(ClientFixture clFx, ITestOutputHelper output)
         {
-            _mgr = new EsManager(new SingleEsClientProvider(clFx.EsClient));
+            _mgr = new EsManager(new SingleEsClientProvider(clFx.EsClient), new ElasticsearchOptions());
         }
 
         [Fact]

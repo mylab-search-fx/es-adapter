@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Nest;
 
 namespace MyLab.Elastic
@@ -9,22 +10,20 @@ namespace MyLab.Elastic
     public interface IEsManager
     {
         Task<bool> PingAsync();
-    }
 
-    class EsManager : IEsManager
-    {
-        private readonly ElasticClient _client;
+        /// <summary>
+        /// Creates index
+        /// </summary>
+        Task<IAsyncDisposable> CreateIndexAsync(string indexName, Func<CreateIndexDescriptor, ICreateIndexRequest> selector = null);
 
-        public EsManager(IEsClientProvider clientProvider)
-        {
-            _client = clientProvider.Provide();
-        }
+        /// <summary>
+        /// Creates default index
+        /// </summary>
+        Task<IAsyncDisposable> CreateDefaultIndexAsync(Func<CreateIndexDescriptor, ICreateIndexRequest> selector = null);
 
-        public async Task<bool> PingAsync()
-        {
-            var resp = await _client.PingAsync();
-
-            return resp.IsValid;
-        }
+        /// <summary>
+        /// Delete index
+        /// </summary>
+        Task DeleteIndexAsync(string indexName);
     }
 }

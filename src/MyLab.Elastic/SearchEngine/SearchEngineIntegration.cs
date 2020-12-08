@@ -11,7 +11,7 @@ namespace MyLab.Elastic.SearchEngine
         /// <summary>
         /// Adds search engine for model <see cref="TDoc"/>
         /// </summary>
-        public static IServiceCollection AddSearchEngine<TSearchEngine, TDoc>(this IServiceCollection services)
+        public static IServiceCollection AddEsSearchEngine<TSearchEngine, TDoc>(this IServiceCollection services)
             where TSearchEngine : class, IEsSearchEngine<TDoc>
             where TDoc: class
         {

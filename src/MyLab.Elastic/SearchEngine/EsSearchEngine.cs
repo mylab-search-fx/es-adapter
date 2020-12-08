@@ -38,9 +38,11 @@ namespace MyLab.Elastic.SearchEngine
         {
             var sp = new SearchParams<TDoc>(d => CreateSearchQuery(d, queryStr, filterKey))
             {
-                Sort = GetSort(sortKey),
                 Page = paging
             };
+
+            if (!string.IsNullOrWhiteSpace(sortKey))
+                sp.Sort = GetSort(sortKey);
 
             return await _searcher.ForIndex(_indexName).SearchAsync(sp);
         }
@@ -75,15 +77,18 @@ namespace MyLab.Elastic.SearchEngine
 
             var filters = new List<Func<QueryContainerDescriptor<TDoc>, QueryContainer>>(GetFilters(queryStr));
 
-            var registeredFilter = GetFilter(filterKey);
-            if(registeredFilter != null)
-                filters.Add(registeredFilter);
+            if (!string.IsNullOrWhiteSpace(filterKey))
+            {
+                var registeredFilter = GetFilter(filterKey);
+                if (registeredFilter != null)
+                    filters.Add(registeredFilter);
+            }
 
             return d.Bool(boolSd =>
             {
                 var cs = boolSd;
 
-                cs = cs.Should(propSearch).MinimumShouldMatch(1);
+                cs = cs.Should(propSearch);
 
                 cs = cs.Filter(filters);
 
@@ -94,27 +99,44 @@ namespace MyLab.Elastic.SearchEngine
 
         IEnumerable<Func<QueryContainerDescriptor<TDoc>, QueryContainer>> GetPropertySearch(string queryStr)
         {
-            var fieldTermsList = new List<Func<QueryContainerDescriptor<TDoc>, QueryContainer>>();
+            var searchFuncs = new List<Func<QueryContainerDescriptor<TDoc>, QueryContainer>>();
 
-            foreach (var termProperty in _strategy.GetTermProperties())
+            if (!string.IsNullOrWhiteSpace(queryStr))
             {
-                fieldTermsList.Add(d => 
-                    d.Match(matchD => 
-                        matchD.Field(termProperty).Query(queryStr)
-                        )
-                    );
+                var termProps = _strategy.GetTermProperties().ToArray();
+                searchFuncs.Add(d =>
+                    d.MultiMatch(mm =>
+                        mm.Fields(termProps).Query(queryStr)));
+
+                var words = queryStr?.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                foreach (var word in words)
+                {
+                    foreach (var termProperty in _strategy.GetTermProperties())
+                    {
+                        searchFuncs.Add(d =>
+                            d.Prefix(p =>
+                                p.Field(termProperty).Value(word)
+                            )
+                        );
+                    }
+
+                    foreach (var textProperty in _strategy.GetTextProperties())
+                    {
+                        searchFuncs.Add(d =>
+                            d.Prefix(matchD =>
+                                matchD.Field(textProperty).Value(word)
+                            )
+                        );
+                    }
+                }
+            }
+            else
+            {
+                searchFuncs.Add(d => d.MatchAll());
             }
 
-            foreach (var textProperty in _strategy.GetTextProperties())
-            {
-                fieldTermsList.Add(d =>
-                    d.Match(matchD =>
-                        matchD.Field(textProperty).Query(queryStr)
-                    )
-                );
-            }
-
-            return fieldTermsList;
+            return searchFuncs;
         }
 
         IEnumerable<Func<QueryContainerDescriptor<TDoc>, QueryContainer>> GetFilters(string queryStr)
@@ -134,16 +156,16 @@ namespace MyLab.Elastic.SearchEngine
 
         private Func<SortDescriptor<TDoc>, IPromise<IList<ISort>>> GetSort(string sortKey)
         {
-            if (sortKey == null || _registeredSorts == null || !_registeredSorts.TryGetValue(sortKey, out var foundSort))
-                return null;
+            if (_registeredSorts == null || !_registeredSorts.TryGetValue(sortKey, out var foundSort))
+                throw new NotSupportedException($"Sort not supported: '{sortKey}'");
 
             return foundSort.Sort;
         }
 
         private Func<QueryContainerDescriptor<TDoc>, QueryContainer> GetFilter(string filterKey)
         {
-            if (filterKey == null || _registeredFilters == null || !_registeredFilters.TryGetValue(filterKey, out var foundFilter))
-                return null;
+            if (_registeredFilters == null || !_registeredFilters.TryGetValue(filterKey, out var foundFilter))
+                throw new NotSupportedException($"Filter not supported: '{filterKey}'");
 
             return foundFilter.Filter;
         }
