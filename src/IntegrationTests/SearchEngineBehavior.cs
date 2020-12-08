@@ -1,30 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using IntegrationTests.Stuff;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using MyLab.Elastic;
-using MyLab.Elastic.SearchEngine;
-using Nest;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace IntegrationTests
 {
-    public class SearchEngineBehavior 
+    public partial class SearchEngineBehavior 
     {
-        private readonly ITestOutputHelper _output;
-
-        private static readonly TestModel[] Models = GenerateTestModels();
-
-        public SearchEngineBehavior(ITestOutputHelper output)
-        {
-            _output = output;
-        }
-
         [Theory]
         [InlineData("")]
         [InlineData(" ")]
@@ -219,175 +201,25 @@ namespace IntegrationTests
             Assert.Equal(expectedArray, actualArray);
         }
 
-        async Task<EsFound<TestModel>> InvokeTest<TSearchEngine>(
-            Func<IEsSearchEngine<TestModel>, Task<EsFound<TestModel>>> logic)
-            where TSearchEngine : class, IEsSearchEngine<TestModel>
+        [Fact]
+        public async Task ShouldProvideTotalCount()
         {
-            IServiceProvider sp = null;
-            EsFound<TestModel> found = null;
+            //Arrange
 
-            try
-            {
-                sp = StartSearchApp<TSearchEngine>();
 
-                var searchEngine = sp.GetService<IEsSearchEngine<TestModel>>();
-                var mgr = sp.GetService<IEsManager>();
-                var indexer = sp.GetService<IEsIndexer<TestModel>>();
-
-                await using (await mgr.CreateDefaultIndexAsync())
+            //Act
+            var found = await InvokeTest<SimpleSearchEngine>(engine => engine.SearchAsync("text1 term4", sortKey: "norm", 
+                paging: new EsPaging
                 {
-                    await indexer.IndexManyAsync(Models);
-                    await Task.Delay(1000);
+                    Size = 2,
+                    From = 1
+                }));
 
-                    //Act
-                    found = await logic(searchEngine);
-                } 
-            }
-            catch (EsSearchException<TestModel> e)
-            {
-                _output.WriteLine(e.Response.DebugInformation);
-            }
-            finally
-            {
+            //Assert
 
-                CloseSearchApp(sp);
-            }
-
-            return found;
-        }
-
-        IServiceProvider StartSearchApp<TSearchEngine>()
-            where TSearchEngine : class, IEsSearchEngine<TestModel>
-        {
-            var config = new ConfigurationBuilder().Build();
-            var srvCollection = new ServiceCollection();
-            srvCollection.AddEsTools(config);
-            srvCollection.AddEsSearchEngine<TSearchEngine, TestModel>();
-            srvCollection.Configure<ElasticsearchOptions>(o =>
-            {
-                o.Url = "http://localhost:10115";
-                o.DefaultIndex = "test-index-" + Guid.NewGuid().ToString("N");
-            });
-            srvCollection.AddSingleton<IEsClientProvider>(
-                new TestEsClientProvider("http://localhost:10115", _output));
-
-            return srvCollection.BuildServiceProvider();
-        }
-
-        void CloseSearchApp(IServiceProvider serviceProvider)
-        {
-            var clientProvider = serviceProvider?.GetService<IEsClientProvider>();
-            (clientProvider as IDisposable)?.Dispose();
-        }
-
-        static TestModel[] GenerateTestModels()
-        {
-            return Enumerable
-                .Range(0, 15)
-                .Select(i => new TestModel
-                {
-                    Id = i,
-                    Term = "term" + i,
-                    Text = "text" + i
-                }).ToArray();
-        }
-
-        [ElasticsearchType(IdProperty = nameof(Id))]
-        public class TestModel
-        {
-            [Number(NumberType.Integer, Name = "uid")]
-            public int Id { get; set; }
-            [Keyword(Name = "trm")]
-            public string Term { get; set; }
-            [Text(Name = "txt")]
-            public string Text { get; set; }
-        }
-
-        class WithPredefinedFilterSearchStrategy : EsSearchEngineStrategy<TestModel>
-        {
-            public WithPredefinedFilterSearchStrategy()
-            {
-                AddTermProperty(entity => entity.Term);
-                AddTextProperty(entity => entity.Text);
-                AddPredefinedFilter(new SingleDigitTermFilter());
-            }
-        }
-
-        class SearchEngineWithStrategyPredefinedFilter : EsSearchEngine<TestModel>
-        {
-            public SearchEngineWithStrategyPredefinedFilter(
-                IIndexNameProvider indexNameProvider,
-                IEsSearcher<TestModel> searcher)
-                : base(indexNameProvider, searcher, new WithPredefinedFilterSearchStrategy())
-            {
-            }
-        }
-
-        class SimpleSearchStrategy : EsSearchEngineStrategy<TestModel>
-        {
-            public SimpleSearchStrategy()
-            {
-                AddTermProperty(entity => entity.Term);
-                AddTextProperty(entity => entity.Text);
-                AddFilterExtractor(new NumberExcludeFilterFilterExtractor());
-            }
-        }
-
-        class SimpleSearchEngine : EsSearchEngine<TestModel>
-        {
-            public SimpleSearchEngine(
-                IIndexNameProvider indexNameProvider, 
-                IEsSearcher<TestModel> searcher) 
-                : base(indexNameProvider, searcher, new SimpleSearchStrategy())
-            {
-                RegisterFilter("single-digit", new SingleDigitTermFilter());
-                RegisterSort("revert", new RevertSort());
-                RegisterSort("norm", new NormSort());
-            }
-        }
-
-        class SingleDigitTermFilter : IEsSearchFilter<TestModel>
-        {
-            public QueryContainer Filter(QueryContainerDescriptor<TestModel> d)
-                => d.Wildcard(m => m.Term, "term?");
-        }
-
-        class RevertSort : IEsSearchSort<TestModel>
-        {
-            public IPromise<IList<ISort>> Sort(SortDescriptor<TestModel> d)
-                => d.Field(m => m.Id, SortOrder.Descending);
-        }
-
-        class NormSort : IEsSearchSort<TestModel>
-        {
-            public IPromise<IList<ISort>> Sort(SortDescriptor<TestModel> d)
-                => d.Field(m => m.Id, SortOrder.Ascending);
-        }
-
-        class NumberExcludeFilterFilterExtractor : EsSearchQueryFilterExtractor<TestModel>
-        {
-            public NumberExcludeFilterFilterExtractor() : base("exclude(?<digit>\\d{1})")
-            {
-            }
-
-            protected override IEsSearchFilter<TestModel> CreateFilter(Match queryMatch)
-            {
-                var i = int.Parse(queryMatch.Groups["digit"].Value);
-
-                return new NumberExcludeFilter(i);
-            }
-
-            class NumberExcludeFilter : IEsSearchFilter<TestModel>
-            {
-                private readonly int _i;
-
-                public NumberExcludeFilter(int i)
-                {
-                    _i = i;
-                }
-                public QueryContainer Filter(QueryContainerDescriptor<TestModel> d)
-                    => !d.Term(t => t.Field(m => m.Term).Value("term" + _i));
-            }
+            Assert.NotNull(found);
+            Assert.Equal(2, found.Count);
+            Assert.Equal(7, found.Total);
         }
     }
 }

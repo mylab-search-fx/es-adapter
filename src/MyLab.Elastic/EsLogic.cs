@@ -44,7 +44,7 @@ namespace MyLab.Elastic
             if (!sr.IsValid)
                 throw new EsSearchException<TDoc>(sr);
 
-            return new EsFound<TDoc>(sr.Documents.ToList());
+            return new EsFound<TDoc>(sr.Documents.ToList(), sr.Total);
         }
 
         public async Task<EsHlFound<TDoc>> SearchAsync(
@@ -70,7 +70,7 @@ namespace MyLab.Elastic
                     )
             );
 
-            return new EsHlFound<TDoc>(foundDocs.ToList());
+            return new EsHlFound<TDoc>(foundDocs.ToList(), sr.Total);
         }
 
         Func<SearchDescriptor<TDoc>, ISearchRequest> GetSearchFunc(string indexName, SearchParams<TDoc> searchParams, EsHlSelector<TDoc> highlight = null)

@@ -9,9 +9,12 @@ namespace MyLab.Elastic
     public class EsHlFound<TDoc> : ReadOnlyCollection<HighLightedDocument<TDoc>>
         where TDoc : class
     {
-        public EsHlFound(IList<HighLightedDocument<TDoc>> list) 
+        public long Total { get; }
+
+        public EsHlFound(IList<HighLightedDocument<TDoc>> list, long total) 
             : base(list)
         {
+            Total = total;
         }
     }
 
@@ -21,9 +24,12 @@ namespace MyLab.Elastic
     public class EsFound<TDoc> : ReadOnlyCollection<TDoc>
         where TDoc : class
     {
-        public EsFound(IList<TDoc> list)
+        public long Total { get; }
+
+        public EsFound(IList<TDoc> list, long total)
             : base(list)
         {
+            Total = total;
         }
     }
 }
