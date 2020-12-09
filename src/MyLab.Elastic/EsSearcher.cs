@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using Nest;
 
 namespace MyLab.Elastic
@@ -16,24 +17,24 @@ namespace MyLab.Elastic
             _logic = new EsLogic<TDoc>(client);
         }
 
-        public Task<EsFound<TDoc>> SearchAsync(string indexName, SearchParams<TDoc> searchParams)
+        public Task<EsFound<TDoc>> SearchAsync(string indexName, SearchParams<TDoc> searchParams, CancellationToken cancellationToken = default)
         {
-            return _logic.SearchAsync(indexName, searchParams);
+            return _logic.SearchAsync(indexName, searchParams, cancellationToken);
         }
 
-        public Task<EsFound<TDoc>> SearchAsync(SearchParams<TDoc> searchParams)
+        public Task<EsFound<TDoc>> SearchAsync(SearchParams<TDoc> searchParams, CancellationToken cancellationToken = default)
         {
-            return SearchAsync(_indexNameProvider.Provide<TDoc>(), searchParams);
+            return SearchAsync(_indexNameProvider.Provide<TDoc>(), searchParams, cancellationToken);
         }
 
-        public Task<EsHlFound<TDoc>> SearchAsync(string indexName, SearchParams<TDoc> searchParams, EsHlSelector<TDoc> hlSelector)
+        public Task<EsHlFound<TDoc>> SearchAsync(string indexName, SearchParams<TDoc> searchParams, EsHlSelector<TDoc> hlSelector, CancellationToken cancellationToken = default)
         {
-            return _logic.SearchAsync(indexName, searchParams, hlSelector);
+            return _logic.SearchAsync(indexName, searchParams, hlSelector, cancellationToken);
         }
 
-        public Task<EsHlFound<TDoc>> SearchAsync(SearchParams<TDoc> searchParams, EsHlSelector<TDoc> hlSelector)
+        public Task<EsHlFound<TDoc>> SearchAsync(SearchParams<TDoc> searchParams, EsHlSelector<TDoc> hlSelector, CancellationToken cancellationToken = default)
         {
-            return SearchAsync(_indexNameProvider.Provide<TDoc>(), searchParams, hlSelector);
+            return SearchAsync(_indexNameProvider.Provide<TDoc>(), searchParams, hlSelector, cancellationToken);
         }
 
         public IIndexSpecificEsSearcher<TDoc> ForIndex(string indexName)
@@ -52,14 +53,14 @@ namespace MyLab.Elastic
                 IndexName = indexName;
             }
 
-            public Task<EsFound<TDoc>> SearchAsync(SearchParams<TDoc> searchParams)
+            public Task<EsFound<TDoc>> SearchAsync(SearchParams<TDoc> searchParams, CancellationToken cancellationToken = default)
             {
-                return _logic.SearchAsync(IndexName, searchParams);
+                return _logic.SearchAsync(IndexName, searchParams, cancellationToken);
             }
 
-            public Task<EsHlFound<TDoc>> SearchAsync(SearchParams<TDoc> searchParams, EsHlSelector<TDoc> hlSelector)
+            public Task<EsHlFound<TDoc>> SearchAsync(SearchParams<TDoc> searchParams, EsHlSelector<TDoc> hlSelector, CancellationToken cancellationToken = default)
             {
-                return _logic.SearchAsync(IndexName, searchParams, hlSelector);
+                return _logic.SearchAsync(IndexName, searchParams, hlSelector, cancellationToken);
             }
         }
     }

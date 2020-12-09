@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Nest;
 
@@ -34,7 +35,13 @@ namespace MyLab.Elastic.SearchEngine
         /// <summary>
         /// Performs searching
         /// </summary>
-        public async Task<EsFound<TDoc>> SearchAsync(string queryStr, IEsSearchEngineStrategy<TDoc> strategy = null, string filterKey = null, string sortKey = null, EsPaging paging = null)
+        public async Task<EsFound<TDoc>> SearchAsync(
+            string queryStr, 
+            IEsSearchEngineStrategy<TDoc> strategy = null, 
+            string filterKey = null, 
+            string sortKey = null, 
+            EsPaging paging = null,
+            CancellationToken cancellationToken = default)
         {
             var sp = new SearchParams<TDoc>(d => CreateSearchQuery(d, queryStr, filterKey, strategy))
             {
@@ -44,7 +51,7 @@ namespace MyLab.Elastic.SearchEngine
             if (!string.IsNullOrWhiteSpace(sortKey))
                 sp.Sort = GetSort(sortKey);
 
-            return await _searcher.ForIndex(_indexName).SearchAsync(sp);
+            return await _searcher.ForIndex(_indexName).SearchAsync(sp, cancellationToken);
         }
 
         /// <summary>

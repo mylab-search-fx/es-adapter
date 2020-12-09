@@ -21,24 +21,24 @@ namespace MyLab.Elastic
             _logic= new EsLogic<TDoc>(client);
         }
 
-        public Task IndexManyAsync(string indexName, IEnumerable<TDoc> documents)
+        public Task IndexManyAsync(string indexName, IEnumerable<TDoc> documents, CancellationToken cancellationToken = default)
         {
-            return _logic.IndexManyAsync(indexName, documents);
+            return _logic.IndexManyAsync(indexName, documents, cancellationToken);
         }
 
-        public Task IndexManyAsync(IEnumerable<TDoc> documents)
+        public Task IndexManyAsync(IEnumerable<TDoc> documents, CancellationToken cancellationToken = default)
         {
-            return IndexManyAsync(_indexNameProvider.Provide<TDoc>(), documents);
+            return IndexManyAsync(_indexNameProvider.Provide<TDoc>(), documents, cancellationToken);
         }
 
-        public Task IndexAsync(string indexName, TDoc document)
+        public Task IndexAsync(string indexName, TDoc document, CancellationToken cancellationToken = default)
         {
-            return _logic.IndexAsync(indexName, document);
+            return _logic.IndexAsync(indexName, document, cancellationToken);
         }
 
-        public Task IndexAsync(TDoc document)
+        public Task IndexAsync(TDoc document, CancellationToken cancellationToken = default)
         {
-            return IndexAsync(_indexNameProvider.Provide<TDoc>(), document);
+            return IndexAsync(_indexNameProvider.Provide<TDoc>(), document, cancellationToken);
         }
 
         public IIndexSpecificEsIndexer<TDoc> ForIndex(string indexName)
@@ -68,14 +68,14 @@ namespace MyLab.Elastic
                 _logic = logic;
                 IndexName = indexName;
             }
-            public Task IndexManyAsync(IEnumerable<TDoc> documents)
+            public Task IndexManyAsync(IEnumerable<TDoc> documents, CancellationToken cancellationToken = default)
             {
-                return _logic.IndexManyAsync(IndexName, documents);
+                return _logic.IndexManyAsync(IndexName, documents, cancellationToken);
             }
 
-            public Task IndexAsync(TDoc document)
+            public Task IndexAsync(TDoc document, CancellationToken cancellationToken = default)
             {
-                return _logic.IndexAsync(IndexName, document);
+                return _logic.IndexAsync(IndexName, document, cancellationToken);
             }
 
             public Task UpdateAsync(string docId, Expression<Func<TDoc>> updateExpression,

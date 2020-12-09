@@ -15,22 +15,22 @@ namespace MyLab.Elastic
         /// <summary>
         /// Index document batch in specified index
         /// </summary>
-        Task IndexManyAsync(string indexName, IEnumerable<TDoc> documents);
+        Task IndexManyAsync(string indexName, IEnumerable<TDoc> documents, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Index document batch in index which bound to document model
         /// </summary>
-        Task IndexManyAsync(IEnumerable<TDoc> documents);
+        Task IndexManyAsync(IEnumerable<TDoc> documents, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Index document in specified index
         /// </summary>
-        Task IndexAsync(string indexName, TDoc document);
+        Task IndexAsync(string indexName, TDoc document, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Index document in index which bound to document model
         /// </summary>
-        Task IndexAsync(TDoc document);
+        Task IndexAsync(TDoc document, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Creates index specific indexer
@@ -64,12 +64,12 @@ namespace MyLab.Elastic
         /// <summary>
         /// Index document batch in index which bound to document model
         /// </summary>
-        Task IndexManyAsync(IEnumerable<TDoc> documents);
+        Task IndexManyAsync(IEnumerable<TDoc> documents, CancellationToken cancellationToken = default);
         
         /// <summary>
         /// Index document in index which bound to document model
         /// </summary>
-        Task IndexAsync(TDoc document);
+        Task IndexAsync(TDoc document, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Update document partially

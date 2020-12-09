@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 
 namespace MyLab.Elastic.SearchEngine
 {
@@ -15,6 +16,7 @@ namespace MyLab.Elastic.SearchEngine
             IEsSearchEngineStrategy<TDoc> strategy = null, 
             string filterKey = null, 
             string sortKey = null, 
-            EsPaging paging = null);
+            EsPaging paging = null,
+            CancellationToken cancellationToken = default);
     }
 }

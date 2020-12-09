@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 
 namespace MyLab.Elastic
 {
@@ -12,22 +13,22 @@ namespace MyLab.Elastic
         /// <summary>
         /// Search documents in specified index
         /// </summary>
-        Task<EsFound<TDoc>> SearchAsync(string indexName,SearchParams<TDoc> searchParams);
+        Task<EsFound<TDoc>> SearchAsync(string indexName,SearchParams<TDoc> searchParams, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Search documents in index which bound to document model
         /// </summary>
-        Task<EsFound<TDoc>> SearchAsync(SearchParams<TDoc> searchParams);
+        Task<EsFound<TDoc>> SearchAsync(SearchParams<TDoc> searchParams, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Search documents with highlighting in specified index
         /// </summary>
-        Task<EsHlFound<TDoc>> SearchAsync(string indexName, SearchParams<TDoc> searchParams, EsHlSelector<TDoc> hlSelector);
+        Task<EsHlFound<TDoc>> SearchAsync(string indexName, SearchParams<TDoc> searchParams, EsHlSelector<TDoc> hlSelector, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Search documents with highlighting in index which bound to document model
         /// </summary>
-        Task<EsHlFound<TDoc>> SearchAsync(SearchParams<TDoc> searchParams, EsHlSelector<TDoc> hlSelector);  
+        Task<EsHlFound<TDoc>> SearchAsync(SearchParams<TDoc> searchParams, EsHlSelector<TDoc> hlSelector, CancellationToken cancellationToken = default);  
 
         /// <summary>
         /// Create index specific manager
@@ -49,11 +50,11 @@ namespace MyLab.Elastic
         /// <summary>
         /// Search documents in index which bound to document model
         /// </summary>
-        Task<EsFound<TDoc>> SearchAsync(SearchParams<TDoc> searchParams);
+        Task<EsFound<TDoc>> SearchAsync(SearchParams<TDoc> searchParams, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Search documents with highlighting in index which bound to document model
         /// </summary>
-        Task<EsHlFound<TDoc>> SearchAsync(SearchParams<TDoc> searchParams, EsHlSelector<TDoc> hlSelector);
+        Task<EsHlFound<TDoc>> SearchAsync(SearchParams<TDoc> searchParams, EsHlSelector<TDoc> hlSelector, CancellationToken cancellationToken = default);
     }
 }
