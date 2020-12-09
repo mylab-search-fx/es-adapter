@@ -9,8 +9,8 @@ namespace MyLab.Elastic.SearchEngine
         where TDoc : class
     {
         /// <summary>
-        /// Extracts filter from query
+        /// Extracts filter from query word
         /// </summary>
-        IEnumerable<IEsSearchFilter<TDoc>> CreateEsSearchFilters(string queryStr);
+        IEsSearchFilter<TDoc> CreateEsSearchFilter(string queryWord);
     }
 }
