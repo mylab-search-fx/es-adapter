@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace MyLab.Elastic.SearchEngine
 {
@@ -17,16 +15,15 @@ namespace MyLab.Elastic.SearchEngine
             _regexpPattern = regexpPattern;
         }
 
-        public IEnumerable<IEsSearchFilter<TDoc>> CreateEsSearchFilters(string queryStr)
-        {
-            if (string.IsNullOrWhiteSpace(queryStr))
-                return Enumerable.Empty<IEsSearchFilter<TDoc>>();
-
-            var matches = Regex.Matches(queryStr, _regexpPattern);
-
-            return matches.Where(m => m.Success).Select(CreateFilter);
-        }
-
         protected abstract IEsSearchFilter<TDoc> CreateFilter(Match queryMatch);
+        public IEsSearchFilter<TDoc> CreateEsSearchFilter(string queryWord)
+        {
+            if (string.IsNullOrWhiteSpace(queryWord))
+                return null;
+
+            var match = Regex.Match(queryWord, _regexpPattern);
+
+            return match.Success ? CreateFilter(match) : null;
+        }
     }
 }

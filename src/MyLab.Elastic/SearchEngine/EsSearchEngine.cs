@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Nest;
 
@@ -34,7 +35,13 @@ namespace MyLab.Elastic.SearchEngine
         /// <summary>
         /// Performs searching
         /// </summary>
-        public async Task<EsFound<TDoc>> SearchAsync(string queryStr, IEsSearchEngineStrategy<TDoc> strategy = null, string filterKey = null, string sortKey = null, EsPaging paging = null)
+        public async Task<EsFound<TDoc>> SearchAsync(
+            string queryStr, 
+            IEsSearchEngineStrategy<TDoc> strategy = null, 
+            string filterKey = null, 
+            string sortKey = null, 
+            EsPaging paging = null,
+            CancellationToken cancellationToken = default)
         {
             var sp = new SearchParams<TDoc>(d => CreateSearchQuery(d, queryStr, filterKey, strategy))
             {
@@ -44,7 +51,7 @@ namespace MyLab.Elastic.SearchEngine
             if (!string.IsNullOrWhiteSpace(sortKey))
                 sp.Sort = GetSort(sortKey);
 
-            return await _searcher.ForIndex(_indexName).SearchAsync(sp);
+            return await _searcher.ForIndex(_indexName).SearchAsync(sp, cancellationToken);
         }
 
         /// <summary>
@@ -78,9 +85,21 @@ namespace MyLab.Elastic.SearchEngine
             if(actualStrategy == null)
                 throw new InvalidOperationException("Search strategy not specified");
 
-            var propSearch = GetPropertySearch(queryStr, actualStrategy);
+            var filters = new List<Func<QueryContainerDescriptor<TDoc>, QueryContainer>>(GetPredefinedFilters(actualStrategy));
 
-            var filters = new List<Func<QueryContainerDescriptor<TDoc>, QueryContainer>>(GetFilters(queryStr, actualStrategy));
+            IEnumerable<Func<QueryContainerDescriptor<TDoc>, QueryContainer>> propSearch = null;
+
+            if (!string.IsNullOrWhiteSpace(queryStr))
+            {
+                var words = queryStr
+                    .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                    .ToList();
+
+                filters.AddRange(ExtractFiltersAndRemoveWords(words, actualStrategy));
+
+                propSearch = GetPropertySearch(words.ToArray(), actualStrategy);
+
+            }
 
             if (!string.IsNullOrWhiteSpace(filterKey))
             {
@@ -93,7 +112,10 @@ namespace MyLab.Elastic.SearchEngine
             {
                 var cs = boolSd;
 
-                cs = cs.Should(propSearch);
+                if (propSearch != null)
+                {
+                    cs = cs.Should(propSearch).MinimumShouldMatch(1);
+                }
 
                 cs = cs.Filter(filters);
 
@@ -102,20 +124,19 @@ namespace MyLab.Elastic.SearchEngine
             });
         }
 
-        IEnumerable<Func<QueryContainerDescriptor<TDoc>, QueryContainer>> GetPropertySearch(string queryStr, IEsSearchEngineStrategy<TDoc> strategy)
+        IEnumerable<Func<QueryContainerDescriptor<TDoc>, QueryContainer>> GetPropertySearch(string[] queryWords, IEsSearchEngineStrategy<TDoc> strategy)
         {
             var searchFuncs = new List<Func<QueryContainerDescriptor<TDoc>, QueryContainer>>();
 
-            if (!string.IsNullOrWhiteSpace(queryStr))
+            if (queryWords.Length > 0)
             {
+                var queryStr = string.Join(' ', queryWords);
                 var termProps = strategy.GetTermProperties().ToArray();
                 searchFuncs.Add(d =>
                     d.MultiMatch(mm =>
                         mm.Fields(termProps).Query(queryStr)));
 
-                var words = queryStr.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-                foreach (var word in words)
+                foreach (var word in queryWords)
                 {
                     if(long.TryParse(word, out var longWord))
                     {
@@ -156,19 +177,27 @@ namespace MyLab.Elastic.SearchEngine
             return searchFuncs;
         }
 
-        IEnumerable<Func<QueryContainerDescriptor<TDoc>, QueryContainer>> GetFilters(string queryStr, IEsSearchEngineStrategy<TDoc> strategy)
+        IEnumerable<Func<QueryContainerDescriptor<TDoc>, QueryContainer>> GetPredefinedFilters(IEsSearchEngineStrategy<TDoc> strategy)
         {
-            var fieldTermsList = new List<Func<QueryContainerDescriptor<TDoc>, QueryContainer>>();
-
-            fieldTermsList.AddRange(strategy
+            return strategy
                 .GetPredefinedFilters()
-                .Select<IEsSearchFilter<TDoc>, Func<QueryContainerDescriptor<TDoc>, QueryContainer>>(filter => filter.Filter));
+                .Select<IEsSearchFilter<TDoc>, Func<QueryContainerDescriptor<TDoc>, QueryContainer>>(filter =>
+                    filter.Filter);
+        }
 
-            fieldTermsList.AddRange(strategy
-                .GetFiltersFromQuery(queryStr)
-                .Select<IEsSearchFilter<TDoc>, Func<QueryContainerDescriptor<TDoc>, QueryContainer>>(filter => filter.Filter));
+        IEnumerable<Func<QueryContainerDescriptor<TDoc>, QueryContainer>> ExtractFiltersAndRemoveWords(List<string> words, IEsSearchEngineStrategy<TDoc> strategy)
+        {
+            foreach (var word in words.ToArray())
+            {
+                var filter = strategy.GetFilterFromQueryWord(word);
+                if (filter != null)
+                {
+                    words.Remove(word);
+                    yield return filter.Filter;
+                }
+            }
 
-            return fieldTermsList;
+            yield break;
         }
 
         private Func<SortDescriptor<TDoc>, IPromise<IList<ISort>>> GetSort(string sortKey)

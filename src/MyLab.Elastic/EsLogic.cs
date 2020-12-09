@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
+using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Nest;
 
@@ -15,31 +16,57 @@ namespace MyLab.Elastic
         {
             _cl = cl;
         }
-        
-        public async Task IndexManyAsync(string indexName, IEnumerable<TDoc> documents)
+
+        public Task UpdateAsync(string indexName, string docId, Expression<Func<TDoc>> updateExpression, CancellationToken cancellationToken)
+        {
+            if (updateExpression == null) throw new ArgumentNullException(nameof(updateExpression));
+            if (string.IsNullOrWhiteSpace(indexName))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(indexName));
+            if (string.IsNullOrWhiteSpace(docId))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(docId));
+
+            return CoreUpdateAsync(indexName, new Id(docId), new UpdateDocument<TDoc>(updateExpression), cancellationToken);
+        }
+
+        public Task UpdateAsync(string indexName, long docId, Expression<Func<TDoc>> updateExpression, CancellationToken cancellationToken)
+        {
+            if (updateExpression == null) throw new ArgumentNullException(nameof(updateExpression));
+            if (string.IsNullOrWhiteSpace(indexName))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(indexName));
+
+            return CoreUpdateAsync(indexName, new Id(docId), new UpdateDocument<TDoc>(updateExpression),  cancellationToken);
+        }
+
+        public async Task IndexManyAsync(string indexName, IEnumerable<TDoc> documents, CancellationToken cancellationToken)
         {
             if (documents == null) throw new ArgumentNullException(nameof(documents));
+            if (string.IsNullOrWhiteSpace(indexName))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(indexName));
 
-            var indexResponse = await _cl.IndexManyAsync(documents, indexName);
+            var indexResponse = await _cl.IndexManyAsync(documents, indexName, cancellationToken);
             if (!indexResponse.IsValid)
                 throw new EsIndexManyException(indexResponse);
         }
 
-        public async Task IndexAsync(string indexName, TDoc document)
+        public async Task IndexAsync(string indexName, TDoc document, CancellationToken cancellationToken)
             
         {
             if (document == null) throw new ArgumentNullException(nameof(document));
+            if (string.IsNullOrWhiteSpace(indexName))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(indexName));
 
-            var indexResponse = await _cl.IndexAsync(document, iDesc => iDesc.Index(indexName));
+            var indexResponse = await _cl.IndexAsync(document, iDesc => iDesc.Index(indexName), cancellationToken);
             if (!indexResponse.IsValid)
                 throw new EsIndexException(indexResponse);
         }
 
-        public async Task<EsFound<TDoc>> SearchAsync(string indexName, SearchParams<TDoc> searchParams)
+        public async Task<EsFound<TDoc>> SearchAsync(string indexName, SearchParams<TDoc> searchParams, CancellationToken cancellationToken)
         {
             if (searchParams == null) throw new ArgumentNullException(nameof(searchParams));
+            if (string.IsNullOrWhiteSpace(indexName))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(indexName));
 
-            var sr = await _cl.SearchAsync(GetSearchFunc(indexName, searchParams));
+            var sr = await _cl.SearchAsync(GetSearchFunc(indexName, searchParams), cancellationToken);
 
             if (!sr.IsValid)
                 throw new EsSearchException<TDoc>(sr);
@@ -50,12 +77,14 @@ namespace MyLab.Elastic
         public async Task<EsHlFound<TDoc>> SearchAsync(
             string indexName, 
             SearchParams<TDoc> searchParams,
-            EsHlSelector<TDoc> highlight)
+            EsHlSelector<TDoc> highlight, CancellationToken cancellationToken)
         {
             if (searchParams == null) throw new ArgumentNullException(nameof(searchParams));
             if (highlight == null) throw new ArgumentNullException(nameof(highlight));
+            if (string.IsNullOrWhiteSpace(indexName))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(indexName));
 
-            var sr = await _cl.SearchAsync(GetSearchFunc(indexName, searchParams, highlight));
+            var sr = await _cl.SearchAsync(GetSearchFunc(indexName, searchParams, highlight), cancellationToken);
 
             if (!sr.IsValid)
                 throw new EsSearchException<TDoc>(sr);
@@ -88,6 +117,16 @@ namespace MyLab.Elastic
 
                 return s;
             };
+        }
+
+        Task CoreUpdateAsync(string indexName, Id docId, UpdateDocument<TDoc> updateDocument, CancellationToken cancellationToken)
+        {
+            var updateReq = new UpdateRequest<TDoc, dynamic>(indexName, docId)
+            {
+                Doc = updateDocument.ToUpdateModel()
+            };
+
+            return _cl.UpdateAsync(updateReq, cancellationToken);
         }
     }
 }

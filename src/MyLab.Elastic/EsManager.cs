@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Nest;
@@ -22,17 +22,17 @@ namespace MyLab.Elastic
             _client = clientProvider.Provide();
         }
 
-        public async Task<bool> PingAsync()
+        public async Task<bool> PingAsync(CancellationToken cancellationToken = default)
         {
-            var resp = await _client.PingAsync();
+            var resp = await _client.PingAsync(ct: cancellationToken);
 
             return resp.IsValid;
         }
 
-        public async Task<IAsyncDisposable> CreateIndexAsync(string indexName, Func<CreateIndexDescriptor, ICreateIndexRequest> selector = null)
+        public async Task<IAsyncDisposable> CreateIndexAsync(string indexName, Func<CreateIndexDescriptor, ICreateIndexRequest> selector = null, CancellationToken cancellationToken = default)
         {
             var res = await _client.Indices.CreateAsync(
-                indexName, selector);
+                indexName, selector, cancellationToken);
 
             if(!res.IsValid)
                 throw new ResponseException("Can't create index", res);
@@ -40,19 +40,19 @@ namespace MyLab.Elastic
             return new IndexDeleter(indexName, this);
         }
 
-        public Task<IAsyncDisposable> CreateDefaultIndexAsync(Func<CreateIndexDescriptor, ICreateIndexRequest> selector = null)
+        public Task<IAsyncDisposable> CreateDefaultIndexAsync(Func<CreateIndexDescriptor, ICreateIndexRequest> selector = null, CancellationToken cancellationToken = default)
         {
-            return CreateIndexAsync(_options.DefaultIndex, selector);
+            return CreateIndexAsync(_options.DefaultIndex, selector, cancellationToken);
         }
 
-        public async Task DeleteIndexAsync(string indexName)
+        public async Task DeleteIndexAsync(string indexName, CancellationToken cancellationToken = default)
         {
-            await _client.Indices.DeleteAsync(indexName);
+            await _client.Indices.DeleteAsync(indexName, ct: cancellationToken);
         }
 
-        public async Task<bool> IsIndexExistsAsync(string indexName)
+        public async Task<bool> IsIndexExistsAsync(string indexName, CancellationToken cancellationToken = default)
         {
-            var res =await _client.Indices.GetAsync(indexName);
+            var res =await _client.Indices.GetAsync(indexName, ct: cancellationToken);
 
             return res.Indices.ContainsKey(indexName);
         }

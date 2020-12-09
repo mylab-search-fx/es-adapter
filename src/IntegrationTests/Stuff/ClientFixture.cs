@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Elasticsearch.Net;
+using MyLab.Elastic;
 using Nest;
+using Xunit.Abstractions;
 
 namespace IntegrationTests.Stuff
 {
@@ -11,11 +13,17 @@ namespace IntegrationTests.Stuff
 
         public ElasticClient EsClient { get; }
 
+        public ITestOutputHelper Output { get;set; }
+
         public ClientFixture()
         {
             _connectionPool = TestConnection.Create();
             var settings = new ConnectionSettings(_connectionPool);
             settings.DisableDirectStreaming();
+            settings.OnRequestCompleted(details =>
+            {
+                Output?.WriteLine(ApiCallDumper.ApiCallToDump(details));
+            });
             EsClient = new ElasticClient(settings);
         }
 

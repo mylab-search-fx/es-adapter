@@ -71,11 +71,16 @@ namespace MyLab.Elastic.SearchEngine
             return _filters.ToArray();
         }
 
-        public IEnumerable<IEsSearchFilter<TDoc>> GetFiltersFromQuery(string queryStr)
+        public IEsSearchFilter<TDoc> GetFilterFromQueryWord(string queryWord)
         {
-            return _filterExtractors
-                .SelectMany(e => e.CreateEsSearchFilters(queryStr))
-                .Where(f => f != null);
+            foreach (var filterExtractor in _filterExtractors)
+            {
+                var filter = filterExtractor.CreateEsSearchFilter(queryWord);
+                if (filter != null)
+                    return filter;
+            }
+
+            return null;
         }
 
         public IEnumerable<Expression<Func<TDoc, long>>> GetNumProperties()

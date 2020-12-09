@@ -8,7 +8,7 @@ namespace MyLab.Elastic.SearchEngine
         where TDoc : class
     {
         IEnumerable<IEsSearchFilter<TDoc>> GetPredefinedFilters();
-        IEnumerable<IEsSearchFilter<TDoc>> GetFiltersFromQuery(string queryStr);
+        IEsSearchFilter<TDoc> GetFilterFromQueryWord(string queryWord);
         IEnumerable<Expression<Func<TDoc, long>>> GetNumProperties();
         IEnumerable<Expression<Func<TDoc, string>>> GetTermProperties();
         IEnumerable<Expression<Func<TDoc, string>>> GetTextProperties();
