@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
+using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Nest;
 
@@ -15,10 +16,32 @@ namespace MyLab.Elastic
         {
             _cl = cl;
         }
-        
+
+        public Task UpdateAsync(string indexName, string docId, Expression<Func<TDoc>> updateExpression, CancellationToken cancellationToken)
+        {
+            if (updateExpression == null) throw new ArgumentNullException(nameof(updateExpression));
+            if (string.IsNullOrWhiteSpace(indexName))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(indexName));
+            if (string.IsNullOrWhiteSpace(docId))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(docId));
+
+            return CoreUpdateAsync(indexName, new Id(docId), new UpdateDocument<TDoc>(updateExpression), cancellationToken);
+        }
+
+        public Task UpdateAsync(string indexName, long docId, Expression<Func<TDoc>> updateExpression, CancellationToken cancellationToken)
+        {
+            if (updateExpression == null) throw new ArgumentNullException(nameof(updateExpression));
+            if (string.IsNullOrWhiteSpace(indexName))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(indexName));
+
+            return CoreUpdateAsync(indexName, new Id(docId), new UpdateDocument<TDoc>(updateExpression),  cancellationToken);
+        }
+
         public async Task IndexManyAsync(string indexName, IEnumerable<TDoc> documents)
         {
             if (documents == null) throw new ArgumentNullException(nameof(documents));
+            if (string.IsNullOrWhiteSpace(indexName))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(indexName));
 
             var indexResponse = await _cl.IndexManyAsync(documents, indexName);
             if (!indexResponse.IsValid)
@@ -29,6 +52,8 @@ namespace MyLab.Elastic
             
         {
             if (document == null) throw new ArgumentNullException(nameof(document));
+            if (string.IsNullOrWhiteSpace(indexName))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(indexName));
 
             var indexResponse = await _cl.IndexAsync(document, iDesc => iDesc.Index(indexName));
             if (!indexResponse.IsValid)
@@ -38,6 +63,8 @@ namespace MyLab.Elastic
         public async Task<EsFound<TDoc>> SearchAsync(string indexName, SearchParams<TDoc> searchParams)
         {
             if (searchParams == null) throw new ArgumentNullException(nameof(searchParams));
+            if (string.IsNullOrWhiteSpace(indexName))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(indexName));
 
             var sr = await _cl.SearchAsync(GetSearchFunc(indexName, searchParams));
 
@@ -54,6 +81,8 @@ namespace MyLab.Elastic
         {
             if (searchParams == null) throw new ArgumentNullException(nameof(searchParams));
             if (highlight == null) throw new ArgumentNullException(nameof(highlight));
+            if (string.IsNullOrWhiteSpace(indexName))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(indexName));
 
             var sr = await _cl.SearchAsync(GetSearchFunc(indexName, searchParams, highlight));
 
@@ -88,6 +117,19 @@ namespace MyLab.Elastic
 
                 return s;
             };
+        }
+
+        //Task CoreUpdateAsync(string indexName, DocumentPath<TDoc> docId, UpdateDocument<TDoc> updateDocument, CancellationToken cancellationToken)
+        Task CoreUpdateAsync(string indexName, Id docId, UpdateDocument<TDoc> updateDocument, CancellationToken cancellationToken)
+        {
+            //dynamic partialDocument = updateDocument.ToUpdateModel();
+            var updateReq = new UpdateRequest<TDoc, dynamic>(indexName, docId)
+            {
+                Doc = updateDocument.ToUpdateModel()
+            };
+
+            return _cl.UpdateAsync(updateReq, cancellationToken);
+            //return _cl.UpdateAsync<TDoc, string>(docId, d => d.Index(indexName).Doc("foo"), cancellationToken);
         }
     }
 }

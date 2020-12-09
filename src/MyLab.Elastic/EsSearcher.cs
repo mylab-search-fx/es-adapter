@@ -7,17 +7,18 @@ namespace MyLab.Elastic
         where TDoc : class
     {
         private readonly IIndexNameProvider _indexNameProvider;
-        private readonly ElasticClient _client;
+        private readonly EsLogic<TDoc> _logic;
 
         public EsSearcher(IEsClientProvider clientProvider, IIndexNameProvider indexNameProvider)
         {
             _indexNameProvider = indexNameProvider;
-            _client = clientProvider.Provide();
+            var client = clientProvider.Provide();
+            _logic = new EsLogic<TDoc>(client);
         }
 
         public Task<EsFound<TDoc>> SearchAsync(string indexName, SearchParams<TDoc> searchParams)
         {
-            return new EsLogic<TDoc>(_client).SearchAsync(indexName, searchParams);
+            return _logic.SearchAsync(indexName, searchParams);
         }
 
         public Task<EsFound<TDoc>> SearchAsync(SearchParams<TDoc> searchParams)
@@ -27,7 +28,7 @@ namespace MyLab.Elastic
 
         public Task<EsHlFound<TDoc>> SearchAsync(string indexName, SearchParams<TDoc> searchParams, EsHlSelector<TDoc> hlSelector)
         {
-            return new EsLogic<TDoc>(_client).SearchAsync(indexName, searchParams, hlSelector);
+            return _logic.SearchAsync(indexName, searchParams, hlSelector);
         }
 
         public Task<EsHlFound<TDoc>> SearchAsync(SearchParams<TDoc> searchParams, EsHlSelector<TDoc> hlSelector)
@@ -37,28 +38,28 @@ namespace MyLab.Elastic
 
         public IIndexSpecificEsSearcher<TDoc> ForIndex(string indexName)
         {
-            return new IndexSpecificEsSearcher(indexName, _client);
+            return new IndexSpecificEsSearcher(indexName, _logic);
         }
 
         class IndexSpecificEsSearcher : IIndexSpecificEsSearcher<TDoc>
         {
-            private readonly ElasticClient _client;
+            private readonly EsLogic<TDoc> _logic;
             public string IndexName { get;}
 
-            public IndexSpecificEsSearcher(string indexName, ElasticClient client)
+            public IndexSpecificEsSearcher(string indexName, EsLogic<TDoc> logic)
             {
+                _logic = logic;
                 IndexName = indexName;
-                _client = client;
             }
 
             public Task<EsFound<TDoc>> SearchAsync(SearchParams<TDoc> searchParams)
             {
-                return new EsLogic<TDoc>(_client).SearchAsync(IndexName, searchParams);
+                return _logic.SearchAsync(IndexName, searchParams);
             }
 
             public Task<EsHlFound<TDoc>> SearchAsync(SearchParams<TDoc> searchParams, EsHlSelector<TDoc> hlSelector)
             {
-                return new EsLogic<TDoc>(_client).SearchAsync(IndexName, searchParams, hlSelector);
+                return _logic.SearchAsync(IndexName, searchParams, hlSelector);
             }
         }
     }

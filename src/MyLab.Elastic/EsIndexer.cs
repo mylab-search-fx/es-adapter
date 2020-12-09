@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Nest;
 
@@ -9,17 +12,18 @@ namespace MyLab.Elastic
         where TDoc : class
     {
         private readonly IIndexNameProvider _indexNameProvider;
-        private readonly ElasticClient _client;
+        private readonly EsLogic<TDoc> _logic;
 
         public EsIndexer(IEsClientProvider clientProvider, IIndexNameProvider indexNameProvider)
         {
             _indexNameProvider = indexNameProvider;
-            _client = clientProvider.Provide();
+             var client = clientProvider.Provide();
+            _logic= new EsLogic<TDoc>(client);
         }
 
         public Task IndexManyAsync(string indexName, IEnumerable<TDoc> documents)
         {
-            return new EsLogic<TDoc>(_client).IndexManyAsync(indexName, documents);
+            return _logic.IndexManyAsync(indexName, documents);
         }
 
         public Task IndexManyAsync(IEnumerable<TDoc> documents)
@@ -29,7 +33,7 @@ namespace MyLab.Elastic
 
         public Task IndexAsync(string indexName, TDoc document)
         {
-            return new EsLogic<TDoc>(_client).IndexAsync(indexName, document);
+            return _logic.IndexAsync(indexName, document);
         }
 
         public Task IndexAsync(TDoc document)
@@ -39,27 +43,51 @@ namespace MyLab.Elastic
 
         public IIndexSpecificEsIndexer<TDoc> ForIndex(string indexName)
         {
-            return new IndexSpecificIndexer(indexName, _client);
+            return new IndexSpecificIndexer(indexName, _logic);
+        }
+
+        public Task UpdateAsync(string indexName, string docId, Expression<Func<TDoc>> updateExpression,
+            CancellationToken cancellationToken = default)
+        {
+            return _logic.UpdateAsync(indexName, docId, updateExpression, cancellationToken);
+        }
+
+        public Task UpdateAsync(string indexName, long docId, Expression<Func<TDoc>> updateExpression,
+            CancellationToken cancellationToken = default)
+        {
+            return _logic.UpdateAsync(indexName, docId, updateExpression, cancellationToken);
         }
 
         class IndexSpecificIndexer : IIndexSpecificEsIndexer<TDoc>
         {
-            private readonly ElasticClient _client;
+            private readonly EsLogic<TDoc> _logic;
             public string IndexName { get; set; }
 
-            public IndexSpecificIndexer(string indexName, ElasticClient client)
+            public IndexSpecificIndexer(string indexName, EsLogic<TDoc> logic)
             {
+                _logic = logic;
                 IndexName = indexName;
-                _client = client;
             }
             public Task IndexManyAsync(IEnumerable<TDoc> documents)
             {
-                return new EsLogic<TDoc>(_client).IndexManyAsync(IndexName, documents);
+                return _logic.IndexManyAsync(IndexName, documents);
             }
 
             public Task IndexAsync(TDoc document)
             {
-                return new EsLogic<TDoc>(_client).IndexAsync(IndexName, document);
+                return _logic.IndexAsync(IndexName, document);
+            }
+
+            public Task UpdateAsync(string docId, Expression<Func<TDoc>> updateExpression,
+                CancellationToken cancellationToken = default)
+            {
+                return _logic.UpdateAsync(IndexName, docId, updateExpression, cancellationToken);
+            }
+
+            public Task UpdateAsync(long docId, Expression<Func<TDoc>> updateExpression,
+                CancellationToken cancellationToken = default)
+            {
+                return _logic.UpdateAsync(IndexName, docId, updateExpression, cancellationToken);
             }
         }
     }
