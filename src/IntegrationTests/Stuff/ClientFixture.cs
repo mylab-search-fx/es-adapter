@@ -15,6 +15,7 @@ namespace IntegrationTests.Stuff
         {
             _connectionPool = TestConnection.Create();
             var settings = new ConnectionSettings(_connectionPool);
+            settings.DisableDirectStreaming();
             EsClient = new ElasticClient(settings);
         }
 
