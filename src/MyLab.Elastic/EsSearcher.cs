@@ -9,8 +9,8 @@ namespace MyLab.Elastic
         where TDoc : class
     {
         private readonly IIndexNameProvider _indexNameProvider;
+        private readonly ElasticsearchOptions _options;
         private readonly EsLogic<TDoc> _logic;
-        private readonly string _defaultIndexName;
 
         public EsSearcher(IEsClientProvider clientProvider, IIndexNameProvider indexNameProvider,
             IOptions<ElasticsearchOptions> options)
@@ -21,9 +21,9 @@ namespace MyLab.Elastic
         public EsSearcher(IEsClientProvider clientProvider, IIndexNameProvider indexNameProvider, ElasticsearchOptions options)
         {
             _indexNameProvider = indexNameProvider;
+            _options = options;
             var client = clientProvider.Provide();
             _logic = new EsLogic<TDoc>(client);
-            _defaultIndexName = options.DefaultIndex;
         }
 
         public Task<EsFound<TDoc>> SearchAsync(string indexName, SearchParams<TDoc> searchParams, CancellationToken cancellationToken = default)
@@ -53,7 +53,7 @@ namespace MyLab.Elastic
 
         public IIndexSpecificEsSearcher<TDoc> ForDefaultIndex()
         {
-            return ForIndex(_defaultIndexName);
+            return ForIndex(_options.DefaultIndex);
         }
 
         class IndexSpecificEsSearcher : IIndexSpecificEsSearcher<TDoc>

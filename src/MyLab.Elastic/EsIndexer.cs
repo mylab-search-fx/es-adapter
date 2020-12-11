@@ -13,16 +13,16 @@ namespace MyLab.Elastic
         where TDoc : class
     {
         private readonly IIndexNameProvider _indexNameProvider;
+        private readonly ElasticsearchOptions _options;
         private readonly EsLogic<TDoc> _logic;
-        private readonly string _defaultIndexName;
 
         public EsIndexer(IEsClientProvider clientProvider, IIndexNameProvider indexNameProvider,
             ElasticsearchOptions options)
         {
             _indexNameProvider = indexNameProvider;
+            _options = options;
             var client = clientProvider.Provide();
             _logic = new EsLogic<TDoc>(client);
-            _defaultIndexName = options.DefaultIndex;
         }
         public EsIndexer(IEsClientProvider clientProvider, IIndexNameProvider indexNameProvider, IOptions<ElasticsearchOptions> options)
             : this(clientProvider, indexNameProvider, options.Value)
@@ -57,7 +57,7 @@ namespace MyLab.Elastic
 
         public IIndexSpecificEsIndexer<TDoc> ForIndex()
         {
-            return ForIndex(_defaultIndexName);
+            return ForIndex(_options.DefaultIndex);
         }
 
         public Task UpdateAsync(string indexName, string docId, Expression<Func<TDoc>> updateExpression,

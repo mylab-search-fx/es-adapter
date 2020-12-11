@@ -19,8 +19,8 @@ namespace IntegrationTests
             _clFx = clFx;
             _output = output;
             _clFx.Output = output;
-            _indexer = new EsIndexer<TestEntity>(new SingleEsClientProvider(_clFx.EsClient), null);
-            _searcher = new EsSearcher<TestEntity>(new SingleEsClientProvider(_clFx.EsClient), null);
+            _indexer = new EsIndexer<TestEntity>(new SingleEsClientProvider(_clFx.EsClient), null, (ElasticsearchOptions)null);
+            _searcher = new EsSearcher<TestEntity>(new SingleEsClientProvider(_clFx.EsClient), null, (ElasticsearchOptions)null);
         }
 
         [Fact]
