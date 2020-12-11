@@ -149,6 +149,17 @@ namespace IntegrationTests
             }
         }
 
+        private class SingleDigitTermDefaultFilteredSearchEngine : EsSearchEngine<TestModel>
+        {
+            public SingleDigitTermDefaultFilteredSearchEngine(
+                IIndexNameProvider indexNameProvider, 
+                IEsSearcher<TestModel> searcher) 
+                : base(indexNameProvider, searcher, new SimpleSearchStrategy())
+            {
+                DefaultFilter = new SingleDigitTermFilter();
+            }
+        }
+
         private class SingleDigitTermFilter : IEsSearchFilter<TestModel>
         {
             public QueryContainer Filter(QueryContainerDescriptor<TestModel> d)

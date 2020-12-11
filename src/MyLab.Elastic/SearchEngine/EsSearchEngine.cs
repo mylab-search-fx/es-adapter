@@ -23,6 +23,11 @@ namespace MyLab.Elastic.SearchEngine
             = new Dictionary<string, IEsSearchSort<TDoc>>();
 
         /// <summary>
+        /// Uses when no named filter specified
+        /// </summary>
+        protected IEsSearchFilter<TDoc> DefaultFilter { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of <see cref="SearchEngine"/>
         /// </summary>
         public EsSearchEngine(IIndexNameProvider indexNameProvider, IEsSearcher<TDoc> searcher, IEsSearchEngineStrategy<TDoc> defaultStrategy)
@@ -106,6 +111,11 @@ namespace MyLab.Elastic.SearchEngine
                 var registeredFilter = GetFilter(filterKey);
                 if (registeredFilter != null)
                     filters.Add(registeredFilter);
+            }
+            else
+            {
+                if(DefaultFilter != null)
+                    filters.Add(DefaultFilter.Filter);
             }
 
             return d.Bool(boolSd =>
