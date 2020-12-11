@@ -143,9 +143,9 @@ namespace IntegrationTests
                 IEsSearcher<TestModel> searcher)
                 : base(indexNameProvider, searcher, new SimpleSearchStrategy())
             {
-                RegisterFilter("single-digit", new SingleDigitTermFilter());
-                RegisterSort("revert", new RevertSort());
-                RegisterSort("norm", new NormSort());
+                RegisterNamedFilter("single-digit", new SingleDigitTermFilter());
+                RegisterNamedSort("revert", new RevertSort());
+                RegisterNamedSort("norm", new NormSort());
             }
         }
 

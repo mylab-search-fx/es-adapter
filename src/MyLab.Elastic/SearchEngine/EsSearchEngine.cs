@@ -57,7 +57,7 @@ namespace MyLab.Elastic.SearchEngine
         /// <summary>
         /// Registers filter with specified key
         /// </summary>
-        protected void RegisterFilter(string key, IEsSearchFilter<TDoc> filter)
+        protected void RegisterNamedFilter(string key, IEsSearchFilter<TDoc> filter)
         {
             if (filter == null) throw new ArgumentNullException(nameof(filter));
             if (string.IsNullOrWhiteSpace(key))
@@ -69,7 +69,7 @@ namespace MyLab.Elastic.SearchEngine
         /// <summary>
         /// Registers sort with specified key
         /// </summary>
-        protected void RegisterSort(string key, IEsSearchSort<TDoc> sort)
+        protected void RegisterNamedSort(string key, IEsSearchSort<TDoc> sort)
         {
             if (sort == null) throw new ArgumentNullException(nameof(sort));
             if (string.IsNullOrWhiteSpace(key))
