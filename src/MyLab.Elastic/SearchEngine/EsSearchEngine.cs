@@ -10,7 +10,7 @@ namespace MyLab.Elastic.SearchEngine
     /// <summary>
     /// Provides object model for searching 
     /// </summary>
-    public class EsSearchEngine<TDoc> : IEsSearchEngine<TDoc> where TDoc : class
+    public partial class EsSearchEngine<TDoc> : IEsSearchEngine<TDoc> where TDoc : class
     {
         private readonly string _indexName;
         private readonly IEsSearcher<TDoc> _searcher;
@@ -21,67 +21,6 @@ namespace MyLab.Elastic.SearchEngine
 
         private readonly IDictionary<string, IEsSearchSort<TDoc>> _registeredSorts 
             = new Dictionary<string, IEsSearchSort<TDoc>>();
-
-        /// <summary>
-        /// Uses when no named filter specified
-        /// </summary>
-        protected IEsSearchFilter<TDoc> DefaultFilter { get; set; }
-
-        /// <summary>
-        /// Initializes a new instance of <see cref="SearchEngine"/>
-        /// </summary>
-        public EsSearchEngine(IIndexNameProvider indexNameProvider, IEsSearcher<TDoc> searcher, IEsSearchEngineStrategy<TDoc> defaultStrategy)
-        {
-            _indexName = indexNameProvider.Provide<TDoc>();
-            _searcher = searcher ?? throw new ArgumentNullException(nameof(searcher));
-            _defaultStrategy = defaultStrategy;
-        }
-
-        /// <summary>
-        /// Performs searching
-        /// </summary>
-        public async Task<EsFound<TDoc>> SearchAsync(
-            string queryStr, 
-            IEsSearchEngineStrategy<TDoc> strategy = null, 
-            string filterKey = null, 
-            string sortKey = null, 
-            EsPaging paging = null,
-            CancellationToken cancellationToken = default)
-        {
-            var sp = new SearchParams<TDoc>(d => CreateSearchQuery(d, queryStr, filterKey, strategy))
-            {
-                Page = paging
-            };
-
-            if (!string.IsNullOrWhiteSpace(sortKey))
-                sp.Sort = GetSort(sortKey);
-
-            return await _searcher.ForIndex(_indexName).SearchAsync(sp, cancellationToken);
-        }
-
-        /// <summary>
-        /// Registers filter with specified key
-        /// </summary>
-        protected void RegisterNamedFilter(string key, IEsSearchFilter<TDoc> filter)
-        {
-            if (filter == null) throw new ArgumentNullException(nameof(filter));
-            if (string.IsNullOrWhiteSpace(key))
-                throw new ArgumentException("Value cannot be null or whitespace.", nameof(key));
-
-            _registeredFilters.Add(key, filter);
-        }
-
-        /// <summary>
-        /// Registers sort with specified key
-        /// </summary>
-        protected void RegisterNamedSort(string key, IEsSearchSort<TDoc> sort)
-        {
-            if (sort == null) throw new ArgumentNullException(nameof(sort));
-            if (string.IsNullOrWhiteSpace(key))
-                throw new ArgumentException("Value cannot be null or whitespace.", nameof(key));
-
-            _registeredSorts.Add(key, sort);
-        }
 
         private QueryContainer CreateSearchQuery(QueryContainerDescriptor<TDoc> d, string queryStr, string filterKey, IEsSearchEngineStrategy<TDoc> strategy)
         {
@@ -114,8 +53,10 @@ namespace MyLab.Elastic.SearchEngine
             }
             else
             {
-                if(DefaultFilter != null)
-                    filters.Add(DefaultFilter.Filter);
+                var defaultFilter = actualStrategy.DefaultFilter ?? DefaultFilter;
+                
+                if(defaultFilter != null)
+                    filters.Add(defaultFilter.Filter);
             }
 
             return d.Bool(boolSd =>
@@ -206,8 +147,6 @@ namespace MyLab.Elastic.SearchEngine
                     yield return filter.Filter;
                 }
             }
-
-            yield break;
         }
 
         private Func<SortDescriptor<TDoc>, IPromise<IList<ISort>>> GetSort(string sortKey)
