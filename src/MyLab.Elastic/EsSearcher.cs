@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using Nest;
 
 namespace MyLab.Elastic
@@ -9,12 +10,20 @@ namespace MyLab.Elastic
     {
         private readonly IIndexNameProvider _indexNameProvider;
         private readonly EsLogic<TDoc> _logic;
+        private readonly string _defaultIndexName;
 
-        public EsSearcher(IEsClientProvider clientProvider, IIndexNameProvider indexNameProvider)
+        public EsSearcher(IEsClientProvider clientProvider, IIndexNameProvider indexNameProvider,
+            IOptions<ElasticsearchOptions> options)
+        : this(clientProvider, indexNameProvider, options.Value)
+        {
+
+        }
+        public EsSearcher(IEsClientProvider clientProvider, IIndexNameProvider indexNameProvider, ElasticsearchOptions options)
         {
             _indexNameProvider = indexNameProvider;
             var client = clientProvider.Provide();
             _logic = new EsLogic<TDoc>(client);
+            _defaultIndexName = options.DefaultIndex;
         }
 
         public Task<EsFound<TDoc>> SearchAsync(string indexName, SearchParams<TDoc> searchParams, CancellationToken cancellationToken = default)
@@ -40,6 +49,11 @@ namespace MyLab.Elastic
         public IIndexSpecificEsSearcher<TDoc> ForIndex(string indexName)
         {
             return new IndexSpecificEsSearcher(indexName, _logic);
+        }
+
+        public IIndexSpecificEsSearcher<TDoc> ForDefaultIndex()
+        {
+            return ForIndex(_defaultIndexName);
         }
 
         class IndexSpecificEsSearcher : IIndexSpecificEsSearcher<TDoc>
