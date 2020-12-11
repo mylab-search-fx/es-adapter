@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using Nest;
 
 namespace MyLab.Elastic
@@ -8,11 +9,19 @@ namespace MyLab.Elastic
         where TDoc : class
     {
         private readonly IIndexNameProvider _indexNameProvider;
+        private readonly ElasticsearchOptions _options;
         private readonly EsLogic<TDoc> _logic;
 
-        public EsSearcher(IEsClientProvider clientProvider, IIndexNameProvider indexNameProvider)
+        public EsSearcher(IEsClientProvider clientProvider, IIndexNameProvider indexNameProvider,
+            IOptions<ElasticsearchOptions> options)
+        : this(clientProvider, indexNameProvider, options.Value)
+        {
+
+        }
+        public EsSearcher(IEsClientProvider clientProvider, IIndexNameProvider indexNameProvider, ElasticsearchOptions options)
         {
             _indexNameProvider = indexNameProvider;
+            _options = options;
             var client = clientProvider.Provide();
             _logic = new EsLogic<TDoc>(client);
         }
@@ -40,6 +49,11 @@ namespace MyLab.Elastic
         public IIndexSpecificEsSearcher<TDoc> ForIndex(string indexName)
         {
             return new IndexSpecificEsSearcher(indexName, _logic);
+        }
+
+        public IIndexSpecificEsSearcher<TDoc> ForDefaultIndex()
+        {
+            return ForIndex(_options.DefaultIndex);
         }
 
         class IndexSpecificEsSearcher : IIndexSpecificEsSearcher<TDoc>

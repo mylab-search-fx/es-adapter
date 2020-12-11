@@ -38,6 +38,11 @@ namespace MyLab.Elastic
         IIndexSpecificEsIndexer<TDoc> ForIndex(string indexName);
 
         /// <summary>
+        /// Creates indexer for default index
+        /// </summary>
+        IIndexSpecificEsIndexer<TDoc> ForIndex();
+
+        /// <summary>
         /// Update document partially
         /// </summary>
         Task UpdateAsync(string indexName, string docId, Expression<Func<TDoc>> updateExpression,

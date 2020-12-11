@@ -109,7 +109,7 @@ namespace IntegrationTests
         }
 
         [Fact]
-        public async Task ShouldApplyRegisteredFilter()
+        public async Task ShouldApplyNamedFilterFromEngine()
         {
             //Arrange
 
@@ -130,13 +130,97 @@ namespace IntegrationTests
         }
 
         [Fact]
-        public async Task ShouldApplyRegisteredSort()
+        public async Task ShouldApplyDefaultFilterFromEngine()
+        {
+            //Arrange
+
+
+            //Act
+            var found = await InvokeTest<SingleDigitTermDefaultFilteredSearchEngine>(engine => engine.SearchAsync(""));
+
+            //Assert
+            Assert.NotNull(found);
+
+            string expectedArray = string.Join(",", Models.Where(m => m.Id < 10).Select(m => m.Id));
+            string actualArray = string.Join(",", found.Select(f => f.Id));
+
+            _output.WriteLine("Expected: " + expectedArray);
+            _output.WriteLine("Actual: " + actualArray);
+
+            Assert.Equal(expectedArray, actualArray);
+        }
+
+        [Fact]
+        public async Task ShouldApplyDefaultFilterFromStrategy()
+        {
+            //Arrange
+
+
+            //Act
+            var found = await InvokeTest<SimpleSearchEngine>(engine => engine.SearchAsync("", new SearchStrategyWithDefaultFilter()));
+
+            //Assert
+            Assert.NotNull(found);
+
+            string expectedArray = string.Join(",", Models.Where(m => m.Id < 10).Select(m => m.Id));
+            string actualArray = string.Join(",", found.Select(f => f.Id));
+
+            _output.WriteLine("Expected: " + expectedArray);
+            _output.WriteLine("Actual: " + actualArray);
+
+            Assert.Equal(expectedArray, actualArray);
+        }
+
+        [Fact]
+        public async Task ShouldApplyNamedSortFromEngine()
         {
             //Arrange
 
 
             //Act
             var found = await InvokeTest<SimpleSearchEngine>(engine => engine.SearchAsync("", sortKey:"revert"));
+
+            //Assert
+            Assert.NotNull(found);
+
+            string expectedArray = string.Join(",", Models.Reverse().Take(10).Select(m => m.Id));
+            string actualArray = string.Join(",", found.Select(f => f.Id));
+
+            _output.WriteLine("Expected: " + expectedArray);
+            _output.WriteLine("Actual: " + actualArray);
+
+            Assert.Equal(expectedArray, actualArray);
+        }
+
+        [Fact]
+        public async Task ShouldApplyDefaultSortFromEngine()
+        {
+            //Arrange
+
+
+            //Act
+            var found = await InvokeTest<DefaultReversedSearchEngine>(engine => engine.SearchAsync(""));
+
+            //Assert
+            Assert.NotNull(found);
+
+            string expectedArray = string.Join(",", Models.Reverse().Take(10).Select(m => m.Id));
+            string actualArray = string.Join(",", found.Select(f => f.Id));
+
+            _output.WriteLine("Expected: " + expectedArray);
+            _output.WriteLine("Actual: " + actualArray);
+
+            Assert.Equal(expectedArray, actualArray);
+        }
+
+        [Fact]
+        public async Task ShouldApplyDefaultSortFromStrategy()
+        {
+            //Arrange
+
+
+            //Act
+            var found = await InvokeTest<SimpleSearchEngine>(engine => engine.SearchAsync("", new SearchStrategyWithDefaultSort()));
 
             //Assert
             Assert.NotNull(found);

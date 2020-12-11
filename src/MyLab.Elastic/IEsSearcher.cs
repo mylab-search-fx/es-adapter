@@ -31,9 +31,14 @@ namespace MyLab.Elastic
         Task<EsHlFound<TDoc>> SearchAsync(SearchParams<TDoc> searchParams, EsHlSelector<TDoc> hlSelector, CancellationToken cancellationToken = default);  
 
         /// <summary>
-        /// Create index specific manager
+        /// Create index specific searcher
         /// </summary>
         IIndexSpecificEsSearcher<TDoc> ForIndex(string indexName);
+
+        /// <summary>
+        /// Create searcher for default index
+        /// </summary>
+        IIndexSpecificEsSearcher<TDoc> ForDefaultIndex();
     }
 
     /// <summary>

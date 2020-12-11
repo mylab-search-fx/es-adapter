@@ -136,6 +136,22 @@ namespace IntegrationTests
             }
         }
 
+        class SearchStrategyWithDefaultFilter : EsSearchEngineStrategy<TestModel>
+        {
+            public SearchStrategyWithDefaultFilter()
+            {
+                DefaultFilter = new SingleDigitTermFilter();   
+            }
+        }
+
+        class SearchStrategyWithDefaultSort : EsSearchEngineStrategy<TestModel>
+        {
+            public SearchStrategyWithDefaultSort()
+            {
+                DefaultSort = new RevertSort();
+            }
+        }
+
         private class SimpleSearchEngine : EsSearchEngine<TestModel>
         {
             public SimpleSearchEngine(
@@ -143,9 +159,31 @@ namespace IntegrationTests
                 IEsSearcher<TestModel> searcher)
                 : base(indexNameProvider, searcher, new SimpleSearchStrategy())
             {
-                RegisterFilter("single-digit", new SingleDigitTermFilter());
-                RegisterSort("revert", new RevertSort());
-                RegisterSort("norm", new NormSort());
+                RegisterNamedFilter("single-digit", new SingleDigitTermFilter());
+                RegisterNamedSort("revert", new RevertSort());
+                RegisterNamedSort("norm", new NormSort());
+            }
+        }
+
+        private class SingleDigitTermDefaultFilteredSearchEngine : EsSearchEngine<TestModel>
+        {
+            public SingleDigitTermDefaultFilteredSearchEngine(
+                IIndexNameProvider indexNameProvider, 
+                IEsSearcher<TestModel> searcher) 
+                : base(indexNameProvider, searcher, new SimpleSearchStrategy())
+            {
+                DefaultFilter = new SingleDigitTermFilter();
+            }
+        }
+
+        private class DefaultReversedSearchEngine : EsSearchEngine<TestModel>
+        {
+            public DefaultReversedSearchEngine(
+                IIndexNameProvider indexNameProvider,
+                IEsSearcher<TestModel> searcher)
+                : base(indexNameProvider, searcher, new SimpleSearchStrategy())
+            {
+                DefaultSort = new RevertSort();
             }
         }
 

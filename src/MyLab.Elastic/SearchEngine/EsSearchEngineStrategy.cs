@@ -17,6 +17,10 @@ namespace MyLab.Elastic.SearchEngine
         readonly List<Expression<Func<TDoc, long>>> _numProps = new List<Expression<Func<TDoc, long>>>();
         readonly List<IEsSearchQueryFilterExtractor<TDoc>> _filterExtractors = new List<IEsSearchQueryFilterExtractor<TDoc>>();
 
+        public IEsSearchFilter<TDoc> DefaultFilter { get; protected set; }
+
+        public IEsSearchSort<TDoc> DefaultSort { get; protected set; }
+
         /// <summary>
         /// Registered predefined filter for all searches
         /// </summary>
