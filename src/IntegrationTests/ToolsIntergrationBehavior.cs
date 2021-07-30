@@ -1,12 +1,10 @@
-using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MyLab.Search.EsAdapter;
 using Xunit;
 
-namespace UnitTests
+namespace IntegrationTests
 {
     public class ToolsIntegrationBehavior
     {
