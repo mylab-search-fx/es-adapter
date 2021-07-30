@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using IntegrationTests.Stuff;
-using MyLab.Elastic;
+using MyLab.Search.EsAdapter;
 using Nest;
 using Xunit;
 using Xunit.Abstractions;

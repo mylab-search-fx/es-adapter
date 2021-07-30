@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using MyLab.Elastic;
+using MyLab.Search.EsAdapter;
 using Nest;
 using Xunit;
 

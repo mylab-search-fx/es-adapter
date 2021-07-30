@@ -5,8 +5,8 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using MyLab.Elastic;
-using MyLab.Elastic.SearchEngine;
+using MyLab.Search.EsAdapter;
+using MyLab.Search.EsAdapter.SearchEngine;
 using Nest;
 using Xunit.Abstractions;
 

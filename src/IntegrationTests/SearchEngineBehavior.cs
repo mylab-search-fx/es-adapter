@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using MyLab.Elastic;
+using MyLab.Search.EsAdapter;
 using Xunit;
 
 namespace IntegrationTests

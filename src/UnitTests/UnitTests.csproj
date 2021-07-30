@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MyLab.Elastic\MyLab.Elastic.csproj" />
+    <ProjectReference Include="..\MyLab.Search.EsAdapter\MyLab.Search.EsAdapter.csproj" />
   </ItemGroup>
 
 </Project>

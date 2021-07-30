@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Elasticsearch.Net;
-using MyLab.Elastic;
+using MyLab.Search.EsAdapter;
 using Nest;
 using Xunit.Abstractions;
 
