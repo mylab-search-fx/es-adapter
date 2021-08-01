@@ -1,7 +1,7 @@
 ﻿using System;
 using Elasticsearch.Net;
-using MyLab.LogDsl;
-using MyLab.Logging;
+using MyLab.Log.Dsl;
+using MyLab.Log;
 
 namespace MyLab.Search.EsAdapter
 {
@@ -13,7 +13,7 @@ namespace MyLab.Search.EsAdapter
         /// <summary>
         /// Adds fact about ES call into log
         /// </summary>
-        public static DslLogEntityBuilder AndFactIs(this DslLogEntityBuilder logger, IApiCallDetails apiCallDetails)
+        public static DslExpression AndFactIs(this DslExpression logger, IApiCallDetails apiCallDetails)
         {
             return logger.AndFactIs("es-call-details", 
                 apiCallDetails != null 

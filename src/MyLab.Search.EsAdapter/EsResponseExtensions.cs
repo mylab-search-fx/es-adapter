@@ -1,6 +1,6 @@
 ﻿using System;
 using Elasticsearch.Net;
-using MyLab.Logging;
+using MyLab.Log;
 using Nest;
 
 namespace MyLab.Search.EsAdapter
