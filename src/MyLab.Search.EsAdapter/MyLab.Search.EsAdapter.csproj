@@ -9,8 +9,8 @@
     <RepositoryUrl>https://github.com/mylab-search-fx/es-adapter.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/mylab-search-fx/es-adapter</PackageProjectUrl>
-    <AssemblyVersion>1.5.13.3007</AssemblyVersion>
-    <FileVersion>1.5.13.3007</FileVersion>
+    <AssemblyVersion>1.5.13.0108</AssemblyVersion>
+    <FileVersion>1.5.13.0108</FileVersion>
     <Version>1.5.13</Version>
     <PackageIcon>analytics.png</PackageIcon>
     <PackageIconUrl />

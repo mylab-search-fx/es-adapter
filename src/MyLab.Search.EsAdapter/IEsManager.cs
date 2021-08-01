@@ -23,6 +23,16 @@ namespace MyLab.Search.EsAdapter
         Task<IAsyncDisposable> CreateDefaultIndexAsync(Func<CreateIndexDescriptor, ICreateIndexRequest> selector = null, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Creates index
+        /// </summary>
+        Task<IAsyncDisposable> CreateIndexAsync(string indexName, string jsonSettings, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Creates default index
+        /// </summary>
+        Task<IAsyncDisposable> CreateDefaultIndexAsync(string jsonSettings, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Delete index
         /// </summary>
         Task DeleteIndexAsync(string indexName, CancellationToken cancellationToken = default);

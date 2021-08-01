@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Elasticsearch.Net;
 using Microsoft.Extensions.Options;
 using Nest;
 
@@ -43,6 +44,21 @@ namespace MyLab.Search.EsAdapter
         public Task<IAsyncDisposable> CreateDefaultIndexAsync(Func<CreateIndexDescriptor, ICreateIndexRequest> selector = null, CancellationToken cancellationToken = default)
         {
             return CreateIndexAsync(_options.DefaultIndex, selector, cancellationToken);
+        }
+
+        public async Task<IAsyncDisposable> CreateIndexAsync(string indexName, string jsonSettings, CancellationToken cancellationToken = default)
+        {
+            var res = await _client.LowLevel.Indices.CreateAsync<CreateIndexResponse>(indexName, jsonSettings, requestParameters: null, ctx: cancellationToken);
+
+            if (!res.IsValid)
+                throw new ResponseException("Can't create index", res);
+
+            return new IndexDeleter(indexName, this);
+        }
+
+        public Task<IAsyncDisposable> CreateDefaultIndexAsync(string jsonSettings, CancellationToken cancellationToken = default)
+        {
+            return CreateIndexAsync(_options.DefaultIndex, jsonSettings, cancellationToken);
         }
 
         public async Task DeleteIndexAsync(string indexName, CancellationToken cancellationToken = default)
