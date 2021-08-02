@@ -37,13 +37,11 @@ namespace MyLab.Search.EsAdapter
             return CoreUpdateAsync(indexName, new Id(docId), new UpdateDocument<TDoc>(updateExpression),  cancellationToken);
         }
 
-        public async Task IndexManyAsync(string indexName, IEnumerable<TDoc> documents, CancellationToken cancellationToken)
+        public async Task IndexManyAsync(IEnumerable<TDoc> documents, Func<BulkIndexDescriptor<TDoc>, TDoc, IBulkIndexOperation<TDoc>> bulkIndexSelector, CancellationToken cancellationToken)
         {
             if (documents == null) throw new ArgumentNullException(nameof(documents));
-            if (string.IsNullOrWhiteSpace(indexName))
-                throw new ArgumentException("Value cannot be null or whitespace.", nameof(indexName));
 
-            var indexResponse = await _cl.IndexManyAsync(documents, indexName, cancellationToken);
+            var indexResponse = await _cl.BulkAsync(bd => bd.IndexMany(documents, bulkIndexSelector), cancellationToken);
             if (!indexResponse.IsValid)
                 throw new EsIndexManyException(indexResponse);
         }

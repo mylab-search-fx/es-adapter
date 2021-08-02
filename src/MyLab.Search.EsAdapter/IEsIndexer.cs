@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Nest;
 
 namespace MyLab.Search.EsAdapter
 {
@@ -16,7 +17,10 @@ namespace MyLab.Search.EsAdapter
         /// Index document batch in specified index
         /// </summary>
         Task IndexManyAsync(string indexName, IEnumerable<TDoc> documents, CancellationToken cancellationToken = default);
-
+        /// <summary>
+        /// Index document batch with descriptors
+        /// </summary>
+        Task IndexManyAsync(IEnumerable<TDoc> documents, Func<BulkIndexDescriptor<TDoc>, TDoc, IBulkIndexOperation<TDoc>> bulkIndexSelector, CancellationToken cancellationToken = default);
         /// <summary>
         /// Index document batch in index which bound to document model
         /// </summary>

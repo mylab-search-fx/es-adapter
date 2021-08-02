@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
+using Nest;
 
 namespace MyLab.Search.EsAdapter
 {
@@ -29,9 +30,14 @@ namespace MyLab.Search.EsAdapter
             
         }
 
+        public Task IndexManyAsync(IEnumerable<TDoc> documents, Func<BulkIndexDescriptor<TDoc>, TDoc, IBulkIndexOperation<TDoc>> bulkIndexSelector, CancellationToken cancellationToken = default)
+        {
+            return _logic.IndexManyAsync(documents, bulkIndexSelector, cancellationToken);
+        }
+
         public Task IndexManyAsync(string indexName, IEnumerable<TDoc> documents, CancellationToken cancellationToken = default)
         {
-            return _logic.IndexManyAsync(indexName, documents, cancellationToken);
+            return _logic.IndexManyAsync(documents, (descriptor, doc) => descriptor.Index(indexName), cancellationToken);
         }
 
         public Task IndexManyAsync(IEnumerable<TDoc> documents, CancellationToken cancellationToken = default)
@@ -89,7 +95,7 @@ namespace MyLab.Search.EsAdapter
             }
             public Task IndexManyAsync(IEnumerable<TDoc> documents, CancellationToken cancellationToken = default)
             {
-                return _logic.IndexManyAsync(IndexName, documents, cancellationToken);
+                return _logic.IndexManyAsync(documents, (descriptor, doc )=> descriptor.Index(IndexName), cancellationToken);
             }
 
             public Task IndexAsync(TDoc document, CancellationToken cancellationToken = default)
