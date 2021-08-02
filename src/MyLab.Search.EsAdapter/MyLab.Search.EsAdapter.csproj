@@ -9,11 +9,12 @@
     <RepositoryUrl>https://github.com/mylab-search-fx/es-adapter.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/mylab-search-fx/es-adapter</PackageProjectUrl>
-    <AssemblyVersion>1.5.14.0108</AssemblyVersion>
-    <FileVersion>1.5.14.0108</FileVersion>
-    <Version>1.5.14</Version>
+    <AssemblyVersion>1.5.15.0208</AssemblyVersion>
+    <FileVersion>1.5.15.0208</FileVersion>
+    <Version>1.5.15</Version>
     <PackageIcon>analytics.png</PackageIcon>
     <PackageIconUrl />
+    <Description>Elastic search 7+ adapter based on official NEST</Description>
   </PropertyGroup>
 
   <ItemGroup>
