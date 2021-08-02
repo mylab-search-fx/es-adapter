@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 
@@ -32,6 +33,9 @@ namespace MyLab.Search.EsAdapter
 
         public Task<EsFound<TDoc>> SearchAsync(SearchParams<TDoc> searchParams, CancellationToken cancellationToken = default)
         {
+            if (_indexNameProvider == null)
+                throw new InvalidOperationException("Default index name is not defined");
+
             return SearchAsync(_indexNameProvider.Provide<TDoc>(), searchParams, cancellationToken);
         }
 
@@ -42,6 +46,9 @@ namespace MyLab.Search.EsAdapter
 
         public Task<EsHlFound<TDoc>> SearchAsync(SearchParams<TDoc> searchParams, EsHlSelector<TDoc> hlSelector, CancellationToken cancellationToken = default)
         {
+            if (_indexNameProvider == null)
+                throw new InvalidOperationException("Default index name is not defined");
+
             return SearchAsync(_indexNameProvider.Provide<TDoc>(), searchParams, hlSelector, cancellationToken);
         }
 

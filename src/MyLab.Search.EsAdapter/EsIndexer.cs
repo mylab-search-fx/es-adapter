@@ -36,6 +36,9 @@ namespace MyLab.Search.EsAdapter
 
         public Task IndexManyAsync(IEnumerable<TDoc> documents, CancellationToken cancellationToken = default)
         {
+            if(_indexNameProvider == null)
+                throw new InvalidOperationException("Default index name is not defined");
+
             return IndexManyAsync(_indexNameProvider.Provide<TDoc>(), documents, cancellationToken);
         }
 
@@ -46,6 +49,9 @@ namespace MyLab.Search.EsAdapter
 
         public Task IndexAsync(TDoc document, CancellationToken cancellationToken = default)
         {
+            if (_indexNameProvider == null)
+                throw new InvalidOperationException("Default index name is not defined");
+
             return IndexAsync(_indexNameProvider.Provide<TDoc>(), document, cancellationToken);
         }
 
