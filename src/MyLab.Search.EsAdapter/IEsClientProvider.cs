@@ -1,6 +1,8 @@
 ﻿using System;
 using Elasticsearch.Net;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MyLab.Log.Dsl;
 using Nest;
 
 namespace MyLab.Search.EsAdapter
@@ -25,18 +27,37 @@ namespace MyLab.Search.EsAdapter
         /// <summary>
         /// Initializes a new instance of <see cref="IEsClientProvider"/>
         /// </summary>
-        public EsClientProvider(ElasticsearchOptions options)
+        public EsClientProvider(
+            ElasticsearchOptions options,
+            ILogger<EsClientProvider> logger = null)
         {
             _connectionPool = new SingleNodeConnectionPool(new Uri(options.Url));
+
             var settings = new ConnectionSettings(_connectionPool);
+
+            if (logger != null)
+            {
+                var log = logger.Dsl();
+
+                settings.DisableDirectStreaming();
+                settings.OnRequestCompleted(details =>
+                {
+                    log.Debug("ElasticSearch request completed")
+                        .AndFactIs("dump", ApiCallDumper.ApiCallToDump(details))
+                        .Write();
+                });
+            }
+
             _client = new ElasticClient(settings);
         }
 
         /// <summary>
         /// Initializes a new instance of <see cref="IEsClientProvider"/>
         /// </summary>
-        public EsClientProvider(IOptions<ElasticsearchOptions> options)
-            : this(options.Value)
+        public EsClientProvider(
+            IOptions<ElasticsearchOptions> options,
+            ILogger<EsClientProvider> logger = null)
+            : this(options.Value, logger)
         {
 
         }

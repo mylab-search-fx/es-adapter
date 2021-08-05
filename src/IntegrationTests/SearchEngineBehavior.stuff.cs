@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MyLab.Search.EsAdapter;
 using MyLab.Search.EsAdapter.SearchEngine;
 using Nest;
@@ -70,8 +71,12 @@ namespace IntegrationTests
                 o.Url = "http://localhost:10115";
                 o.DefaultIndex = "test-index-" + Guid.NewGuid().ToString("N");
             });
-            srvCollection.AddSingleton<IEsClientProvider>(
-                new TestEsClientProvider("http://localhost:10115", _output));
+            srvCollection.AddLogging(l => l
+                .AddXUnit(_output)
+                .AddFilter(l => true)
+            );
+            //srvCollection.AddSingleton<IEsClientProvider>(
+            //    new TestEsClientProvider("http://localhost:10115", _output));
 
             return srvCollection.BuildServiceProvider();
         }

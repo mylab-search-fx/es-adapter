@@ -17,50 +17,50 @@ namespace MyLab.Search.EsAdapter
         {
             var call = apiCall;
             var sb = new StringBuilder();
-
-            sb.AppendLine("# REQUEST");
-            sb.AppendLine();
-            sb.AppendLine($"{call.HttpMethod} {call.Uri}");
-            sb.AppendLine();
+            
+            sb.Append("# REQUEST\n");
+            sb.Append("\n");
+            sb.Append($"{call.HttpMethod} {call.Uri}\n");
+            sb.Append("\n");
 
             if (call.RequestBodyInBytes != null)
             {
                 var formattedReqBody = DumpToString(call.RequestBodyInBytes);
-                sb.AppendLine(formattedReqBody);
+                sb.Append(formattedReqBody + "\n");
             }
             else
             {
-                sb.AppendLine("[no request body]");
+                sb.Append("[no request body]\n");
             }
 
-            sb.AppendLine();
-            sb.AppendLine("# RESPONSE");
-            sb.AppendLine();
+            sb.Append("\n");
+            sb.Append("# RESPONSE\n");
+            sb.Append("\n");
 
             if (call.HttpStatusCode.HasValue)
             {
                 HttpStatusCode statusCode = (HttpStatusCode)call.HttpStatusCode;
-                sb.AppendLine($"{(int)statusCode} ({statusCode})");
+                sb.Append($"{(int)statusCode} ({statusCode})\n");
             }
             else
             {
-                sb.AppendLine($"[null]");
+                sb.Append("[null]\n");
             }
 
-            sb.AppendLine();
+            sb.Append("\n");
 
             if (call.ResponseBodyInBytes != null)
             {
                 var formattedRespBody = DumpToString(call.ResponseBodyInBytes);
-                sb.AppendLine(formattedRespBody);
+                sb.Append(formattedRespBody+ "\n");
             }
             else
             {
-                sb.AppendLine("[no response body]");
+                sb.Append("[no response body]\n");
             }
 
-            sb.AppendLine();
-            sb.AppendLine("# END");
+            sb.Append("\n");
+            sb.Append("# END\n");
 
             return sb.ToString();
         }
@@ -72,12 +72,14 @@ namespace MyLab.Search.EsAdapter
             try
             {
                 dynamic parsedJson = JsonConvert.DeserializeObject(str);
-                return JsonConvert.SerializeObject(parsedJson, Formatting.Indented);
+                str = JsonConvert.SerializeObject(parsedJson, Formatting.Indented);
             }
             catch (JsonReaderException)
             {
-                return str;
+                //ignore it
             }
+
+            return str.Replace("\r\n", "\n");
         }
     }
 }
