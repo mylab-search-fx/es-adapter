@@ -3,6 +3,7 @@ using Elasticsearch.Net;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MyLab.Log.Dsl;
+using MyLab.Search.EsAdapter.Serialization;
 using Nest;
 
 namespace MyLab.Search.EsAdapter
@@ -33,7 +34,9 @@ namespace MyLab.Search.EsAdapter
         {
             _connectionPool = new SingleNodeConnectionPool(new Uri(options.Url));
 
-            var settings = new ConnectionSettings(_connectionPool);
+            var settings = options.SerializerFactory == null 
+                ? new ConnectionSettings(_connectionPool)
+                : new ConnectionSettings(_connectionPool, options.SerializerFactory.Create);
 
             if (logger != null)
             {

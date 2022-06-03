@@ -1,4 +1,6 @@
-﻿namespace MyLab.Search.EsAdapter
+﻿using MyLab.Search.EsAdapter.Serialization;
+
+namespace MyLab.Search.EsAdapter
 {
     /// <summary>
     /// Contains options parameters for ES tools
@@ -14,5 +16,10 @@
         /// Index name which will be used when no index specified for model
         /// </summary>
         public string DefaultIndex { get; set; }
+
+        /// <summary>
+        /// User object serializer factory
+        /// </summary>
+        public IEsSerializerFactory SerializerFactory { get; set; }
     }
 }
