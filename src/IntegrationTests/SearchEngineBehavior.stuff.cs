@@ -64,7 +64,8 @@ namespace IntegrationTests
         {
             var config = new ConfigurationBuilder().Build();
             var srvCollection = new ServiceCollection();
-            srvCollection.AddEsTools(config);
+            srvCollection.AddEsTools();
+            srvCollection.ConfigureEsTools(config);
             srvCollection.AddEsSearchEngine<TSearchEngine, TestModel>();
             srvCollection.Configure<ElasticsearchOptions>(o =>
             {

@@ -16,7 +16,8 @@ namespace IntegrationTests
 
             //Act
             var serviceProvider = new ServiceCollection()
-                .AddEsTools(config)
+                .AddEsTools()
+                .ConfigureEsTools(config)
                 .Configure<ElasticsearchOptions>(opt => opt.Url = "http://localhost:10115")
                 .BuildServiceProvider();
 
