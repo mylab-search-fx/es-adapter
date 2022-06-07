@@ -12,7 +12,7 @@ services:
     volumes:
       - mylab-es-tests:/usr/share/elasticsearch/data
     ports:
-      - 10115:9200
+      - 9200:9200
     networks:
       - mylab-es-tests
 

@@ -7,7 +7,7 @@ namespace IntegrationTests.Stuff
     {
         public static IConnectionPool Create()
         {
-            return new SingleNodeConnectionPool(new Uri("http://localhost:10115"));
+            return new SingleNodeConnectionPool(new Uri("http://localhost:9200"));
         }
     }
 }

@@ -69,7 +69,7 @@ namespace IntegrationTests
             srvCollection.AddEsSearchEngine<TSearchEngine, TestModel>();
             srvCollection.Configure<ElasticsearchOptions>(o =>
             {
-                o.Url = "http://localhost:10115";
+                o.Url = "http://localhost:9200";
                 o.DefaultIndex = "test-index-" + Guid.NewGuid().ToString("N");
             });
             srvCollection.AddLogging(l => l
@@ -77,7 +77,7 @@ namespace IntegrationTests
                 .AddFilter(l => true)
             );
             //srvCollection.AddSingleton<IEsClientProvider>(
-            //    new TestEsClientProvider("http://localhost:10115", _output));
+            //    new TestEsClientProvider("http://localhost:9200", _output));
 
             return srvCollection.BuildServiceProvider();
         }
