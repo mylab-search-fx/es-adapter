@@ -7,7 +7,7 @@ using Nest;
 
 namespace MyLab.Search.EsAdapter
 {
-    class EsIndexTools<TDoc> : IEsIndexTools<TDoc> where TDoc: class
+    public class EsIndexTools<TDoc> : IEsIndexTools<TDoc> where TDoc: class
     {
         private readonly IEsIndexTools _baseIndexTools;
         private readonly Lazy<string> _indexName;

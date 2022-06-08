@@ -7,7 +7,7 @@ using Nest;
 
 namespace MyLab.Search.EsAdapter.Search
 {
-    class EsSearcher : IEsSearcher
+    public class EsSearcher : IEsSearcher
     {
         private readonly IEsClientProvider _clientProvider;
 

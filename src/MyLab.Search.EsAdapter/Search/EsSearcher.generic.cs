@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace MyLab.Search.EsAdapter.Search
 {
-    class EsSearcher<TDoc> : IEsSearcher<TDoc>
+    public class EsSearcher<TDoc> : IEsSearcher<TDoc>
         where TDoc : class
     {
         private readonly IEsSearcher _baseSearcher;

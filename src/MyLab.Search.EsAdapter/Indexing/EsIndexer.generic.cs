@@ -7,7 +7,7 @@ using Nest;
 
 namespace MyLab.Search.EsAdapter.Indexing
 {
-    class EsIndexer<TDoc> : IEsIndexer<TDoc>
+    public class EsIndexer<TDoc> : IEsIndexer<TDoc>
         where TDoc : class 
     {
         private readonly IEsIndexer _baseIndexer;

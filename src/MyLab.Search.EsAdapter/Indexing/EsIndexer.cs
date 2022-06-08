@@ -8,7 +8,7 @@ using Nest;
 
 namespace MyLab.Search.EsAdapter.Indexing
 {
-    class EsIndexer : IEsIndexer
+    public class EsIndexer : IEsIndexer
     {
         private readonly IEsClientProvider _clientProvider;
 
