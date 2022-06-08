@@ -65,8 +65,8 @@ namespace MyLab.Search.EsAdapter.Serialization
         /// <inheritdoc />
         public void Serialize<T>(T data, Stream stream, SerializationFormatting formatting = SerializationFormatting.None)
         {
-            using TextWriter txtWriter = new StreamWriter(stream);
-            using JsonWriter jsonWriter = new JsonTextWriter(txtWriter)
+            TextWriter txtWriter = new StreamWriter(stream);
+            JsonWriter jsonWriter = new JsonTextWriter(txtWriter)
             {
                 Formatting = formatting == SerializationFormatting.Indented 
                     ? Formatting.Indented
@@ -74,14 +74,15 @@ namespace MyLab.Search.EsAdapter.Serialization
             };
 
             _newtonSerializer.Serialize(jsonWriter, data);
+            jsonWriter.Flush();
         }
 
         /// <inheritdoc />
-        public Task SerializeAsync<T>(T data, Stream stream, SerializationFormatting formatting = SerializationFormatting.None,
+        public async Task SerializeAsync<T>(T data, Stream stream, SerializationFormatting formatting = SerializationFormatting.None,
             CancellationToken cancellationToken = new CancellationToken())
         {
-            using TextWriter txtWriter = new StreamWriter(stream);
-            using JsonWriter jsonWriter = new JsonTextWriter(txtWriter)
+            TextWriter txtWriter = new StreamWriter(stream);
+            JsonWriter jsonWriter = new JsonTextWriter(txtWriter)
             {
                 Formatting = formatting == SerializationFormatting.Indented
                     ? Formatting.Indented
@@ -90,7 +91,7 @@ namespace MyLab.Search.EsAdapter.Serialization
 
             _newtonSerializer.Serialize(jsonWriter, data);
 
-            return Task.CompletedTask;
+            await jsonWriter.FlushAsync();
         }
     }
 }
