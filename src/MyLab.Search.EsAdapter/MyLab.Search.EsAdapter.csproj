@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MyLab.Log" Version="3.3.12" />
+    <PackageReference Include="MyLab.Log.Dsl" Version="3.5.3" />
+    <PackageReference Include="NEST" Version="7.17.2" />
+  </ItemGroup>
+
+</Project>
