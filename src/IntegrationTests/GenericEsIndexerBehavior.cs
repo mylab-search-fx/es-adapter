@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using MyLab.Search.EsAdapter;
+using MyLab.Search.EsAdapter.Indexing;
 using MyLab.Search.EsAdapter.Inter;
 using Nest;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace IntegrationTests
 {

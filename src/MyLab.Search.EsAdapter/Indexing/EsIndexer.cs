@@ -3,11 +3,10 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
 using MyLab.Search.EsAdapter.Inter;
 using Nest;
 
-namespace MyLab.Search.EsAdapter
+namespace MyLab.Search.EsAdapter.Indexing
 {
     class EsIndexer : IEsIndexer
     {

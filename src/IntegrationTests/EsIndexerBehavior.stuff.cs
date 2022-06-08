@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using MyLab.Search.EsAdapter;
+using MyLab.Search.EsAdapter.Indexing;
 using MyLab.Search.EsAdapter.Inter;
 using Nest;
 using Xunit.Abstractions;
@@ -39,24 +40,6 @@ namespace IntegrationTests
             {
                 return sd =>
                     sd.Index(_indexName).Query(qd => qd.Ids(ids => ids.Values(id)));
-            }
-        }
-
-        [ElasticsearchType(IdProperty = nameof(Id))]
-        private class TestDoc
-        {
-            [Keyword(Name = "id")] public string Id { get; set; }
-            [Keyword(Name = "content")] public string Content { get; set; }
-            [Keyword(Name = "content2")] public string Content2 { get; set; }
-
-            public static TestDoc Generate(string id = null)
-            {
-                return new TestDoc
-                {
-                    Id = id ?? Guid.NewGuid().ToString("N"),
-                    Content = Guid.NewGuid().ToString("N"),
-                    Content2 = Guid.NewGuid().ToString("N"),
-                };
             }
         }
 

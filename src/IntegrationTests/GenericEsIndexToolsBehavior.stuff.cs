@@ -34,10 +34,5 @@ namespace IntegrationTests
 
             _indexTools = new EsIndexTools<TestDoc>(baseIndexTools, options);
         }
-
-        [EsBindingKey("foo")]
-        private class TestDoc
-        {
-        }
     }
 }

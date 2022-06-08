@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using MyLab.Search.EsAdapter;
+using MyLab.Search.EsAdapter.Indexing;
 using MyLab.Search.EsAdapter.Inter;
 using Nest;
 using Xunit.Abstractions;

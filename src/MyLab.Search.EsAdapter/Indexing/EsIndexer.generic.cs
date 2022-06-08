@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Nest;
 
-namespace MyLab.Search.EsAdapter
+namespace MyLab.Search.EsAdapter.Indexing
 {
     class EsIndexer<TDoc> : IEsIndexer<TDoc>
         where TDoc : class 
