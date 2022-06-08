@@ -3,7 +3,6 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
-using MyLab.Search.EsAdapter.Inter;
 using Nest;
 
 namespace MyLab.Search.EsAdapter
@@ -59,6 +58,13 @@ namespace MyLab.Search.EsAdapter
             var indexName = _indexName.Value;
 
             return _baseIndexer.DeleteAsync(indexName, docId, cancellationToken);
+        }
+
+        public Task BulkAsync(EsBulkIndexingRequest<TDoc> request, CancellationToken cancellationToken = default)
+        {
+            var indexName = _indexName.Value;
+
+            return _baseIndexer.BulkAsync(indexName, request, cancellationToken);
         }
     }
 }

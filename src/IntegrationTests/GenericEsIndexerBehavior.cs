@@ -163,5 +163,78 @@ namespace IntegrationTests
             //Assert
             Assert.Null(found);
         }
+
+        [Fact]
+        public async Task ShouldPerformBulk()
+        {
+            //Arrange
+            var docForReplace = TestDoc.Generate();
+            var docForUpdate = TestDoc.Generate();
+            var docForDelete = TestDoc.Generate();
+            var docForCreate = TestDoc.Generate();
+            var docReplacer = TestDoc.Generate(docForReplace.Id);
+            var docUpdater = new TestDoc
+            {
+                Id = docForUpdate.Id,
+                Content = Guid.NewGuid().ToString("N"),
+                Content2 = null
+            };
+
+            var initialBulkReq = new EsBulkIndexingRequest<TestDoc>
+            {
+                CreateList = new[] { docForDelete, docForReplace, docForUpdate }
+            };
+
+            var controlBulkReq = new EsBulkIndexingRequest<TestDoc>
+            {
+                CreateList = new[] { docForCreate },
+                IndexList = new[] { docReplacer },
+                UpdateList = new[] { docUpdater },
+                DeleteList = new[] { new Id(docForDelete.Id) }
+            };
+
+            ISearchRequest searchReq = new SearchRequest(_indexName)
+            {
+                Query = new QueryContainer(new IdsQuery
+                {
+                    Values = new Id[]
+                    {
+                        docForCreate.Id,
+                        docForUpdate.Id,
+                        docForDelete.Id,
+                        docForReplace.Id
+                    }
+                })
+            };
+
+            //Act
+            await _indexer.BulkAsync(initialBulkReq);
+            await Task.Delay(1000);
+            await _indexer.BulkAsync(controlBulkReq);
+            await Task.Delay(1000);
+
+            var searchResp = await _client.SearchAsync<TestDoc>(searchReq);
+
+            EsException.ThrowIfInvalid(searchResp);
+
+            var actualCreatedDoc = searchResp.Hits.FirstOrDefault(h => h.Id == docForCreate.Id)?.Source;
+            var actualReplacedDoc = searchResp.Hits.FirstOrDefault(h => h.Id == docForReplace.Id)?.Source;
+            var actualUpdatedDoc = searchResp.Hits.FirstOrDefault(h => h.Id == docForUpdate.Id)?.Source;
+
+            //Assert
+            Assert.DoesNotContain(searchResp.Hits, h => h.Id == docForDelete.Id);
+
+            Assert.NotNull(actualCreatedDoc);
+            Assert.Equal(docForCreate.Content, actualCreatedDoc.Content);
+            Assert.Equal(docForCreate.Content2, actualCreatedDoc.Content2);
+
+            Assert.NotNull(actualReplacedDoc);
+            Assert.Equal(docReplacer.Content, actualReplacedDoc.Content);
+            Assert.Equal(docReplacer.Content2, actualReplacedDoc.Content2);
+
+            Assert.NotNull(actualUpdatedDoc);
+            Assert.Equal(docUpdater.Content, actualUpdatedDoc.Content);
+            Assert.Equal(docForUpdate.Content2, actualUpdatedDoc.Content2);
+        }
     }
 }

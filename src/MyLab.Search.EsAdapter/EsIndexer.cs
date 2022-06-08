@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -63,6 +64,34 @@ namespace MyLab.Search.EsAdapter
             var resp = await _clientProvider.Provide().DeleteAsync(deleteReq, cancellationToken);
 
             EsException.ThrowIfInvalid(resp, "Unable to delete document");
+        }
+
+        public async Task BulkAsync<TDoc>(string indexName, EsBulkIndexingRequest<TDoc> request, CancellationToken cancellationToken = default) where TDoc : class
+        {
+            if (request.IsEmpty())
+                throw new InvalidOperationException("Bulk request is empty");
+
+            IBulkRequest req = new BulkRequest(indexName)
+            {
+                Operations = new BulkOperationsCollection<IBulkOperation>()
+            };
+
+            if (request.CreateList != null)
+                req.Operations.AddRange(request.CreateList.Select(d => new BulkCreateOperation<TDoc>(d)));
+            if (request.IndexList != null)
+                req.Operations.AddRange(request.IndexList.Select(d => new BulkIndexOperation<TDoc>(d)));
+            if (request.UpdateList != null)
+                req.Operations.AddRange(request.UpdateList.Select(d => new BulkUpdateOperation<TDoc, TDoc>(d)
+                {
+                    Doc = d,
+                    DocAsUpsert = true
+                }));
+            if (request.DeleteList != null)
+                req.Operations.AddRange(request.DeleteList.Select(d => new BulkDeleteOperation<TDoc>(d)));
+
+            var resp = await _clientProvider.Provide().BulkAsync(req, cancellationToken);
+
+            EsException.ThrowIfInvalid(resp);
         }
     }
 }
