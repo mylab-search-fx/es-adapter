@@ -3,12 +3,32 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <Version>2.0.0</Version>
+    <Authors>Andrey O.</Authors>
+    <Company>Andrey O.</Company>
+    <Description>Elastic search 7+ adapter based on official NEST</Description>
+    <Copyright>Copyright (c) 2022 Andrey Osintsev &lt;ozzy.ext@gmail.com&gt;</Copyright>
+    <PackageProjectUrl>https://github.com/mylab-search-fx/es-adapter</PackageProjectUrl>
+    <PackageIcon>analytics.png</PackageIcon>
+    <RepositoryUrl>https://github.com/mylab-search-fx/es-adapter.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>elasticsearch</PackageTags>
+    <AssemblyVersion>2.0.0.0906</AssemblyVersion>
+    <FileVersion>2.0.0.0906</FileVersion>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="MyLab.Log" Version="3.3.12" />
     <PackageReference Include="MyLab.Log.Dsl" Version="3.5.3" />
     <PackageReference Include="NEST" Version="7.17.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="analytics.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
