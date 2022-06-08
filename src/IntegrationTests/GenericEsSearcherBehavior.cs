@@ -22,22 +22,10 @@ namespace IntegrationTests
         {
             var client = fxt.GetClientProvider(output);
             var esClientProvider = new SingleEsClientProvider(client);
-            
-            var options = new EsOptions
-            {
-                IndexBindings = new[]
-                {
-                    new IndexBinding
-                    {
-                        Doc = "foo",
-                        Index = preindexFxt.IndexName
-                    }
-                }
-            };
 
             var baseSearcher = new EsSearcher(esClientProvider);
 
-            _searcher = new EsSearcher<TestDoc>(baseSearcher, options);
+            _searcher = new EsSearcher<TestDoc>(baseSearcher, new SingleIndexNameProvider(preindexFxt.IndexName));
         }
 
         [Fact]

@@ -4,7 +4,7 @@ using Xunit;
 
 namespace UnitTests
 {
-    public class EsOptionsBehavior
+    public class OptionsIndexNameProviderBehavior
     {
         [Theory]
         [InlineData("foo")]
@@ -25,8 +25,10 @@ namespace UnitTests
                 }
             };
 
+            var provider = new OptionsIndexNameProvider(options);
+
             //Act
-            var index = options.GetIndexForDocType<DocType>();
+            var index = provider.Provide<DocType>();
 
             //Assert
             Assert.Equal("bar", index);
@@ -50,8 +52,10 @@ namespace UnitTests
                 }
             };
 
+            var provider = new OptionsIndexNameProvider(options);
+
             //Act
-            var index = options.GetIndexForDocType<DocType2>();
+            var index = provider.Provide<DocType2>();
 
             //Assert
             Assert.Equal("bar", index);
@@ -73,8 +77,10 @@ namespace UnitTests
                 }
             };
 
+            var provider = new OptionsIndexNameProvider(options);
+
             //Act & Assert
-            Assert.Throws<InvalidOperationException>(() => options.GetIndexForDocType<DocType2>());
+            Assert.Throws<InvalidOperationException>(() => provider.Provide<DocType2>());
         }
 
         [EsBindingKey("foo")]

@@ -10,7 +10,7 @@ namespace MyLab.Search.EsAdapter
     public class EsIndexTools<TDoc> : IEsIndexTools<TDoc> where TDoc: class
     {
         private readonly IEsIndexTools _baseIndexTools;
-        private readonly Lazy<string> _indexName;
+        private readonly string _indexName;
 
         public EsIndexTools(IEsIndexTools baseIndexTools, IOptions<EsOptions> options)
             :this(baseIndexTools, options.Value)
@@ -19,37 +19,35 @@ namespace MyLab.Search.EsAdapter
         }
 
         public EsIndexTools(IEsIndexTools baseIndexTools, EsOptions options)
+            : this(baseIndexTools, new OptionsIndexNameProvider(options))
+        {
+
+        }
+
+        public EsIndexTools(IEsIndexTools baseIndexTools, IIndexNameProvider indexNameProvider)
         {
             _baseIndexTools = baseIndexTools;
-            _indexName = new Lazy<string>(options.GetIndexForDocType<TDoc>);
+            _indexName = indexNameProvider.Provide<TDoc>();
         }
 
         public Task<IIndexDeleter> CreateIndexAsync(Func<CreateIndexDescriptor, ICreateIndexRequest> createDescriptor = null, CancellationToken cancellationToken = default)
         {
-            var indexName = _indexName.Value;
-
-            return _baseIndexTools.CreateIndexAsync(indexName, createDescriptor, cancellationToken);
+            return _baseIndexTools.CreateIndexAsync(_indexName, createDescriptor, cancellationToken);
         }
 
         public Task<IIndexDeleter> CreateIndexAsync(string jsonSettings, CancellationToken cancellationToken = default)
         {
-            var indexName = _indexName.Value;
-
-            return _baseIndexTools.CreateIndexAsync(indexName, jsonSettings, cancellationToken);
+            return _baseIndexTools.CreateIndexAsync(_indexName, jsonSettings, cancellationToken);
         }
 
         public Task DeleteIndexAsync(CancellationToken cancellationToken = default)
         {
-            var indexName = _indexName.Value;
-
-            return _baseIndexTools.DeleteIndexAsync(indexName, cancellationToken);
+            return _baseIndexTools.DeleteIndexAsync(_indexName, cancellationToken);
         }
 
         public Task<bool> IsIndexExistsAsync(CancellationToken cancellationToken = default)
         {
-            var indexName = _indexName.Value;
-
-            return _baseIndexTools.IsIndexExistsAsync(indexName, cancellationToken);
+            return _baseIndexTools.IsIndexExistsAsync(_indexName, cancellationToken);
         }
     }
 }

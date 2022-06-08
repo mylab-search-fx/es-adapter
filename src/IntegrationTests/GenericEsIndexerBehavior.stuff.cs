@@ -23,22 +23,11 @@ namespace IntegrationTests
             var esClientProvider = new SingleEsClientProvider(_client);
 
             _indexName = Guid.NewGuid().ToString("N");
-
-            var options = new EsOptions
-            {
-                IndexBindings = new[]
-                {
-                    new IndexBinding
-                    {
-                        Doc = "foo",
-                        Index = _indexName
-                    }
-                }
-            };
+            
 
             _indexTools = new EsIndexTools(esClientProvider);
             var baseIndexer = new EsIndexer(esClientProvider);
-            _indexer = new EsIndexer<TestDoc>(baseIndexer, options);
+            _indexer = new EsIndexer<TestDoc>(baseIndexer, new SingleIndexNameProvider(_indexName));
         }
 
         private async Task<TestDoc> SearchAsync(string id)

@@ -11,7 +11,7 @@ namespace MyLab.Search.EsAdapter.Indexing
         where TDoc : class 
     {
         private readonly IEsIndexer _baseIndexer;
-        private readonly Lazy<string> _indexName;
+        private readonly string _indexName;
 
         public EsIndexer(IEsIndexer baseIndexer, IOptions<EsOptions> options)
             : this(baseIndexer, options.Value)
@@ -20,51 +20,45 @@ namespace MyLab.Search.EsAdapter.Indexing
         }
 
         public EsIndexer(IEsIndexer baseIndexer, EsOptions options)
+            : this(baseIndexer, new OptionsIndexNameProvider(options))
+        {
+
+        }
+
+        public EsIndexer(IEsIndexer baseIndexer, IIndexNameProvider indexNameProvider)
         {
             _baseIndexer = baseIndexer;
-            _indexName = new Lazy<string>(options.GetIndexForDocType<TDoc>);
+            _indexName = indexNameProvider.Provide<TDoc>();
         }
 
         public Task CreateAsync(TDoc doc, CancellationToken cancellationToken = default)
         {
-            var indexName = _indexName.Value;
-
-            return _baseIndexer.CreateAsync<TDoc>(indexName, doc, cancellationToken);
+            return _baseIndexer.CreateAsync<TDoc>(_indexName, doc, cancellationToken);
         }
 
         public Task IndexAsync(TDoc doc, CancellationToken cancellationToken = default)
         {
-            var indexName = _indexName.Value;
-
-            return _baseIndexer.IndexAsync<TDoc>(indexName, doc, cancellationToken);
+            return _baseIndexer.IndexAsync<TDoc>(_indexName, doc, cancellationToken);
         }
 
         public Task UpdateAsync(Id id, Expression<Func<TDoc>> factoryExpression, CancellationToken cancellationToken = default)
         {
-            var indexName = _indexName.Value;
-
-            return _baseIndexer.UpdateAsync<TDoc>(indexName,id, factoryExpression, cancellationToken);
+            return _baseIndexer.UpdateAsync<TDoc>(_indexName,id, factoryExpression, cancellationToken);
         }
 
         public Task UpdateAsync(TDoc partialDocument, CancellationToken cancellationToken = default)
         {
-            var indexName = _indexName.Value;
-
-            return _baseIndexer.UpdateAsync<TDoc>(indexName, partialDocument, cancellationToken);
+            return _baseIndexer.UpdateAsync<TDoc>(_indexName, partialDocument, cancellationToken);
         }
 
         public Task DeleteAsync(Id docId, CancellationToken cancellationToken = default)
         {
-            var indexName = _indexName.Value;
-
-            return _baseIndexer.DeleteAsync(indexName, docId, cancellationToken);
+            return _baseIndexer.DeleteAsync(_indexName, docId, cancellationToken);
         }
 
         public Task BulkAsync(EsBulkIndexingRequest<TDoc> request, CancellationToken cancellationToken = default)
         {
-            var indexName = _indexName.Value;
-
-            return _baseIndexer.BulkAsync(indexName, request, cancellationToken);
+            return _baseIndexer.BulkAsync(_indexName, request, cancellationToken);
         }
     }
 }

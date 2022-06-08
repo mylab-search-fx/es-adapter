@@ -9,7 +9,7 @@ namespace MyLab.Search.EsAdapter.Search
         where TDoc : class
     {
         private readonly IEsSearcher _baseSearcher;
-        private readonly Lazy<string> _indexName;
+        private readonly string _indexName;
 
         public EsSearcher(IEsSearcher baseSearcher, IOptions<EsOptions> options)
             :this(baseSearcher, options.Value)
@@ -17,17 +17,21 @@ namespace MyLab.Search.EsAdapter.Search
         }
 
         public EsSearcher(IEsSearcher baseSearcher, EsOptions options)
+            : this(baseSearcher, new OptionsIndexNameProvider(options))
+        {
+        }
+
+        public EsSearcher(IEsSearcher baseSearcher, IIndexNameProvider indexNameProvider)
         {
             _baseSearcher = baseSearcher;
-            _indexName = new Lazy<string>(options.GetIndexForDocType<TDoc>);
+            _indexName = indexNameProvider.Provide<TDoc>();
         }
 
         public Task<EsFound<TDoc>> SearchAsync(
             EsSearchParams<TDoc> searchParams, 
             CancellationToken cancellationToken = default) 
         {
-            var indexName = _indexName.Value;
-            return _baseSearcher.SearchAsync(indexName, searchParams, cancellationToken);
+            return _baseSearcher.SearchAsync(_indexName, searchParams, cancellationToken);
         }
 
         public Task<EsHlFound<TDoc>> SearchAsync(
@@ -35,8 +39,7 @@ namespace MyLab.Search.EsAdapter.Search
             EsHlSelector<TDoc> highlight,
             CancellationToken cancellationToken = default)
         {
-            var indexName = _indexName.Value;
-            return _baseSearcher.SearchAsync(indexName, searchParams, highlight, cancellationToken);
+            return _baseSearcher.SearchAsync(_indexName, searchParams, highlight, cancellationToken);
         }
     }
 }

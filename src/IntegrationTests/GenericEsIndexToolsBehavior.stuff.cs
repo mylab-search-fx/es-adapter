@@ -20,19 +20,7 @@ namespace IntegrationTests
 
             _indexName = Guid.NewGuid().ToString("N");
 
-            var options = new EsOptions
-            {
-                IndexBindings = new[]
-                {
-                    new IndexBinding
-                    {
-                        Doc = "foo",
-                        Index = _indexName
-                    }
-                }
-            };
-
-            _indexTools = new EsIndexTools<TestDoc>(baseIndexTools, options);
+            _indexTools = new EsIndexTools<TestDoc>(baseIndexTools, new SingleIndexNameProvider(_indexName));
         }
     }
 }
