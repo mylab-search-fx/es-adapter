@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyLab.Search.EsAdapter", "M
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests", "IntegrationTests\IntegrationTests.csproj", "{7ACC9A2E-236B-48E9-9C8B-D849CB8B5538}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{0B7098DE-2EBD-47CF-A9C6-81BA7E644EF9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{7ACC9A2E-236B-48E9-9C8B-D849CB8B5538}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7ACC9A2E-236B-48E9-9C8B-D849CB8B5538}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7ACC9A2E-236B-48E9-9C8B-D849CB8B5538}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B7098DE-2EBD-47CF-A9C6-81BA7E644EF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B7098DE-2EBD-47CF-A9C6-81BA7E644EF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B7098DE-2EBD-47CF-A9C6-81BA7E644EF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B7098DE-2EBD-47CF-A9C6-81BA7E644EF9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

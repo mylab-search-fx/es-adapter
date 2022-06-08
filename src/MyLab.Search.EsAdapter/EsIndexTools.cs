@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using MyLab.Search.EsAdapter.Inter;
 using Nest;
 
@@ -19,7 +20,7 @@ namespace MyLab.Search.EsAdapter
         {
             var resp = await _clientProvider.Provide().Indices.CreateAsync(indexName, createDescriptor, cancellationToken);
 
-            EsException.ThrowIfInvalid(resp, "Can't create the index");
+            EsException.ThrowIfInvalid(resp, "Unable to create the index");
 
             return new IndexDeleter(indexName, this);
         }
@@ -28,7 +29,7 @@ namespace MyLab.Search.EsAdapter
         {
             var resp = await _clientProvider.Provide().LowLevel.Indices.CreateAsync<CreateIndexResponse>(indexName, jsonSettings, null, cancellationToken);
 
-            EsException.ThrowIfInvalid(resp, "Can't create the index");
+            EsException.ThrowIfInvalid(resp, "Unable to create the index");
 
             return new IndexDeleter(indexName, this);
         }
@@ -37,7 +38,7 @@ namespace MyLab.Search.EsAdapter
         {
             var resp = await _clientProvider.Provide().Indices.DeleteAsync(indexName, ct: cancellationToken);
 
-            EsException.ThrowIfInvalid(resp, "Can't delete the index");
+            EsException.ThrowIfInvalid(resp, "Unable to delete the index");
         }
 
         public async Task<bool> IsIndexExistsAsync(string indexName, CancellationToken cancellationToken = default)

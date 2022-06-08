@@ -10,12 +10,17 @@ namespace MyLab.Search.EsAdapter.Inter
     public class EsException : Exception
     {
         /// <summary>
+        /// Elasticsearch response
+        /// </summary>
+        public IResponse Response { get; }
+
+        /// <summary>
         /// Initializes a new instance of <see cref="EsException"/>
         /// </summary>
         public EsException(string message, IResponse response)
             : base(message, response.OriginalException)
         {
-            
+            Response = response;
         }
 
         /// <summary>

@@ -27,4 +27,27 @@ namespace MyLab.Search.EsAdapter
         /// </summary>
         Task<bool> IsIndexExistsAsync(string indexName, CancellationToken cancellationToken = default);
     }
+
+    /// <summary>
+    /// Provides abilities to work with index which bound to document
+    /// </summary>
+    public interface IEsIndexTools<TDoc> where TDoc : class
+    {
+        /// <summary>
+        /// Creates the index
+        /// </summary>
+        Task<IIndexDeleter> CreateIndexAsync(Func<CreateIndexDescriptor, ICreateIndexRequest> createDescriptor = null, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Creates the index
+        /// </summary>
+        Task<IIndexDeleter> CreateIndexAsync(string jsonSettings, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Deletes the index
+        /// </summary>
+        Task DeleteIndexAsync(CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Gets whether the index exists
+        /// </summary>
+        Task<bool> IsIndexExistsAsync(CancellationToken cancellationToken = default);
+    }
 }

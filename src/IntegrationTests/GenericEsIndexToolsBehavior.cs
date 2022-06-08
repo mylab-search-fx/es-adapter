@@ -8,20 +8,8 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests
 {
-    public class EsIndexToolsBehavior : IClassFixture<TestClientFixture>
+    public partial class GenericEsIndexToolsBehavior : IClassFixture<TestClientFixture>
     {
-        private readonly ElasticClient _client;
-        private readonly EsIndexTools _indexTools;
-        private readonly string _indexName;
-
-        public EsIndexToolsBehavior(TestClientFixture fxt, ITestOutputHelper output)
-        {
-            _client = fxt.GetClientProvider(output);
-            var esClientProvider = new SingleEsClientProvider(_client);
-            _indexTools = new EsIndexTools(esClientProvider);
-            _indexName = Guid.NewGuid().ToString("N");
-        }
-
         [Fact]
         public async Task ShouldCreateIndexWithLambdaSettings()
         {
@@ -29,7 +17,7 @@ namespace IntegrationTests
             GetIndexResponse resp;
 
             //Act
-            await using var deleter = await _indexTools.CreateIndexAsync(_indexName, 
+            await using var deleter = await _indexTools.CreateIndexAsync( 
                 d => d.Map(md => md.Properties(p =>
                     p.Text(tpd => tpd.Name("foo")))));
             {
@@ -53,7 +41,7 @@ namespace IntegrationTests
             GetIndexResponse resp;
 
             //Act
-            await using var deleter = await _indexTools.CreateIndexAsync(_indexName, settings);
+            await using var deleter = await _indexTools.CreateIndexAsync(settings);
             {
                 resp = await _client.Indices.GetAsync(_indexName);
             }
@@ -73,8 +61,8 @@ namespace IntegrationTests
             //Arrange
 
             //Act
-            await _indexTools.CreateIndexAsync(_indexName);
-            await _indexTools.DeleteIndexAsync(_indexName);
+            await _indexTools.CreateIndexAsync();
+            await _indexTools.DeleteIndexAsync();
             
             var resp = await _client.Indices.GetAsync(_indexName);
 
@@ -92,9 +80,9 @@ namespace IntegrationTests
             bool exists;
 
             //Act
-            await using var deleter = await _indexTools.CreateIndexAsync(_indexName);
+            await using var deleter = await _indexTools.CreateIndexAsync();
             {
-                exists = await _indexTools.IsIndexExistsAsync(_indexName);
+                exists = await _indexTools.IsIndexExistsAsync();
             }
 
             //Assert
@@ -107,7 +95,7 @@ namespace IntegrationTests
             //Arrange
 
             //Act
-            var exists = await _indexTools.IsIndexExistsAsync("absent");
+            var exists = await _indexTools.IsIndexExistsAsync();
 
             //Assert
             Assert.False(exists);
