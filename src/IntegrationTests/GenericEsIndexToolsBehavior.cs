@@ -100,5 +100,36 @@ namespace IntegrationTests
             //Assert
             Assert.False(exists);
         }
+
+        [Fact]
+        public async Task ShouldPruneIndex()
+        {
+            //Arrange
+            var testDoc = TestDoc.Generate();
+
+            IIndexRequest<TestDoc> indexReq = new IndexDescriptor<TestDoc>(testDoc, _indexName);
+
+            await using var deleter = await _indexTools.CreateIndexAsync();
+
+            var indexResp = await _client.IndexAsync(indexReq);
+            EsException.ThrowIfInvalid(indexResp);
+            await Task.Delay(1000);
+
+            //Act
+            await _indexTools.PruneIndexAsync();
+            await Task.Delay(1000);
+
+            var searchResp = await _client.SearchAsync<TestDoc>(CreateSearch);
+
+            //Assert
+            Assert.Equal(0, searchResp.Total);
+
+            ISearchRequest CreateSearch(SearchDescriptor<TestDoc> d)
+            {
+                return d
+                    .Index(Indices.Index(_indexName))
+                    .MatchAll();
+            }
+        }
     }
 }

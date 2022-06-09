@@ -8,29 +8,36 @@ using Nest;
 
 namespace MyLab.Search.EsAdapter.Indexing
 {
+    /// <summary>
+    /// Default implementation for <see cref="IEsIndexer"/>
+    /// </summary>
     public class EsIndexer : IEsIndexer
     {
         private readonly IEsClientProvider _clientProvider;
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="EsIndexer"/>
+        /// </summary>
         public EsIndexer(IEsClientProvider clientProvider)
         {
             _clientProvider = clientProvider;
         }
 
+        /// <inheritdoc />
         public async Task CreateAsync<TDoc>(string indexName, TDoc doc, CancellationToken cancellationToken = default) where TDoc : class
         {
             var resp = await _clientProvider.Provide().CreateAsync(doc, d => d.Index(indexName), cancellationToken);
 
             EsException.ThrowIfInvalid(resp, "Unable to create document");
         }
-
+        /// <inheritdoc />
         public async Task IndexAsync<TDoc>(string indexName, TDoc doc, CancellationToken cancellationToken = default) where TDoc : class
         {
             var resp = await _clientProvider.Provide().IndexAsync(doc, d => d.Index(indexName), cancellationToken);
 
             EsException.ThrowIfInvalid(resp, "Unable to index document");
         }
-
+        /// <inheritdoc />
         public async Task UpdateAsync<TDoc>(string indexName, Id id, Expression<Func<TDoc>> factoryExpression, CancellationToken cancellationToken = default) where TDoc : class
         {
             var updateExpr = new UpdateExpression<TDoc>(factoryExpression);
@@ -43,7 +50,7 @@ namespace MyLab.Search.EsAdapter.Indexing
 
             EsException.ThrowIfInvalid(resp, "Unable to update document");
         }
-
+        /// <inheritdoc />
         public async Task UpdateAsync<TDoc>(string indexName, TDoc partialDocument, CancellationToken cancellationToken = default) where TDoc : class
         {
             var resp = await _clientProvider.Provide().UpdateAsync<TDoc>(
@@ -56,7 +63,7 @@ namespace MyLab.Search.EsAdapter.Indexing
 
             EsException.ThrowIfInvalid(resp, "Unable to update document");
         }
-
+        /// <inheritdoc />
         public async Task DeleteAsync(string indexName, Id docId, CancellationToken cancellationToken = default)
         {
             IDeleteRequest deleteReq = new DeleteRequest(indexName, docId);
@@ -64,7 +71,7 @@ namespace MyLab.Search.EsAdapter.Indexing
 
             EsException.ThrowIfInvalid(resp, "Unable to delete document");
         }
-
+        /// <inheritdoc />
         public async Task BulkAsync<TDoc>(string indexName, EsBulkIndexingRequest<TDoc> request, CancellationToken cancellationToken = default) where TDoc : class
         {
             if (request.IsEmpty())

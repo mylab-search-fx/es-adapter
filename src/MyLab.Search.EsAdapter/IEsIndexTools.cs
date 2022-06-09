@@ -26,6 +26,10 @@ namespace MyLab.Search.EsAdapter
         /// Gets whether the index exists
         /// </summary>
         Task<bool> IsIndexExistsAsync(string indexName, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Prune index
+        /// </summary>
+        Task PruneIndexAsync(string indexName, CancellationToken cancellationToken = default);
     }
 
     /// <summary>
@@ -49,5 +53,9 @@ namespace MyLab.Search.EsAdapter
         /// Gets whether the index exists
         /// </summary>
         Task<bool> IsIndexExistsAsync(CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Prune index
+        /// </summary>
+        Task PruneIndexAsync(CancellationToken cancellationToken = default);
     }
 }
