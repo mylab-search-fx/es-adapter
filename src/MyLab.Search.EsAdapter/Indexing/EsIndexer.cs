@@ -95,7 +95,24 @@ namespace MyLab.Search.EsAdapter.Indexing
             if (request.DeleteList != null)
                 req.Operations.AddRange(request.DeleteList.Select(d => new BulkDeleteOperation<TDoc>(d)));
 
-            var resp = await _clientProvider.Provide().BulkAsync(req, cancellationToken);
+            await BulkCoreAsync(_ => req, cancellationToken);
+        }
+
+        /// <inheritdoc />
+        public Task BulkAsync<TDoc>(string indexName, Func<BulkDescriptor, IBulkRequest> selector, CancellationToken cancellationToken = default) where TDoc : class
+        {
+            var resSelector = new Func<BulkDescriptor, IBulkRequest>(d =>
+            {
+                var desc = d.Index(indexName);
+                return selector(desc);
+            });
+
+            return BulkCoreAsync(resSelector, cancellationToken);
+        }
+
+        async Task BulkCoreAsync(Func<BulkDescriptor, IBulkRequest> selector, CancellationToken cancellationToken)
+        {
+            var resp = await _clientProvider.Provide().BulkAsync(selector, cancellationToken);
 
             EsException.ThrowIfInvalid(resp);
         }
