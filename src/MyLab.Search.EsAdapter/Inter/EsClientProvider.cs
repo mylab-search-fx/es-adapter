@@ -19,6 +19,11 @@ namespace MyLab.Search.EsAdapter.Inter
             EsOptions options,
             ILogger<EsClientProvider> logger = null)
         {
+            if (options.Url == null)
+            {
+                throw new InvalidOperationException("Elasticsearch URL is not specified");
+            }
+
             _connectionPool = new SingleNodeConnectionPool(new Uri(options.Url));
 
             var settings = options.SerializerFactory == null
