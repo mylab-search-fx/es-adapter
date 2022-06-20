@@ -9,8 +9,10 @@ namespace MyLab.Search.EsAdapter.Inter
 {
     class EsClientProvider : IEsClientProvider, IDisposable
     {
-        private readonly IConnectionPool _connectionPool;
-        private readonly ElasticClient _client;
+        private readonly EsOptions _options;
+        private IConnectionPool _connectionPool;
+        private readonly Lazy<ElasticClient> _client;
+        private readonly IDslLogger _logger;
 
         /// <summary>
         /// Initializes a new instance of <see cref="IEsClientProvider"/>
@@ -19,31 +21,10 @@ namespace MyLab.Search.EsAdapter.Inter
             EsOptions options,
             ILogger<EsClientProvider> logger = null)
         {
-            if (options.Url == null)
-            {
-                throw new InvalidOperationException("Elasticsearch URL is not specified");
-            }
+            _options = options;
+            _logger = logger?.Dsl();
 
-            _connectionPool = new SingleNodeConnectionPool(new Uri(options.Url));
-
-            var settings = options.SerializerFactory == null
-                ? new ConnectionSettings(_connectionPool)
-                : new ConnectionSettings(_connectionPool, options.SerializerFactory.Create);
-
-            if (logger != null)
-            {
-                var log = logger.Dsl();
-
-                settings.DisableDirectStreaming();
-                settings.OnRequestCompleted(details =>
-                {
-                    log.Debug("ElasticSearch request completed")
-                        .AndFactIs("dump", ApiCallDumper.ApiCallToDump(details))
-                        .Write();
-                });
-            }
-
-            _client = new ElasticClient(settings);
+            _client = new Lazy<ElasticClient>(CreateClient);
         }
 
         /// <summary>
@@ -58,12 +39,39 @@ namespace MyLab.Search.EsAdapter.Inter
         }
         public ElasticClient Provide()
         {
-            return _client;
+            return _client.Value;
         }
 
         public void Dispose()
         {
             _connectionPool?.Dispose();
+        }
+
+        ElasticClient CreateClient()
+        {
+            if (_options.Url == null)
+            {
+                throw new InvalidOperationException("Elasticsearch URL is not specified");
+            }
+
+            _connectionPool = new SingleNodeConnectionPool(new Uri(_options.Url));
+
+            var settings = _options.SerializerFactory == null
+                ? new ConnectionSettings(_connectionPool)
+                : new ConnectionSettings(_connectionPool, _options.SerializerFactory.Create);
+
+            if (_logger != null)
+            {
+                settings.DisableDirectStreaming();
+                settings.OnRequestCompleted(details =>
+                {
+                    _logger.Debug("ElasticSearch request completed")
+                        .AndFactIs("dump", ApiCallDumper.ApiCallToDump(details))
+                        .Write();
+                });
+            }
+
+            return new ElasticClient(settings);
         }
     }
 }
