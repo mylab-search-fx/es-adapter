@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using MyLab.Search.EsAdapter;
 using MyLab.Search.EsAdapter.Inter;
 using MyLab.Search.EsAdapter.Search;
 using Nest;
@@ -8,14 +9,13 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests
 {
-    public class EsSearcherBehavior :
+    public class GenericEsSearcherBehavior :
         IClassFixture<TestPreindexEsFixture>,
         IClassFixture<TestClientFixture>
     {
-        private readonly string _indexName;
-        private readonly EsSearcher _searcher;
+        private readonly EsSearcher<TestDoc> _searcher;
 
-        public EsSearcherBehavior(
+        public GenericEsSearcherBehavior(
             TestClientFixture fxt,
             TestPreindexEsFixture preindexFxt,
             ITestOutputHelper output)
@@ -23,9 +23,9 @@ namespace IntegrationTests
             var client = fxt.GetClientProvider(output);
             var esClientProvider = new SingleEsClientProvider(client);
 
-            _indexName = preindexFxt.IndexName;
+            var baseSearcher = new EsSearcher(esClientProvider);
 
-            _searcher = new EsSearcher(esClientProvider);
+            _searcher = new EsSearcher<TestDoc>(baseSearcher, new SingleIndexNameProvider(preindexFxt.IndexName));
         }
 
         [Fact]
@@ -35,7 +35,7 @@ namespace IntegrationTests
             var request = new EsSearchParams<TestDoc>(d => d.Ids(ids => ids.Values(0,4)));
 
             //Act
-            var found = await _searcher.SearchAsync(_indexName, request);
+            var found = await _searcher.SearchAsync(request);
 
             var foundDoc0 = found.FirstOrDefault(d => d.Id == "0");
             var foundDoc1 = found.FirstOrDefault(d => d.Id == "4");
@@ -62,7 +62,7 @@ namespace IntegrationTests
             };
 
             //Act
-            var found = await _searcher.SearchAsync(_indexName, request);
+            var found = await _searcher.SearchAsync(request);
 
             //Assert
             Assert.Equal(2, found.Count);
@@ -84,7 +84,7 @@ namespace IntegrationTests
             };
 
             //Act
-            var found = await _searcher.SearchAsync(_indexName, request);
+            var found = await _searcher.SearchAsync(request);
 
             //Assert
             Assert.Single(found);
@@ -107,7 +107,7 @@ namespace IntegrationTests
             string foundHlValue = null;
 
             //Act
-            var found = await _searcher.SearchAsync(_indexName, request, highlight);
+            var found = await _searcher.SearchAsync(request, highlight);
             var foundHl = found.FirstOrDefault()?.Highlights;
             foundHl?.TryGetValue("content", out foundHlValue);
 
