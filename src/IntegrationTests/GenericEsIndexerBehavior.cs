@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using MyLab.Search.EsAdapter;
 using MyLab.Search.EsAdapter.Indexing;
@@ -10,7 +9,7 @@ using Xunit;
 
 namespace IntegrationTests
 {
-    public partial class EsIndexerBehavior : IClassFixture<TestClientFixture>, IAsyncLifetime
+    public partial class GenericEsIndexerBehavior : IClassFixture<TestClientFixture>, IAsyncLifetime
     {
         [Fact]
         public async Task ShouldCreate()
@@ -19,7 +18,7 @@ namespace IntegrationTests
             var doc = TestDoc.Generate();
 
             //Act
-            await _indexer.CreateAsync(_indexName, doc);
+            await _indexer.CreateAsync(doc);
             await Task.Delay(1000);
 
             var found = await SearchAsync(doc.Id);
@@ -37,11 +36,11 @@ namespace IntegrationTests
             //Arrange
             var doc = TestDoc.Generate();
 
-            await _indexer.CreateAsync(_indexName, doc);
+            await _indexer.CreateAsync(doc);
             await Task.Delay(1000);
 
             //Act 
-            var ex = await Assert.ThrowsAsync<EsException>(() => _indexer.CreateAsync(_indexName, doc));
+            var ex = await Assert.ThrowsAsync<EsException>(() => _indexer.CreateAsync(doc));
 
             //Assert
             Assert.Equal(409, ex.Response.ServerError.Status);
@@ -54,7 +53,7 @@ namespace IntegrationTests
             var doc = TestDoc.Generate();
 
             //Act
-            await _indexer.IndexAsync(_indexName, doc);
+            await _indexer.IndexAsync(doc);
             await Task.Delay(1000);
 
             var found = await SearchAsync(doc.Id);
@@ -74,11 +73,11 @@ namespace IntegrationTests
             var doc1 = TestDoc.Generate(docId);
             var doc2 = TestDoc.Generate(docId);
 
-            await _indexer.CreateAsync(_indexName, doc1);
+            await _indexer.CreateAsync(doc1);
             await Task.Delay(1000);
 
             //Act
-            await _indexer.IndexAsync(_indexName, doc2);
+            await _indexer.IndexAsync(doc2);
             await Task.Delay(1000);
 
             var found = await SearchAsync(docId);
@@ -97,11 +96,11 @@ namespace IntegrationTests
             var docId = Guid.NewGuid().ToString("N");
             var doc = TestDoc.Generate(docId);
 
-            await _indexer.CreateAsync(_indexName, doc);
+            await _indexer.CreateAsync(doc);
             await Task.Delay(1000);
 
             //Act
-            await _indexer.UpdateAsync(_indexName, docId, 
+            await _indexer.UpdateAsync(docId, 
                 () => new TestDoc
                 {
                     Content = "foo"
@@ -129,11 +128,11 @@ namespace IntegrationTests
                 Content = "foo"
             };
 
-            await _indexer.CreateAsync(_indexName, doc1);
+            await _indexer.CreateAsync(doc1);
             await Task.Delay(1000);
 
             //Act
-            await _indexer.UpdateAsync(_indexName, doc2);
+            await _indexer.UpdateAsync(doc2);
             await Task.Delay(1000);
 
             var found = await SearchAsync(docId);
@@ -151,11 +150,11 @@ namespace IntegrationTests
             //Arrange
             var doc = TestDoc.Generate();
 
-            await _indexer.CreateAsync(_indexName, doc);
+            await _indexer.CreateAsync(doc);
             await Task.Delay(1000);
 
             //Act
-            await _indexer.DeleteAsync(_indexName, doc.Id);
+            await _indexer.DeleteAsync(doc.Id);
             await Task.Delay(1000);
 
             var found = await SearchAsync(doc.Id);
@@ -188,9 +187,9 @@ namespace IntegrationTests
             var controlBulkReq = new EsBulkIndexingRequest<TestDoc>
             {
                 CreateList = new[] { docForCreate },
-                IndexList = new []{ docReplacer },
-                UpdateList = new [] { docUpdater },
-                DeleteList = new [] { new Id(docForDelete.Id) }
+                IndexList = new[] { docReplacer },
+                UpdateList = new[] { docUpdater },
+                DeleteList = new[] { new Id(docForDelete.Id) }
             };
 
             ISearchRequest searchReq = new SearchRequest(_indexName)
@@ -208,9 +207,9 @@ namespace IntegrationTests
             };
 
             //Act
-            await _indexer.BulkAsync(_indexName, initialBulkReq);
+            await _indexer.BulkAsync(initialBulkReq);
             await Task.Delay(1000);
-            await _indexer.BulkAsync(_indexName, controlBulkReq);
+            await _indexer.BulkAsync(controlBulkReq);
             await Task.Delay(1000);
 
             var searchResp = await _client.SearchAsync<TestDoc>(searchReq);
@@ -279,9 +278,9 @@ namespace IntegrationTests
             };
 
             //Act
-            await _indexer.BulkAsync<TestDoc>(_indexName, initialBulkReq);
+            await _indexer.BulkAsync(initialBulkReq);
             await Task.Delay(1000);
-            await _indexer.BulkAsync<TestDoc>(_indexName, controlBulkReq);
+            await _indexer.BulkAsync(controlBulkReq);
             await Task.Delay(1000);
 
             var searchResp = await _client.SearchAsync<TestDoc>(searchReq);
