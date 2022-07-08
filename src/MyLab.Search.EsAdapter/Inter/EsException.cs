@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using MyLab.Log;
 using Nest;
 
@@ -21,6 +22,20 @@ namespace MyLab.Search.EsAdapter.Inter
             : base(message, response.OriginalException)
         {
             Response = response;
+        }
+
+        /// <summary>
+        /// Determines that the exception have error about the index absence 
+        /// </summary>
+        public bool HasIndexNotFound()
+        {
+            if (Response is BulkResponse bulkResp)
+            {
+                return bulkResp.ItemsWithErrors != null &&
+                       bulkResp.ItemsWithErrors.Any(itm => itm.Status == 404);
+            }
+
+            return Response?.ServerError?.Error?.Type == "index_not_found_exception";
         }
 
         /// <summary>
