@@ -6,21 +6,23 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests
 {
-    public partial class GenericEsIndexToolsBehavior
+    public partial class SpecialEsIndexToolsBehavior
     {
         private readonly ElasticClient _client;
-        private readonly EsIndexTools<TestDoc> _indexTools;
+        private readonly EsSpecialIndexTools<TestDoc> _specialIndexTools;
         private readonly string _indexName;
 
-        public GenericEsIndexToolsBehavior(TestClientFixture fxt, ITestOutputHelper output)
+        public SpecialEsIndexToolsBehavior(TestClientFixture fxt, ITestOutputHelper output)
         {
-            _client = fxt.GetClientProvider(output);
+            fxt.Output = output;
+            _client = fxt.Client;
+
             var esClientProvider = new SingleEsClientProvider(_client);
             var baseIndexTools = new EsIndexTools(esClientProvider);
 
             _indexName = Guid.NewGuid().ToString("N");
 
-            _indexTools = new EsIndexTools<TestDoc>(baseIndexTools, new SingleIndexNameProvider(_indexName));
+            _specialIndexTools = new EsSpecialIndexTools<TestDoc>(baseIndexTools, new SingleIndexNameProvider(_indexName));
         }
     }
 }

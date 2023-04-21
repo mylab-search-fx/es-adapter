@@ -6,17 +6,24 @@ namespace IntegrationTests
 {
     public class TestClientFixture
     {
-        public ElasticClient GetClientProvider(ITestOutputHelper output)
+        public ITestOutputHelper Output { get; set; }
+
+        public ElasticClient Client { get; }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="TestClientFixture"/>
+        /// </summary>
+        public TestClientFixture()
         {
             var settings = new ConnectionSettings(TestTools.ConnectionPool);
 
             settings.DisableDirectStreaming();
             settings.OnRequestCompleted(details =>
             {
-                output?.WriteLine(ApiCallDumper.ApiCallToDump(details));
+                Output?.WriteLine(ApiCallDumper.ApiCallToDump(details));
             });
 
-            return new ElasticClient(settings);
+            Client = new ElasticClient(settings);
         }
     }
 }

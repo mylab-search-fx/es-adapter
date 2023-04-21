@@ -9,7 +9,7 @@ namespace UnitTests
         [Theory]
         [InlineData("foo")]
         [InlineData("DocType")]
-        [InlineData("UnitTests.EsOptionsBehavior+DocType")]
+        [InlineData("UnitTests.OptionsIndexNameProviderBehavior+DocType")]
         public void ShouldProvideIndexForDocWithBindAttr(string doc)
         {
             //Arrange
@@ -36,7 +36,7 @@ namespace UnitTests
 
         [Theory]
         [InlineData("DocType2")]
-        [InlineData("UnitTests.EsOptionsBehavior+DocType2")]
+        [InlineData("UnitTests.OptionsIndexNameProviderBehavior+DocType2")]
         public void ShouldProvideIndexForDocWithoutBindAttr(string doc)
         {
             //Arrange

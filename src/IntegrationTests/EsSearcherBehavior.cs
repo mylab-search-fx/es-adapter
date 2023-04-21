@@ -20,7 +20,8 @@ namespace IntegrationTests
             TestPreindexEsFixture preindexFxt,
             ITestOutputHelper output)
         {
-            var client = fxt.GetClientProvider(output);
+            fxt.Output = output;
+            var client = fxt.Client;
             var esClientProvider = new SingleEsClientProvider(client);
 
             _indexName = preindexFxt.IndexName;

@@ -5,6 +5,9 @@ services:
     container_name: mylab-es-tests-es01
     environment:
       - discovery.type=single-node
+      - action.auto_create_index=.watches,.triggered_watches,.watcher-history-*
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - TZ=Europe/Moscow
     ulimits:
       memlock:
         soft: -1

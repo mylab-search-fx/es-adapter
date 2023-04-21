@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using MyLab.Search.EsAdapter;
 using MyLab.Search.EsAdapter.Indexing;
 using MyLab.Search.EsAdapter.Inter;
@@ -14,14 +10,14 @@ namespace IntegrationTests
 {
     public  class EsExceptionBehavior : IClassFixture<TestClientFixture>
     {
-        private readonly ElasticClient _client;
         private readonly EsIndexer _indexer;
         private readonly EsIndexTools _indexTools;
 
         public EsExceptionBehavior(TestClientFixture fxt, ITestOutputHelper output)
         {
-            _client = fxt.GetClientProvider(output);
-            var esClientProvider = new SingleEsClientProvider(_client);
+            fxt.Output = output;
+            var client = fxt.Client;
+            var esClientProvider = new SingleEsClientProvider(client);
             
             _indexer = new EsIndexer(esClientProvider);
             _indexTools = new EsIndexTools(esClientProvider);
@@ -48,7 +44,7 @@ namespace IntegrationTests
 
             //Assert
             Assert.NotNull(exception);
-            Assert.True(exception.HasIndexNotFound());
+            Assert.True(exception.Response.HasIndexNotFound);
         }
 
         [Fact]
@@ -72,7 +68,7 @@ namespace IntegrationTests
 
             //Assert
             Assert.NotNull(exception);
-            Assert.True(exception.HasIndexNotFound());
+            Assert.True(exception.Response.HasIndexNotFound);
         }
     }
 }

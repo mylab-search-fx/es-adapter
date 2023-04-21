@@ -19,7 +19,8 @@ namespace IntegrationTests
 
         public EsIndexerBehavior(TestClientFixture fxt, ITestOutputHelper output)
         {
-            _client = fxt.GetClientProvider(output);
+            fxt.Output = output;
+            _client = fxt.Client;
             var esClientProvider = new SingleEsClientProvider(_client);
 
             _indexName = Guid.NewGuid().ToString("N");

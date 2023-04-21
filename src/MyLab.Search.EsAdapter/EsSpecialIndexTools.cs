@@ -2,15 +2,14 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
-using MyLab.Search.EsAdapter.Inter;
 using Nest;
 
 namespace MyLab.Search.EsAdapter
 {
     /// <summary>
-    /// Default implementation for <see cref="IEsIndexTools{TDoc}"/>
+    /// Default implementation for <see cref="IEsSpecialIndexTools"/>
     /// </summary>
-    public class EsIndexTools<TDoc> : IEsIndexTools<TDoc> where TDoc: class
+    public class EsSpecialIndexTools<TDoc> : IEsSpecialIndexTools where TDoc: class
     {
         private readonly IEsIndexTools _baseIndexTools;
         private readonly string _indexName;
@@ -18,7 +17,7 @@ namespace MyLab.Search.EsAdapter
         /// <summary>
         /// Initializes a new instance of <see cref="EsIndexTools"/>
         /// </summary>
-        public EsIndexTools(IEsIndexTools baseIndexTools, IOptions<EsOptions> options)
+        public EsSpecialIndexTools(IEsIndexTools baseIndexTools, IOptions<EsOptions> options)
             :this(baseIndexTools, options.Value)
         {
             
@@ -27,7 +26,7 @@ namespace MyLab.Search.EsAdapter
         /// <summary>
         /// Initializes a new instance of <see cref="EsIndexTools"/>
         /// </summary>
-        public EsIndexTools(IEsIndexTools baseIndexTools, EsOptions options)
+        public EsSpecialIndexTools(IEsIndexTools baseIndexTools, EsOptions options)
             : this(baseIndexTools, new OptionsIndexNameProvider(options))
         {
 
@@ -36,7 +35,7 @@ namespace MyLab.Search.EsAdapter
         /// <summary>
         /// Initializes a new instance of <see cref="EsIndexTools"/>
         /// </summary>
-        public EsIndexTools(IEsIndexTools baseIndexTools, IIndexNameProvider indexNameProvider)
+        public EsSpecialIndexTools(IEsIndexTools baseIndexTools, IIndexNameProvider indexNameProvider)
         {
             _baseIndexTools = baseIndexTools;
             _indexName = indexNameProvider.Provide<TDoc>();

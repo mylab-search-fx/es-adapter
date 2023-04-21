@@ -43,7 +43,7 @@ namespace IntegrationTests
             var ex = await Assert.ThrowsAsync<EsException>(() => _indexer.CreateAsync(doc));
 
             //Assert
-            Assert.Equal(409, ex.Response.ServerError.Status);
+            Assert.Equal(409, ex.Response.ApiCall.HttpStatusCode);
         }
 
         [Fact]
