@@ -1,7 +1,8 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace MyLab.Search.EsAdapter
+namespace MyLab.Search.EsAdapter.Tools
 {
     /// <summary>
     /// Provides abilities to work with special stream
@@ -11,7 +12,8 @@ namespace MyLab.Search.EsAdapter
         /// <summary>
         /// Creates the stream
         /// </summary>
-        Task<IStreamDeleter> CreateStreamAsync(CancellationToken cancellationToken = default);
+        /// <returns>Stream deleter</returns>
+        Task<IAsyncDisposable> CreateStreamAsync(CancellationToken cancellationToken = default);
         /// <summary>
         /// Deletes the stream
         /// </summary>

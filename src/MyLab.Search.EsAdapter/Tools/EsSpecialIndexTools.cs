@@ -4,12 +4,12 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Nest;
 
-namespace MyLab.Search.EsAdapter
+namespace MyLab.Search.EsAdapter.Tools
 {
     /// <summary>
     /// Default implementation for <see cref="IEsSpecialIndexTools"/>
     /// </summary>
-    public class EsSpecialIndexTools<TDoc> : IEsSpecialIndexTools where TDoc: class
+    public class EsSpecialIndexTools<TDoc> : IEsSpecialIndexTools where TDoc : class
     {
         private readonly IEsIndexTools _baseIndexTools;
         private readonly string _indexName;
@@ -18,9 +18,9 @@ namespace MyLab.Search.EsAdapter
         /// Initializes a new instance of <see cref="EsIndexTools"/>
         /// </summary>
         public EsSpecialIndexTools(IEsIndexTools baseIndexTools, IOptions<EsOptions> options)
-            :this(baseIndexTools, options.Value)
+            : this(baseIndexTools, options.Value)
         {
-            
+
         }
 
         /// <summary>
@@ -42,13 +42,13 @@ namespace MyLab.Search.EsAdapter
         }
 
         /// <inheritdoc />
-        public Task<IIndexDeleter> CreateIndexAsync(Func<CreateIndexDescriptor, ICreateIndexRequest> createDescriptor = null, CancellationToken cancellationToken = default)
+        public Task<IAsyncDisposable> CreateIndexAsync(Func<CreateIndexDescriptor, ICreateIndexRequest> createDescriptor = null, CancellationToken cancellationToken = default)
         {
             return _baseIndexTools.CreateIndexAsync(_indexName, createDescriptor, cancellationToken);
         }
 
         /// <inheritdoc />
-        public Task<IIndexDeleter> CreateIndexAsync(string jsonSettings, CancellationToken cancellationToken = default)
+        public Task<IAsyncDisposable> CreateIndexAsync(string jsonSettings, CancellationToken cancellationToken = default)
         {
             return _baseIndexTools.CreateIndexAsync(_indexName, jsonSettings, cancellationToken);
         }

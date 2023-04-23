@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using MyLab.Search.EsAdapter.Inter;
 using Nest;
 
-namespace MyLab.Search.EsAdapter
+namespace MyLab.Search.EsAdapter.Tools
 {
     /// <summary>
     /// Default implementation for <see cref="IEsIndexTools"/>
@@ -22,7 +22,7 @@ namespace MyLab.Search.EsAdapter
         }
 
         /// <inheritdoc />
-        public async Task<IIndexDeleter> CreateIndexAsync(string indexName, Func<CreateIndexDescriptor, ICreateIndexRequest> createDescriptor = null, CancellationToken cancellationToken = default)
+        public async Task<IAsyncDisposable> CreateIndexAsync(string indexName, Func<CreateIndexDescriptor, ICreateIndexRequest> createDescriptor = null, CancellationToken cancellationToken = default)
         {
             var resp = await _clientProvider.Provide().Indices.CreateAsync(indexName, createDescriptor, cancellationToken);
 
@@ -32,7 +32,7 @@ namespace MyLab.Search.EsAdapter
         }
 
         /// <inheritdoc />
-        public async Task<IIndexDeleter> CreateIndexAsync(string indexName, string jsonSettings, CancellationToken cancellationToken = default)
+        public async Task<IAsyncDisposable> CreateIndexAsync(string indexName, string jsonSettings, CancellationToken cancellationToken = default)
         {
             var resp = await _clientProvider.Provide().LowLevel.Indices.CreateAsync<CreateIndexResponse>(indexName, jsonSettings, null, cancellationToken);
 
@@ -72,7 +72,7 @@ namespace MyLab.Search.EsAdapter
             await _clientProvider.Provide().DeleteByQueryAsync(req, cancellationToken);
         }
 
-        class IndexDeleter : IIndexDeleter
+        class IndexDeleter : IAsyncDisposable
         {
             private readonly string _indexName;
             private readonly IEsIndexTools _idxTools;

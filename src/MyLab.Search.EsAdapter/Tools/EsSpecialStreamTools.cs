@@ -1,21 +1,22 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 
-namespace MyLab.Search.EsAdapter
+namespace MyLab.Search.EsAdapter.Tools
 {
     /// <summary>
     /// Default implementation for <see cref="IEsSpecialStreamTools"/>
     /// </summary>
-    public class EsSpecialStreamTools<TDoc> : EsSpecialStreamTools where TDoc: class
+    public class EsSpecialStreamTools<TDoc> : EsSpecialStreamTools where TDoc : class
     {
         /// <summary>
         /// Initializes a new instance of <see cref="EsIndexTools"/>
         /// </summary>
         public EsSpecialStreamTools(IEsStreamTools baseStreamTools, IOptions<EsOptions> options)
-            :this(baseStreamTools, options.Value)
+            : this(baseStreamTools, options.Value)
         {
-            
+
         }
 
         /// <summary>
@@ -31,7 +32,7 @@ namespace MyLab.Search.EsAdapter
         /// Initializes a new instance of <see cref="EsIndexTools"/>
         /// </summary>
         public EsSpecialStreamTools(IEsStreamTools baseStreamTools, IIndexNameProvider indexNameProvider)
-            :base(baseStreamTools, indexNameProvider.Provide<TDoc>())
+            : base(baseStreamTools, indexNameProvider.Provide<TDoc>())
         {
         }
     }
@@ -54,7 +55,7 @@ namespace MyLab.Search.EsAdapter
         }
 
         /// <inheritdoc />
-        public Task<IStreamDeleter> CreateStreamAsync(CancellationToken cancellationToken = default)
+        public Task<IAsyncDisposable> CreateStreamAsync(CancellationToken cancellationToken = default)
         {
             return _baseStreamTools.CreateStreamAsync(_streamName, cancellationToken);
         }

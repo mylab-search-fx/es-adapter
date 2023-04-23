@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Nest;
 
-namespace MyLab.Search.EsAdapter
+namespace MyLab.Search.EsAdapter.Tools
 {
     /// <summary>
     /// Provides abilities to work with indexes
@@ -13,11 +13,13 @@ namespace MyLab.Search.EsAdapter
         /// <summary>
         /// Creates the index
         /// </summary>
-        Task<IIndexDeleter> CreateIndexAsync(string indexName, Func<CreateIndexDescriptor, ICreateIndexRequest> createDescriptor = null, CancellationToken cancellationToken = default);
+        /// <returns>Index deleter</returns>
+        Task<IAsyncDisposable> CreateIndexAsync(string indexName, Func<CreateIndexDescriptor, ICreateIndexRequest> createDescriptor = null, CancellationToken cancellationToken = default);
         /// <summary>
         /// Creates the index
         /// </summary>
-        Task<IIndexDeleter> CreateIndexAsync(string indexName, string jsonSettings, CancellationToken cancellationToken = default);
+        /// <returns>Index deleter</returns>
+        Task<IAsyncDisposable> CreateIndexAsync(string indexName, string jsonSettings, CancellationToken cancellationToken = default);
         /// <summary>
         /// Deletes the index
         /// </summary>

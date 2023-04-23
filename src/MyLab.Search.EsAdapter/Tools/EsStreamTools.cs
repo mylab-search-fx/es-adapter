@@ -5,7 +5,7 @@ using Elasticsearch.Net;
 using MyLab.Search.EsAdapter.Inter;
 using Nest;
 
-namespace MyLab.Search.EsAdapter
+namespace MyLab.Search.EsAdapter.Tools
 {
     /// <summary>
     /// Default implementation for <see cref="IEsStreamTools"/>
@@ -23,12 +23,12 @@ namespace MyLab.Search.EsAdapter
         }
 
         /// <inheritdoc />
-        public async Task<IStreamDeleter> CreateStreamAsync(string streamName, CancellationToken cancellationToken = default)
+        public async Task<IAsyncDisposable> CreateStreamAsync(string streamName, CancellationToken cancellationToken = default)
         {
             var resp = await _clientProvider.Provide().LowLevel
                 .DoRequestAsync<StringResponse>(HttpMethod.PUT, $"_data_stream/{streamName}", cancellationToken);
 
-            EsException.ThrowIfInvalid(resp, "Unable to create the index");
+            EsException.ThrowIfInvalid(resp, "Unable to create the stream");
 
             return new StreamDeleter(streamName, this);
         }
@@ -39,7 +39,7 @@ namespace MyLab.Search.EsAdapter
             var resp = await _clientProvider.Provide().LowLevel
                 .DoRequestAsync<StringResponse>(HttpMethod.DELETE, $"_data_stream/{streamName}", cancellationToken);
 
-            EsException.ThrowIfInvalid(resp, "Unable to delete the index");
+            EsException.ThrowIfInvalid(resp, "Unable to delete the stream");
         }
 
         /// <inheritdoc />
@@ -53,7 +53,7 @@ namespace MyLab.Search.EsAdapter
             return resp.HttpStatusCode != 404;
         }
 
-        class StreamDeleter : IStreamDeleter
+        class StreamDeleter : IAsyncDisposable
         {
             private readonly string _indexName;
             private readonly IEsStreamTools _strmTools;

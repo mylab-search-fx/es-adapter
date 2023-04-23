@@ -1,6 +1,7 @@
 using System;
 using MyLab.Search.EsAdapter;
 using MyLab.Search.EsAdapter.Inter;
+using MyLab.Search.EsAdapter.Tools;
 using Nest;
 using Xunit.Abstractions;
 

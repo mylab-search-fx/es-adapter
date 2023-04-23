@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MyLab.Search.EsAdapter.Indexing;
 using MyLab.Search.EsAdapter.Inter;
 using MyLab.Search.EsAdapter.Search;
+using MyLab.Search.EsAdapter.Tools;
 
 namespace MyLab.Search.EsAdapter
 {
@@ -30,6 +31,7 @@ namespace MyLab.Search.EsAdapter
                 .AddSingleton<IEsStreamTools, EsStreamTools>()
                 .AddSingleton<IEsIndexer, EsIndexer>()
                 .AddSingleton<IEsSearcher, EsSearcher>()
+                .AddSingleton<IEsLifecycleTools, EsLifecycleTools>()
                 .AddSingleton(typeof(IEsSpecialIndexTools), typeof(EsSpecialIndexTools<>))
                 .AddSingleton(typeof(IEsIndexer<>), typeof(EsIndexer<>))
                 .AddSingleton(typeof(IEsSearcher<>), typeof(EsSearcher<>));
