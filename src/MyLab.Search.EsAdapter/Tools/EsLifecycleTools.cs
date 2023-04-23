@@ -40,7 +40,7 @@ namespace MyLab.Search.EsAdapter.Tools
                 .DoRequestAsync<StringResponse>(HttpMethod.PUT, "_ilm/policy/" + policyId, cancellationToken,
                     jsonRequest);
 
-            EsException.ThrowIfInvalid(resp, "Unable to delete the stream");
+            EsException.ThrowIfInvalid(resp, "Unable to delete the lifecycle");
 
             return new LifecycleDeleter(policyId, this);
         }
@@ -54,11 +54,15 @@ namespace MyLab.Search.EsAdapter.Tools
         /// <inheritdoc />
         public async Task<bool> IsLifecyclePolicyExists(string policyId)
         {
-            var resp = await _clientProvider.Provide().IndexLifecycleManagement.GetStatusAsync();
+            var resp = await _clientProvider.Provide().IndexLifecycleManagement
+                .GetLifecycleAsync(s => s.PolicyId(policyId));
 
-            EsException.ThrowIfInvalid(resp, "Unable to delete the stream");
+            if (resp.ApiCall.HttpStatusCode == 404)
+                return false;
 
-            return resp.ApiCall.HttpStatusCode != 404;
+            EsException.ThrowIfInvalid(resp, "Unable to get lifecycle info");
+
+            return true;
         }
 
         class LifecycleDeleter : IAsyncDisposable

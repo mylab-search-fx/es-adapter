@@ -48,9 +48,11 @@ namespace MyLab.Search.EsAdapter.Tools
             var resp = await _clientProvider.Provide().LowLevel
                 .DoRequestAsync<StringResponse>(HttpMethod.GET, $"_data_stream/{streamName}", cancellationToken);
 
+            if (resp.HttpStatusCode == 404) return false; 
+
             EsException.ThrowIfInvalid(resp);
 
-            return resp.HttpStatusCode != 404;
+            return true;
         }
 
         class StreamDeleter : IAsyncDisposable

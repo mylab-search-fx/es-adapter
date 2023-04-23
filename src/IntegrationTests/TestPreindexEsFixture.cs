@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using MyLab.Search.EsAdapter;
 using MyLab.Search.EsAdapter.Indexing;
 using MyLab.Search.EsAdapter.Inter;
+using MyLab.Search.EsAdapter.Tools;
 using Nest;
 using Xunit;
 
@@ -11,7 +12,7 @@ namespace IntegrationTests
     public class TestPreindexEsFixture : IAsyncLifetime
     {
         private readonly ElasticClient _client;
-        private IIndexDeleter _indexDeleter;
+        private IAsyncDisposable _indexDeleter;
 
         public string IndexName { get; }
 

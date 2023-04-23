@@ -16,7 +16,7 @@ namespace IntegrationTests
         private readonly EsIndexer _indexer;
         private readonly string _indexName;
         private readonly EsIndexTools _indexTools;
-        private IIndexDeleter _indexDeleter;
+        private IAsyncDisposable _indexDeleter;
 
         public EsIndexerBehavior(TestClientFixture fxt, ITestOutputHelper output)
         {
