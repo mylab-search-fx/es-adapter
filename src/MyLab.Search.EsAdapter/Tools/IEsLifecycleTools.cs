@@ -14,28 +14,28 @@ namespace MyLab.Search.EsAdapter.Tools
         /// Creates or updates lifecycle
         /// </summary>
         /// <returns>Lifecycle deleter</returns>
-        public Task<IAsyncDisposable> PutLifecyclePolicyAsync(IPutLifecycleRequest lifecycleRequest, CancellationToken cancellationToken);
+        public Task<IAsyncDisposable> PutLifecyclePolicyAsync(IPutLifecycleRequest lifecycleRequest, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Creates or updates lifecycle
         /// </summary>
         /// <returns>Lifecycle deleter</returns>
-        public Task<IAsyncDisposable> PutLifecyclePolicyAsync(string policyId, string jsonRequest, CancellationToken cancellationToken);
+        public Task<IAsyncDisposable> PutLifecyclePolicyAsync(string policyId, string jsonRequest, CancellationToken cancellationToken = default);
         
         /// <summary>
         /// Tries get lifecycle policy
         /// </summary>
         /// <returns>lifecycle if exists or null</returns>
-        public Task<LifecyclePolicy> TryGetLifecyclePolicyAsync(string policyId, CancellationToken cancellationToken);
+        public Task<LifecyclePolicy> TryGetLifecyclePolicyAsync(string policyId, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Deletes lifecycle
         /// </summary>
-        public Task DeleteLifecycleAsync(string policyId, CancellationToken cancellationToken);
+        public Task DeleteLifecycleAsync(string policyId, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Gets whether the lifecycle policy exists
         /// </summary>
-        public Task<bool> IsLifecyclePolicyExistentAsync(string policyId, CancellationToken cancellationToken);
+        public Task<bool> IsLifecyclePolicyExistentAsync(string policyId, CancellationToken cancellationToken = default);
     }
 }

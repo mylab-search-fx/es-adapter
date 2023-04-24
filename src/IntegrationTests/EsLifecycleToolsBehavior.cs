@@ -38,8 +38,8 @@ namespace IntegrationTests
             var lcId = Guid.NewGuid().ToString("N");
 
             //Act
-            await using var deleter = await _lcTools.PutLifecyclePolicyAsync(lcId, _lifecycleExampleJson, CancellationToken.None);
-            var streamExists = await _lcTools.IsLifecyclePolicyExistentAsync(lcId, CancellationToken.None);
+            await using var deleter = await _lcTools.PutLifecyclePolicyAsync(lcId, _lifecycleExampleJson);
+            var streamExists = await _lcTools.IsLifecyclePolicyExistentAsync(lcId);
 
             //Assert
             Assert.True(streamExists);
@@ -52,8 +52,8 @@ namespace IntegrationTests
             var lcId = Guid.NewGuid().ToString("N");
 
             //Act
-            await using var deleter = await _lcTools.PutLifecyclePolicyAsync(lcId, _lifecycleExampleJson, CancellationToken.None);
-            var lcPolicy = await _lcTools.TryGetLifecyclePolicyAsync(lcId, CancellationToken.None);
+            await using var deleter = await _lcTools.PutLifecyclePolicyAsync(lcId, _lifecycleExampleJson);
+            var lcPolicy = await _lcTools.TryGetLifecyclePolicyAsync(lcId);
 
             //Assert
             Assert.NotNull(lcPolicy);
@@ -65,12 +65,12 @@ namespace IntegrationTests
         {
             //Arrange
             var lcId = Guid.NewGuid().ToString("N");
-            await _lcTools.PutLifecyclePolicyAsync(lcId, _lifecycleExampleJson, CancellationToken.None);
+            await _lcTools.PutLifecyclePolicyAsync(lcId, _lifecycleExampleJson);
 
             //Act
-            await _lcTools.DeleteLifecycleAsync(lcId, CancellationToken.None);
+            await _lcTools.DeleteLifecycleAsync(lcId);
 
-            var streamExists = await _lcTools.IsLifecyclePolicyExistentAsync(lcId, CancellationToken.None);
+            var streamExists = await _lcTools.IsLifecyclePolicyExistentAsync(lcId);
 
             //Assert
             Assert.False(streamExists);
@@ -83,7 +83,7 @@ namespace IntegrationTests
             var randomId = Guid.NewGuid().ToString("N");
 
             //Act
-            var exists = await _lcTools.IsLifecyclePolicyExistentAsync(randomId, CancellationToken.None);
+            var exists = await _lcTools.IsLifecyclePolicyExistentAsync(randomId);
 
             //Assert
             Assert.False(exists);
@@ -96,7 +96,7 @@ namespace IntegrationTests
             var randomId = Guid.NewGuid().ToString("N");
 
             //Act
-            var lifecycle = await _lcTools.TryGetLifecyclePolicyAsync(randomId, CancellationToken.None);
+            var lifecycle = await _lcTools.TryGetLifecyclePolicyAsync(randomId);
 
             //Assert
             Assert.Null(lifecycle);
@@ -109,9 +109,9 @@ namespace IntegrationTests
             var lcId = Guid.NewGuid().ToString("N");
 
             //Act
-            await using var deleter = await _lcTools.PutLifecyclePolicyAsync(lcId, _lifecycleExampleJson, CancellationToken.None);
-            await _lcTools.PutLifecyclePolicyAsync(lcId, _lifecycleExample2Json, CancellationToken.None);
-            var lcPolicy = await _lcTools.TryGetLifecyclePolicyAsync(lcId, CancellationToken.None);
+            await using var deleter = await _lcTools.PutLifecyclePolicyAsync(lcId, _lifecycleExampleJson);
+            await _lcTools.PutLifecyclePolicyAsync(lcId, _lifecycleExample2Json);
+            var lcPolicy = await _lcTools.TryGetLifecyclePolicyAsync(lcId);
 
             //Assert
             Assert.NotNull(lcPolicy);
