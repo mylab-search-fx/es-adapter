@@ -36,6 +36,7 @@ namespace IntegrationTests
             {
                 resp = await _client.Indices.GetAsync(_indexName);
             }
+
             resp.Indices.TryGetValue(_indexName, out var indexState);
 
             //Assert
@@ -83,6 +84,16 @@ namespace IntegrationTests
 
             //Assert
             Assert.Null(indexState);
+        }
+
+        [Fact]
+        public async Task ShouldNotUpdateExistentIndex()
+        {
+            //Arrange
+            await _indexTools.CreateIndexAsync(_indexName);
+
+            //Act & Assert
+            await Assert.ThrowsAsync<EsException>(() => _indexTools.CreateIndexAsync(_indexName));
         }
 
         [Fact]

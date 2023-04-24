@@ -14,6 +14,7 @@ namespace IntegrationTests
     {
         private readonly IEsLifecycleTools _lcTools;
         private readonly string _lifecycleExampleJson;
+        private readonly string _lifecycleExample2Json;
 
         public EsLifecycleToolsBehavior(
             TestClientFixture clientFxt,
@@ -27,6 +28,7 @@ namespace IntegrationTests
             _lcTools = new EsLifecycleTools(esClientProvider);
 
             _lifecycleExampleJson = File.ReadAllText("Files\\lifecycle-example.json");
+            _lifecycleExample2Json = File.ReadAllText("Files\\lifecycle-example-2.json");
         }
 
         [Fact]
@@ -37,10 +39,25 @@ namespace IntegrationTests
 
             //Act
             await using var deleter = await _lcTools.PutLifecyclePolicyAsync(lcId, _lifecycleExampleJson, CancellationToken.None);
-            var streamExists = await _lcTools.IsLifecyclePolicyExists(lcId);
+            var streamExists = await _lcTools.IsLifecyclePolicyExistentAsync(lcId, CancellationToken.None);
 
             //Assert
             Assert.True(streamExists);
+        }
+
+        [Fact]
+        public async Task ShouldGetLifecycle()
+        {
+            //Arrange
+            var lcId = Guid.NewGuid().ToString("N");
+
+            //Act
+            await using var deleter = await _lcTools.PutLifecyclePolicyAsync(lcId, _lifecycleExampleJson, CancellationToken.None);
+            var lcPolicy = await _lcTools.TryGetLifecyclePolicyAsync(lcId, CancellationToken.None);
+
+            //Assert
+            Assert.NotNull(lcPolicy);
+            Assert.Contains(lcPolicy.Policy.Meta, pair => pair.Key == "ver" && (string)pair.Value == "1");
         }
 
         [Fact]
@@ -51,9 +68,9 @@ namespace IntegrationTests
             await _lcTools.PutLifecyclePolicyAsync(lcId, _lifecycleExampleJson, CancellationToken.None);
 
             //Act
-            await _lcTools.DeleteLifecycleAsync(lcId);
+            await _lcTools.DeleteLifecycleAsync(lcId, CancellationToken.None);
 
-            var streamExists = await _lcTools.IsLifecyclePolicyExists(lcId);
+            var streamExists = await _lcTools.IsLifecyclePolicyExistentAsync(lcId, CancellationToken.None);
 
             //Assert
             Assert.False(streamExists);
@@ -66,10 +83,39 @@ namespace IntegrationTests
             var randomId = Guid.NewGuid().ToString("N");
 
             //Act
-            var exists = await _lcTools.IsLifecyclePolicyExists(randomId);
+            var exists = await _lcTools.IsLifecyclePolicyExistentAsync(randomId, CancellationToken.None);
 
             //Assert
             Assert.False(exists);
+        }
+
+        [Fact]
+        public async Task ShouldNotGetAbsentLifecycle()
+        {
+            //Arrange
+            var randomId = Guid.NewGuid().ToString("N");
+
+            //Act
+            var lifecycle = await _lcTools.TryGetLifecyclePolicyAsync(randomId, CancellationToken.None);
+
+            //Assert
+            Assert.Null(lifecycle);
+        }
+
+        [Fact]
+        public async Task ShouldUpdateLifecycle()
+        {
+            //Arrange
+            var lcId = Guid.NewGuid().ToString("N");
+
+            //Act
+            await using var deleter = await _lcTools.PutLifecyclePolicyAsync(lcId, _lifecycleExampleJson, CancellationToken.None);
+            await _lcTools.PutLifecyclePolicyAsync(lcId, _lifecycleExample2Json, CancellationToken.None);
+            var lcPolicy = await _lcTools.TryGetLifecyclePolicyAsync(lcId, CancellationToken.None);
+
+            //Assert
+            Assert.NotNull(lcPolicy);
+            Assert.Contains(lcPolicy.Policy.Meta, pair => pair.Key == "ver" && (string)pair.Value == "2");
         }
     }
 }

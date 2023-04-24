@@ -63,6 +63,16 @@ namespace IntegrationTests
         }
 
         [Fact]
+        public async Task ShouldNotUpdateExistentStream()
+        {
+            //Arrange
+            await _specStrmTools.CreateStreamAsync();
+
+            //Act & Assert
+            await Assert.ThrowsAsync<EsException>(() => _specStrmTools.CreateStreamAsync());
+        }
+
+        [Fact]
         public async Task ShouldNotFindAbsentIndex()
         {
             //Arrange

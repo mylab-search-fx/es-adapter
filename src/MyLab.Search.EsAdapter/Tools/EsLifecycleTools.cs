@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Elasticsearch.Net;
@@ -23,9 +24,11 @@ namespace MyLab.Search.EsAdapter.Tools
         }
 
         /// <inheritdoc />
-        public async Task<IAsyncDisposable> PutLifecyclePolicyAsync(IPutLifecycleRequest lifecycleRequest)
+        public async Task<IAsyncDisposable> PutLifecyclePolicyAsync(IPutLifecycleRequest lifecycleRequest, CancellationToken cancellationToken)
         {
-            await _clientProvider.Provide().IndexLifecycleManagement.PutLifecycleAsync(lifecycleRequest);
+            var resp = await _clientProvider.Provide().IndexLifecycleManagement.PutLifecycleAsync(lifecycleRequest, cancellationToken);
+
+            EsException.ThrowIfInvalid(resp, "Unable to put the lifecycle");
 
             return new LifecycleDeleter(lifecycleRequest.PolicyId.ToString(), this);
         }
@@ -40,22 +43,37 @@ namespace MyLab.Search.EsAdapter.Tools
                 .DoRequestAsync<StringResponse>(HttpMethod.PUT, "_ilm/policy/" + policyId, cancellationToken,
                     jsonRequest);
 
-            EsException.ThrowIfInvalid(resp, "Unable to delete the lifecycle");
+            EsException.ThrowIfInvalid(resp, "Unable to put the lifecycle");
 
             return new LifecycleDeleter(policyId, this);
         }
 
         /// <inheritdoc />
-        public Task DeleteLifecycleAsync(string policyId)
+        public async Task<LifecyclePolicy> TryGetLifecyclePolicyAsync(string policyId, CancellationToken cancellationToken)
         {
-            return _clientProvider.Provide().IndexLifecycleManagement.DeleteLifecycleAsync(policyId);
+            var resp = await _clientProvider.Provide().IndexLifecycleManagement.GetLifecycleAsync(d => d.PolicyId(policyId), cancellationToken);
+
+            if (resp.ApiCall.HttpStatusCode == 404)
+                return null;
+
+            EsException.ThrowIfInvalid(resp, "Unable to get lifecycle");
+
+            return resp.Policies[policyId];
         }
 
         /// <inheritdoc />
-        public async Task<bool> IsLifecyclePolicyExists(string policyId)
+        public async Task DeleteLifecycleAsync(string policyId, CancellationToken cancellationToken)
+        {
+            var resp =  await _clientProvider.Provide().IndexLifecycleManagement.DeleteLifecycleAsync(policyId, d => d, cancellationToken);
+
+            EsException.ThrowIfInvalid(resp, "Unable to delete lifecycle");
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> IsLifecyclePolicyExistentAsync(string policyId, CancellationToken cancellationToken)
         {
             var resp = await _clientProvider.Provide().IndexLifecycleManagement
-                .GetLifecycleAsync(s => s.PolicyId(policyId));
+                .GetLifecycleAsync(s => s.PolicyId(policyId), cancellationToken);
 
             if (resp.ApiCall.HttpStatusCode == 404)
                 return false;
@@ -77,7 +95,7 @@ namespace MyLab.Search.EsAdapter.Tools
             }
             public async ValueTask DisposeAsync()
             {
-                await _tools.DeleteLifecycleAsync(_policyId);
+                await _tools.DeleteLifecycleAsync(_policyId, CancellationToken.None);
             }
         }
     }

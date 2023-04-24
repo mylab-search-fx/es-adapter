@@ -19,7 +19,6 @@
       "cold": {
         "min_age": "60d",
         "actions": {
-          
         }
       },
       "delete": {
@@ -30,7 +29,7 @@
       }
     },
     "_meta": {
-      "ver": "1"
+      "ver": "2"
     }
   }
 }

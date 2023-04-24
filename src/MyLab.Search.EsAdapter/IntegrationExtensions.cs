@@ -29,9 +29,10 @@ namespace MyLab.Search.EsAdapter
                 .AddSingleton<IEsClientProvider, EsClientProvider>()
                 .AddSingleton<IEsIndexTools, EsIndexTools>()
                 .AddSingleton<IEsStreamTools, EsStreamTools>()
+                .AddSingleton<IEsLifecycleTools, EsLifecycleTools>()
+                .AddSingleton<IEsComponentTemplateTools, EsComponentTemplateTools>()
                 .AddSingleton<IEsIndexer, EsIndexer>()
                 .AddSingleton<IEsSearcher, EsSearcher>()
-                .AddSingleton<IEsLifecycleTools, EsLifecycleTools>()
                 .AddSingleton(typeof(IEsSpecialIndexTools), typeof(EsSpecialIndexTools<>))
                 .AddSingleton(typeof(IEsIndexer<>), typeof(EsIndexer<>))
                 .AddSingleton(typeof(IEsSearcher<>), typeof(EsSearcher<>));
