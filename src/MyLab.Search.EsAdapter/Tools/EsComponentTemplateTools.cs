@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Elasticsearch.Net;
@@ -23,17 +24,17 @@ namespace MyLab.Search.EsAdapter.Tools
         }
 
         /// <inheritdoc />
-        public async Task<IAsyncDisposable> PutComponentTemplateAsync(string cTemplateId, string jsonRequest, CancellationToken cancellationToken)
+        public async Task<IAsyncDisposable> PutComponentTemplateAsync(string templateName, string jsonRequest, CancellationToken cancellationToken)
         {
-            if (cTemplateId == null) throw new ArgumentNullException(nameof(cTemplateId));
+            if (templateName == null) throw new ArgumentNullException(nameof(templateName));
             if (jsonRequest == null) throw new ArgumentNullException(nameof(jsonRequest));
             var resp = await _clientProvider.Provide().LowLevel
-                .DoRequestAsync<StringResponse>(HttpMethod.PUT, "_component_template/" + cTemplateId, cancellationToken,
+                .DoRequestAsync<StringResponse>(HttpMethod.PUT, "_component_template/" + templateName, cancellationToken,
                     jsonRequest);
 
-            EsException.ThrowIfInvalid(resp, "Unable to put the component template");
+            EsException.ThrowIfInvalid(resp, "Unable to put component template");
 
-            return new ComponentTemplateDeleter(cTemplateId, this);
+            return new ComponentTemplateDeleter(templateName, this);
         }
 
         /// <inheritdoc />
@@ -47,22 +48,35 @@ namespace MyLab.Search.EsAdapter.Tools
         }
 
         /// <inheritdoc />
-        public async Task DeleteComponentTemplateAsync(string cTemplateId)
+        public async Task<ComponentTemplate> TryGetComponentTemplateAsync(string templateName, CancellationToken cancellationToken)
         {
-            var resp = await _clientProvider.Provide().Cluster.DeleteComponentTemplateAsync(cTemplateId);
+            var resp = await _clientProvider.Provide().Cluster.GetComponentTemplateAsync(templateName, d => d, cancellationToken);
 
-            EsException.ThrowIfInvalid(resp, "Unable to delete the component template");
+            if (resp.ApiCall.HttpStatusCode == 404)
+                return null;
+
+            EsException.ThrowIfInvalid(resp, "Unable to get component template");
+
+            return resp.ComponentTemplates.FirstOrDefault(t => t.Name == templateName)?.ComponentTemplate;
         }
 
         /// <inheritdoc />
-        public async Task<bool> IsComponentTemplateExistsAsync(string cTemplateId)
+        public async Task DeleteComponentTemplateAsync(string templateName, CancellationToken cancellationToken)
         {
-            var resp = await _clientProvider.Provide().Cluster.ComponentTemplateExistsAsync(cTemplateId);
+            var resp = await _clientProvider.Provide().Cluster.DeleteComponentTemplateAsync(templateName, d => d, cancellationToken);
+
+            EsException.ThrowIfInvalid(resp, "Unable to delete component template");
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> IsComponentTemplateExistentAsync(string templateName, CancellationToken cancellationToken)
+        {
+            var resp = await _clientProvider.Provide().Cluster.ComponentTemplateExistsAsync(templateName, d => d, cancellationToken);
 
             if (resp.ApiCall.HttpStatusCode == 404)
                 return false;
 
-            EsException.ThrowIfInvalid(resp, "Unable to detect the component template");
+            EsException.ThrowIfInvalid(resp, "Unable to detect component template");
 
             return true;
         }
@@ -79,7 +93,7 @@ namespace MyLab.Search.EsAdapter.Tools
             }
             public async ValueTask DisposeAsync()
             {
-                await _tools.DeleteComponentTemplateAsync(_cTemplateId);
+                await _tools.DeleteComponentTemplateAsync(_cTemplateId, CancellationToken.None);
             }
         }
     }
