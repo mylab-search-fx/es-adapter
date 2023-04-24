@@ -82,7 +82,7 @@ namespace IntegrationTests
             //Act
             await using var deleter = await _specialIndexTools.CreateIndexAsync();
             {
-                exists = await _specialIndexTools.IsIndexExistsAsync();
+                exists = await _specialIndexTools.IsIndexExistentAsync();
             }
 
             //Assert
@@ -95,7 +95,7 @@ namespace IntegrationTests
             //Arrange
 
             //Act
-            var exists = await _specialIndexTools.IsIndexExistsAsync();
+            var exists = await _specialIndexTools.IsIndexExistentAsync();
 
             //Assert
             Assert.False(exists);

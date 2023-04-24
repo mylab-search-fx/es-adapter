@@ -33,7 +33,7 @@ namespace MyLab.Search.EsAdapter
                 .AddSingleton<IEsComponentTemplateTools, EsComponentTemplateTools>()
                 .AddSingleton<IEsIndexer, EsIndexer>()
                 .AddSingleton<IEsSearcher, EsSearcher>()
-                .AddSingleton(typeof(IEsSpecialIndexTools), typeof(EsSpecialIndexTools<>))
+                .AddSingleton(typeof(IEsSpecialIndexTools<>), typeof(EsSpecialIndexTools<>))
                 .AddSingleton(typeof(IEsIndexer<>), typeof(EsIndexer<>))
                 .AddSingleton(typeof(IEsSearcher<>), typeof(EsSearcher<>));
 

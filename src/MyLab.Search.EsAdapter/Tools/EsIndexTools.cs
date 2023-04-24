@@ -50,7 +50,7 @@ namespace MyLab.Search.EsAdapter.Tools
         }
 
         /// <inheritdoc />
-        public async Task<bool> IsIndexExistsAsync(string indexName, CancellationToken cancellationToken = default)
+        public async Task<bool> IsIndexExistentAsync(string indexName, CancellationToken cancellationToken = default)
         {
             var resp = await _clientProvider.Provide().Indices.GetAsync(indexName, ct: cancellationToken);
 

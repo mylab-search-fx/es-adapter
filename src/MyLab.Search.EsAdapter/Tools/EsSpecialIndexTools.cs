@@ -9,7 +9,7 @@ namespace MyLab.Search.EsAdapter.Tools
     /// <summary>
     /// Default implementation for <see cref="IEsSpecialIndexTools"/>
     /// </summary>
-    public class EsSpecialIndexTools<TDoc> : IEsSpecialIndexTools where TDoc : class
+    public class EsSpecialIndexTools<TDoc> : IEsSpecialIndexTools<TDoc> where TDoc : class
     {
         private readonly IEsIndexTools _baseIndexTools;
         private readonly string _indexName;
@@ -60,9 +60,9 @@ namespace MyLab.Search.EsAdapter.Tools
         }
 
         /// <inheritdoc />
-        public Task<bool> IsIndexExistsAsync(CancellationToken cancellationToken = default)
+        public Task<bool> IsIndexExistentAsync(CancellationToken cancellationToken = default)
         {
-            return _baseIndexTools.IsIndexExistsAsync(_indexName, cancellationToken);
+            return _baseIndexTools.IsIndexExistentAsync(_indexName, cancellationToken);
         }
 
         /// <inheritdoc />

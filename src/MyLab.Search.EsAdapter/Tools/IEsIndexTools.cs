@@ -27,7 +27,7 @@ namespace MyLab.Search.EsAdapter.Tools
         /// <summary>
         /// Gets whether the index exists
         /// </summary>
-        Task<bool> IsIndexExistsAsync(string indexName, CancellationToken cancellationToken = default);
+        Task<bool> IsIndexExistentAsync(string indexName, CancellationToken cancellationToken = default);
         /// <summary>
         /// Prune index
         /// </summary>

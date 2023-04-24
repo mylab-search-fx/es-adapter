@@ -27,10 +27,18 @@ namespace MyLab.Search.EsAdapter.Tools
         /// <summary>
         /// Gets whether the index exists
         /// </summary>
-        Task<bool> IsIndexExistsAsync(CancellationToken cancellationToken = default);
+        Task<bool> IsIndexExistentAsync(CancellationToken cancellationToken = default);
         /// <summary>
         /// Prune index
         /// </summary>
         Task PruneIndexAsync(CancellationToken cancellationToken = default);
+    }
+
+    /// <summary>
+    /// Provides abilities to work with special index
+    /// </summary>
+    /// <remarks>Special for injection</remarks>
+    public interface IEsSpecialIndexTools<TDoc> : IEsSpecialIndexTools where TDoc : class
+    {
     }
 }
