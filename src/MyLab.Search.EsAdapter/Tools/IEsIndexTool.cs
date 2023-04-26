@@ -38,7 +38,7 @@ namespace MyLab.Search.EsAdapter.Tools
         /// Tries to get index info
         /// </summary>
         /// <returns>Index info or null if not exists</returns>
-        Task<IndexState> TryGet(CancellationToken cancellationToken = default);
+        Task<IndexState> TryGetAsync(CancellationToken cancellationToken = default);
     }
     
 }
