@@ -33,5 +33,10 @@ namespace MyLab.Search.EsAdapter.Tools
         {
             return new EsComponentTemplateTool(componentTemplateName, _clientProvider);
         }
+
+        public IEsComponentTemplateTool IndexTemplate(string indexTemplateName)
+        {
+            return new EsComponentTemplateTool(indexTemplateName, _clientProvider);
+        }
     }
 }

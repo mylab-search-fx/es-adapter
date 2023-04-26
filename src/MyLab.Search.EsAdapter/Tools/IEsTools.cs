@@ -24,5 +24,10 @@
         /// Creates special component template tool
         /// </summary>
         IEsComponentTemplateTool ComponentTemplate(string componentTemplateName);
+
+        /// <summary>
+        /// Creates special index template tool
+        /// </summary>
+        IEsComponentTemplateTool IndexTemplate(string indexTemplateName);
     }
 }

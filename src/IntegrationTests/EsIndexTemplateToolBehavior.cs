@@ -10,14 +10,14 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests
 {
-    public class EsComponentTemplateToolBehavior : IClassFixture<TestClientFixture>
+    public class EsIndexTemplateToolBehavior : IClassFixture<TestClientFixture>
     {
-        private readonly IEsComponentTemplateTool _ctTool;
+        private readonly IEsIndexTemplateTool _itTool;
         private readonly string _cTemplateExampleJson;
         private readonly string _cTemplateExample2Json;
         private readonly SingleEsClientProvider _esClientProvider;
 
-        public EsComponentTemplateToolBehavior(
+        public EsIndexTemplateToolBehavior(
             TestClientFixture clientFxt,
             ITestOutputHelper output)
         {
@@ -26,12 +26,14 @@ namespace IntegrationTests
 
             _esClientProvider = new SingleEsClientProvider(client);
 
-            var templateName = Guid.NewGuid().ToString("N");
+            var templateName = nameof(EsIndexTemplateToolBehavior).ToLower() + "-" + Guid.NewGuid().ToString("N");
 
-            _ctTool = new EsComponentTemplateTool(templateName, _esClientProvider);
+            _esClientProvider.Provide().Indices.DeleteTemplateV2(new DeleteIndexTemplateV2Request(nameof(EsIndexTemplateToolBehavior).ToLower() + "-*"));
 
-            _cTemplateExampleJson = File.ReadAllText("Files\\component-template-example.json");
-            _cTemplateExample2Json = File.ReadAllText("Files\\component-template-example-2.json");
+            _itTool = new EsIndexTemplateTool(templateName, _esClientProvider);
+
+            _cTemplateExampleJson = File.ReadAllText("Files\\index-template-example.json");
+            _cTemplateExample2Json = File.ReadAllText("Files\\index-template-example-2.json");
         }
 
         [Fact]
@@ -40,8 +42,8 @@ namespace IntegrationTests
             //Arrange
 
             //Act
-            await using var deleter = await _ctTool.PutAsync(_cTemplateExampleJson);
-            var streamExists = await _ctTool.ExistsAsync();
+            await using var deleter = await _itTool.PutAsync(_cTemplateExampleJson);
+            var streamExists = await _itTool.ExistsAsync();
 
             //Assert
             Assert.True(streamExists);
@@ -53,8 +55,8 @@ namespace IntegrationTests
             //Arrange
 
             //Act
-            await using var deleter = await _ctTool.PutAsync(_cTemplateExampleJson);
-            var cTemplate = await _ctTool.TryGetAsync();
+            await using var deleter = await _itTool.PutAsync(_cTemplateExampleJson);
+            var cTemplate = await _itTool.TryGetAsync();
 
             //Assert
             Assert.NotNull(cTemplate);
@@ -67,9 +69,9 @@ namespace IntegrationTests
             //Arrange
 
             //Act
-            await using var deleter = await _ctTool.PutAsync(_cTemplateExampleJson);
-            await _ctTool.PutAsync(_cTemplateExample2Json);
-            var cTemplate = await _ctTool.TryGetAsync();
+            await using var deleter = await _itTool.PutAsync(_cTemplateExampleJson);
+            await _itTool.PutAsync(_cTemplateExample2Json);
+            var cTemplate = await _itTool.TryGetAsync();
 
             //Assert
             Assert.NotNull(cTemplate);
@@ -80,12 +82,12 @@ namespace IntegrationTests
         public async Task ShouldDeleteTemplate()
         {
             //Arrange
-            await _ctTool.PutAsync(_cTemplateExampleJson);
+            await _itTool.PutAsync(_cTemplateExampleJson);
 
             //Act
-            await _ctTool.DeleteAsync();
+            await _itTool.DeleteAsync();
 
-            var streamExists = await _ctTool.ExistsAsync();
+            var streamExists = await _itTool.ExistsAsync();
 
             //Assert
             Assert.False(streamExists);
@@ -98,7 +100,7 @@ namespace IntegrationTests
             var randomName = Guid.NewGuid().ToString("N");
 
             //Act
-            var exists = await new EsComponentTemplateTool(randomName, _esClientProvider).ExistsAsync(CancellationToken.None);
+            var exists = await new EsIndexTemplateTool(randomName, _esClientProvider).ExistsAsync(CancellationToken.None);
 
             //Assert
             Assert.False(exists);
@@ -111,7 +113,7 @@ namespace IntegrationTests
             var randomName = Guid.NewGuid().ToString("N");
 
             //Act
-            var cTemplate = await new EsComponentTemplateTool(randomName, _esClientProvider).TryGetAsync(CancellationToken.None);
+            var cTemplate = await new EsIndexTemplateTool(randomName, _esClientProvider).TryGetAsync(CancellationToken.None);
 
             //Assert
             Assert.Null(cTemplate);

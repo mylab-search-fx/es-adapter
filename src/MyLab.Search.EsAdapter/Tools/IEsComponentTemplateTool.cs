@@ -34,7 +34,7 @@ namespace MyLab.Search.EsAdapter.Tools
         Task DeleteAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Gets whether the lifecycle policy exists
+        /// Gets whether the component template exists
         /// </summary>
         Task<bool> ExistsAsync(CancellationToken cancellationToken = default);
     }
