@@ -51,7 +51,6 @@ namespace IntegrationTests
         public async Task ShouldGetTemplate()
         {
             //Arrange
-            var templateName = Guid.NewGuid().ToString("N");
 
             //Act
             await using var deleter = await _ctTool.PutAsync(_cTemplateExampleJson);
@@ -66,7 +65,6 @@ namespace IntegrationTests
         public async Task ShouldUpdateTemplate()
         {
             //Arrange
-            var templateName = Guid.NewGuid().ToString("N");
 
             //Act
             await using var deleter = await _ctTool.PutAsync(_cTemplateExampleJson);
