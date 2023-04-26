@@ -33,6 +33,12 @@ namespace MyLab.Search.EsAdapter.Tools
         /// Prune index
         /// </summary>
         Task PruneAsync(CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Tries to get index info
+        /// </summary>
+        /// <returns>Index info or null if not exists</returns>
+        Task<IndexState> TryGet(CancellationToken cancellationToken = default);
     }
     
 }

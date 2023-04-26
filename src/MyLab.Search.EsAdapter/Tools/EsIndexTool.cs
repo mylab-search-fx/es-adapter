@@ -63,6 +63,23 @@ namespace MyLab.Search.EsAdapter.Tools
             await _clientProvider.Provide().DeleteByQueryAsync(req, cancellationToken);
         }
 
+        public async Task<IndexState> TryGet(CancellationToken cancellationToken = default)
+        {
+            var resp = await _clientProvider.Provide().Indices.GetAsync(_indexName, s => s, cancellationToken);
+
+            if (resp.Indices != null && resp.Indices.TryGetValue(_indexName, out var foundIndex))
+            {
+                return foundIndex;
+            }
+
+            if (resp.ApiCall.HttpStatusCode == 404)
+                return null;
+
+            EsException.ThrowIfInvalid(resp);
+
+            return null;
+        }
+
         class IndexDeleter : IAsyncDisposable
         {
             private readonly IEsIndexTool _idxTool;

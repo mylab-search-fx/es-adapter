@@ -50,6 +50,26 @@ namespace IntegrationTests
         }
 
         [Fact]
+        public async Task ShouldGetIndexInfo()
+        {
+            //Arrange
+            IndexState indexInfo;
+
+            //Act
+            await using var deleter = await _indexTool.CreateAsync(
+                d => d.Map(md => md.Properties(p =>
+                    p.Text(tpd => tpd.Name("foo")))));
+            {
+                indexInfo = await _indexTool.TryGet();
+            }
+
+            //Assert
+            Assert.NotNull(indexInfo);
+            Assert.True(indexInfo.Mappings.Properties.ContainsKey("foo"));
+            Assert.Equal("text", indexInfo.Mappings.Properties["foo"].Type);
+        }
+
+        [Fact]
         public async Task ShouldCreateIndexWithStringSettings()
         {
             //Arrange
@@ -126,6 +146,18 @@ namespace IntegrationTests
 
             //Assert
             Assert.False(exists);
+        }
+
+        [Fact]
+        public async Task ShouldNotGetInfoOfAbsentIndex()
+        {
+            //Arrange
+
+            //Act
+            var indexInfo = await new EsIndexTool("absent", _esClientProvider).TryGet();
+
+            //Assert
+            Assert.Null(indexInfo);
         }
 
         [Fact]
