@@ -30,9 +30,9 @@ namespace IntegrationTests
         {
             var esClientProvider = new SingleEsClientProvider(_client);
 
-            var indexTools = new EsIndexTools(esClientProvider);
+            var indexTool = new EsIndexTool(IndexName, esClientProvider);
 
-            _indexDeleter = await indexTools.CreateIndexAsync(IndexName, d => d.Map(md => md.AutoMap(typeof(TestDoc))));
+            _indexDeleter = await indexTool.CreateAsync(d => d.Map(md => md.AutoMap(typeof(TestDoc))));
 
             await Task.Delay(1000);
 

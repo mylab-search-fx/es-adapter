@@ -7,16 +7,16 @@ using MyLab.Search.EsAdapter.Tools;
 using Nest;
 using Xunit;
 using Xunit.Abstractions;
-using static IntegrationTests.EsStreamToolsBehavior;
+using static IntegrationTests.EsStreamToolBehavior;
 
 namespace IntegrationTests
 {
-    public class EsStreamToolsBehavior : IClassFixture<TestClientFixture>, IClassFixture<IndexTemplateFixture>
+    public class EsStreamToolBehavior : IClassFixture<TestClientFixture>, IClassFixture<IndexTemplateFixture>
     {
-        private readonly IEsSpecialStreamTools _specStrmTools;
-        private readonly IEsStreamTools _strmTools;
+        private readonly IEsStreamTool _strmTool;
+        private readonly SingleEsClientProvider _esClientProvider;
 
-        public EsStreamToolsBehavior(
+        public EsStreamToolBehavior(
             TestClientFixture clientFxt,
             IndexTemplateFixture indexTemplateFxt,
             ITestOutputHelper output)
@@ -24,11 +24,10 @@ namespace IntegrationTests
             clientFxt.Output = output;
             var client = clientFxt.Client;
 
-            var esClientProvider = new SingleEsClientProvider(client);
+            _esClientProvider = new SingleEsClientProvider(client);
             var streamName = indexTemplateFxt.NamePrefix + "-" + Guid.NewGuid().ToString("N");
-
-            _strmTools = new EsStreamTools(esClientProvider);
-            _specStrmTools = new EsSpecialStreamTools(_strmTools, streamName);
+            
+            _strmTool = new EsStreamTool(streamName, _esClientProvider);
 
             output.WriteLine("Index template: " + indexTemplateFxt.TemplateName);
             output.WriteLine("Name prefix: " + indexTemplateFxt.NamePrefix);
@@ -40,8 +39,8 @@ namespace IntegrationTests
             //Arrange
             
             //Act
-            await using var deleter = await _specStrmTools.CreateStreamAsync();
-            var streamExists = await _specStrmTools.IsStreamExistsAsync();
+            await using var deleter = await _strmTool.CreateAsync();
+            var streamExists = await _strmTool.ExistsAsync();
 
             //Assert
             Assert.True(streamExists);
@@ -51,12 +50,12 @@ namespace IntegrationTests
         public async Task ShouldDeleteStream()
         {
             //Arrange
-            await _specStrmTools.CreateStreamAsync();
+            await _strmTool.CreateAsync();
 
             //Act
-            await _specStrmTools.DeleteStreamAsync();
+            await _strmTool.DeleteAsync();
 
-            var streamExists = await _specStrmTools.IsStreamExistsAsync();
+            var streamExists = await _strmTool.ExistsAsync();
 
             //Assert
             Assert.False(streamExists);
@@ -66,10 +65,10 @@ namespace IntegrationTests
         public async Task ShouldNotUpdateExistentStream()
         {
             //Arrange
-            await _specStrmTools.CreateStreamAsync();
+            await _strmTool.CreateAsync();
 
             //Act & Assert
-            await Assert.ThrowsAsync<EsException>(() => _specStrmTools.CreateStreamAsync());
+            await Assert.ThrowsAsync<EsException>(() => _strmTool.CreateAsync());
         }
 
         [Fact]
@@ -79,7 +78,7 @@ namespace IntegrationTests
             string randomStreamName = Guid.NewGuid().ToString("N");
 
             //Act
-            var exists = await _strmTools.IsStreamExistsAsync(randomStreamName);
+            var exists = await new EsStreamTool(randomStreamName, _esClientProvider).ExistsAsync();
 
             //Assert
             Assert.False(exists);

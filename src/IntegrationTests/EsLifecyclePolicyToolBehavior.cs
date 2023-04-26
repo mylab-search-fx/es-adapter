@@ -10,22 +10,24 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests
 {
-    public class EsLifecycleToolsBehavior : IClassFixture<TestClientFixture>
+    public class EsLifecyclePolicyToolBehavior : IClassFixture<TestClientFixture>
     {
-        private readonly IEsLifecycleTools _lcTools;
+        private readonly IEsLifecyclePolicyTool _lcTool;
         private readonly string _lifecycleExampleJson;
         private readonly string _lifecycleExample2Json;
+        private readonly SingleEsClientProvider _esClientProvider;
 
-        public EsLifecycleToolsBehavior(
+        public EsLifecyclePolicyToolBehavior(
             TestClientFixture clientFxt,
             ITestOutputHelper output)
         {
             clientFxt.Output = output;
             var client = clientFxt.Client;
 
-            var esClientProvider = new SingleEsClientProvider(client);
+            _esClientProvider = new SingleEsClientProvider(client);
+            var lcId = Guid.NewGuid().ToString("N");
 
-            _lcTools = new EsLifecycleTools(esClientProvider);
+            _lcTool = new EsLifecyclePolicyTool(lcId, _esClientProvider);
 
             _lifecycleExampleJson = File.ReadAllText("Files\\lifecycle-example.json");
             _lifecycleExample2Json = File.ReadAllText("Files\\lifecycle-example-2.json");
@@ -35,11 +37,10 @@ namespace IntegrationTests
         public async Task ShouldCreateLifecycle()
         {
             //Arrange
-            var lcId = Guid.NewGuid().ToString("N");
 
             //Act
-            await using var deleter = await _lcTools.PutLifecyclePolicyAsync(lcId, _lifecycleExampleJson);
-            var streamExists = await _lcTools.IsLifecyclePolicyExistentAsync(lcId);
+            await using var deleter = await _lcTool.PutAsync(_lifecycleExampleJson);
+            var streamExists = await _lcTool.ExistsAsync();
 
             //Assert
             Assert.True(streamExists);
@@ -49,11 +50,10 @@ namespace IntegrationTests
         public async Task ShouldGetLifecycle()
         {
             //Arrange
-            var lcId = Guid.NewGuid().ToString("N");
 
             //Act
-            await using var deleter = await _lcTools.PutLifecyclePolicyAsync(lcId, _lifecycleExampleJson);
-            var lcPolicy = await _lcTools.TryGetLifecyclePolicyAsync(lcId);
+            await using var deleter = await _lcTool.PutAsync(_lifecycleExampleJson);
+            var lcPolicy = await _lcTool.TryGetAsync();
 
             //Assert
             Assert.NotNull(lcPolicy);
@@ -64,13 +64,12 @@ namespace IntegrationTests
         public async Task ShouldDeleteLifecycle()
         {
             //Arrange
-            var lcId = Guid.NewGuid().ToString("N");
-            await _lcTools.PutLifecyclePolicyAsync(lcId, _lifecycleExampleJson);
+            await _lcTool.PutAsync(_lifecycleExampleJson);
 
             //Act
-            await _lcTools.DeleteLifecycleAsync(lcId);
+            await _lcTool.DeleteAsync();
 
-            var streamExists = await _lcTools.IsLifecyclePolicyExistentAsync(lcId);
+            var streamExists = await _lcTool.ExistsAsync();
 
             //Assert
             Assert.False(streamExists);
@@ -83,7 +82,7 @@ namespace IntegrationTests
             var randomId = Guid.NewGuid().ToString("N");
 
             //Act
-            var exists = await _lcTools.IsLifecyclePolicyExistentAsync(randomId);
+            var exists = await new EsLifecyclePolicyTool(randomId, _esClientProvider).ExistsAsync(CancellationToken.None);
 
             //Assert
             Assert.False(exists);
@@ -96,7 +95,7 @@ namespace IntegrationTests
             var randomId = Guid.NewGuid().ToString("N");
 
             //Act
-            var lifecycle = await _lcTools.TryGetLifecyclePolicyAsync(randomId);
+            var lifecycle = await new EsLifecyclePolicyTool(randomId, _esClientProvider).TryGetAsync(CancellationToken.None);
 
             //Assert
             Assert.Null(lifecycle);
@@ -106,12 +105,11 @@ namespace IntegrationTests
         public async Task ShouldUpdateLifecycle()
         {
             //Arrange
-            var lcId = Guid.NewGuid().ToString("N");
 
             //Act
-            await using var deleter = await _lcTools.PutLifecyclePolicyAsync(lcId, _lifecycleExampleJson);
-            await _lcTools.PutLifecyclePolicyAsync(lcId, _lifecycleExample2Json);
-            var lcPolicy = await _lcTools.TryGetLifecyclePolicyAsync(lcId);
+            await using var deleter = await _lcTool.PutAsync(_lifecycleExampleJson);
+            await _lcTool.PutAsync(_lifecycleExample2Json);
+            var lcPolicy = await _lcTool.TryGetAsync();
 
             //Assert
             Assert.NotNull(lcPolicy);

@@ -15,7 +15,7 @@ namespace IntegrationTests
         private readonly ElasticClient _client;
         private readonly EsIndexer _indexer;
         private readonly string _indexName;
-        private readonly EsIndexTools _indexTools;
+        private readonly IEsTools _esTools;
         private IAsyncDisposable _indexDeleter;
 
         public EsIndexerBehavior(TestClientFixture fxt, ITestOutputHelper output)
@@ -27,7 +27,7 @@ namespace IntegrationTests
             _indexName = Guid.NewGuid().ToString("N");
 
             _indexer = new EsIndexer(esClientProvider);
-            _indexTools = new EsIndexTools(esClientProvider);
+            _esTools = new EsTools(esClientProvider);
         }
 
         private async Task<TestDoc> SearchAsync(string id)
@@ -47,7 +47,7 @@ namespace IntegrationTests
 
         public async Task InitializeAsync()
         {
-            _indexDeleter = await _indexTools.CreateIndexAsync(_indexName);
+            _indexDeleter = await _esTools.Index(_indexName).CreateAsync();
         }
 
         public async Task DisposeAsync()

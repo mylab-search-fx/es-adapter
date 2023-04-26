@@ -11,7 +11,6 @@ namespace IntegrationTests
     public  class EsExceptionBehavior : IClassFixture<TestClientFixture>
     {
         private readonly EsIndexer _indexer;
-        private readonly EsIndexTools _indexTools;
 
         public EsExceptionBehavior(TestClientFixture fxt, ITestOutputHelper output)
         {
@@ -20,7 +19,6 @@ namespace IntegrationTests
             var esClientProvider = new SingleEsClientProvider(client);
             
             _indexer = new EsIndexer(esClientProvider);
-            _indexTools = new EsIndexTools(esClientProvider);
         }
 
         [Fact]

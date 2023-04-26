@@ -10,22 +10,25 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests
 {
-    public class EsComponentTemplateToolsBehavior : IClassFixture<TestClientFixture>
+    public class EsComponentTemplateToolBehavior : IClassFixture<TestClientFixture>
     {
-        private readonly IEsComponentTemplateTools _ctTools;
+        private readonly IEsComponentTemplateTool _ctTool;
         private readonly string _cTemplateExampleJson;
         private readonly string _cTemplateExample2Json;
+        private readonly SingleEsClientProvider _esClientProvider;
 
-        public EsComponentTemplateToolsBehavior(
+        public EsComponentTemplateToolBehavior(
             TestClientFixture clientFxt,
             ITestOutputHelper output)
         {
             clientFxt.Output = output;
             var client = clientFxt.Client;
 
-            var esClientProvider = new SingleEsClientProvider(client);
+            _esClientProvider = new SingleEsClientProvider(client);
 
-            _ctTools = new EsComponentTemplateTools(esClientProvider);
+            var templateName = Guid.NewGuid().ToString("N");
+
+            _ctTool = new EsComponentTemplateTool(templateName, _esClientProvider);
 
             _cTemplateExampleJson = File.ReadAllText("Files\\component-template-example.json");
             _cTemplateExample2Json = File.ReadAllText("Files\\component-template-example-2.json");
@@ -35,11 +38,10 @@ namespace IntegrationTests
         public async Task ShouldCreateLifecycle()
         {
             //Arrange
-            var templateName = Guid.NewGuid().ToString("N");
 
             //Act
-            await using var deleter = await _ctTools.PutComponentTemplateAsync(templateName, _cTemplateExampleJson);
-            var streamExists = await _ctTools.IsComponentTemplateExistentAsync(templateName);
+            await using var deleter = await _ctTool.PutAsync(_cTemplateExampleJson);
+            var streamExists = await _ctTool.ExistsAsync();
 
             //Assert
             Assert.True(streamExists);
@@ -52,8 +54,8 @@ namespace IntegrationTests
             var templateName = Guid.NewGuid().ToString("N");
 
             //Act
-            await using var deleter = await _ctTools.PutComponentTemplateAsync(templateName, _cTemplateExampleJson);
-            var cTemplate = await _ctTools.TryGetComponentTemplateAsync(templateName);
+            await using var deleter = await _ctTool.PutAsync(_cTemplateExampleJson);
+            var cTemplate = await _ctTool.TryGetAsync();
 
             //Assert
             Assert.NotNull(cTemplate);
@@ -67,9 +69,9 @@ namespace IntegrationTests
             var templateName = Guid.NewGuid().ToString("N");
 
             //Act
-            await using var deleter = await _ctTools.PutComponentTemplateAsync(templateName, _cTemplateExampleJson);
-            await _ctTools.PutComponentTemplateAsync(templateName, _cTemplateExample2Json);
-            var cTemplate = await _ctTools.TryGetComponentTemplateAsync(templateName);
+            await using var deleter = await _ctTool.PutAsync(_cTemplateExampleJson);
+            await _ctTool.PutAsync(_cTemplateExample2Json);
+            var cTemplate = await _ctTool.TryGetAsync();
 
             //Assert
             Assert.NotNull(cTemplate);
@@ -80,13 +82,12 @@ namespace IntegrationTests
         public async Task ShouldDeleteLifecycle()
         {
             //Arrange
-            var templateName = Guid.NewGuid().ToString("N");
-            await _ctTools.PutComponentTemplateAsync(templateName, _cTemplateExampleJson);
+            await _ctTool.PutAsync(_cTemplateExampleJson);
 
             //Act
-            await _ctTools.DeleteComponentTemplateAsync(templateName);
+            await _ctTool.DeleteAsync();
 
-            var streamExists = await _ctTools.IsComponentTemplateExistentAsync(templateName);
+            var streamExists = await _ctTool.ExistsAsync();
 
             //Assert
             Assert.False(streamExists);
@@ -99,7 +100,7 @@ namespace IntegrationTests
             var randomName = Guid.NewGuid().ToString("N");
 
             //Act
-            var exists = await _ctTools.IsComponentTemplateExistentAsync(randomName);
+            var exists = await new EsComponentTemplateTool(randomName, _esClientProvider).ExistsAsync(CancellationToken.None);
 
             //Assert
             Assert.False(exists);
@@ -112,7 +113,7 @@ namespace IntegrationTests
             var randomName = Guid.NewGuid().ToString("N");
 
             //Act
-            var cTemplate = await _ctTools.TryGetComponentTemplateAsync(randomName);
+            var cTemplate = await new EsComponentTemplateTool(randomName, _esClientProvider).TryGetAsync(CancellationToken.None);
 
             //Assert
             Assert.Null(cTemplate);

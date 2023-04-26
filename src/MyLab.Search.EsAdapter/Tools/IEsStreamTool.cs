@@ -5,22 +5,22 @@ using System.Threading.Tasks;
 namespace MyLab.Search.EsAdapter.Tools
 {
     /// <summary>
-    /// Provides abilities to work with streams
+    /// Provides abilities to work with special stream
     /// </summary>
-    public interface IEsStreamTools
+    public interface IEsStreamTool
     {
         /// <summary>
         /// Creates the stream
         /// </summary>
         /// <returns>Stream deleter</returns>
-        Task<IAsyncDisposable> CreateStreamAsync(string streamName, CancellationToken cancellationToken = default);
+        Task<IAsyncDisposable> CreateAsync(CancellationToken cancellationToken = default);
         /// <summary>
         /// Deletes the stream
         /// </summary>
-        Task DeleteStreamAsync(string streamName, CancellationToken cancellationToken = default);
+        Task DeleteAsync(CancellationToken cancellationToken = default);
         /// <summary>
         /// Gets whether the stream exists
         /// </summary>
-        Task<bool> IsStreamExistsAsync(string streamName, CancellationToken cancellationToken = default);
+        Task<bool> ExistsAsync(CancellationToken cancellationToken = default);
     }
 }

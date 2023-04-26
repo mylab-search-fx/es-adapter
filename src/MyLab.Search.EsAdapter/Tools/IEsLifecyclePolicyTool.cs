@@ -6,36 +6,36 @@ using Nest;
 namespace MyLab.Search.EsAdapter.Tools
 {
     /// <summary>
-    /// Provides tools to manage life cycles
+    /// Provides tools to manage special life cycle
     /// </summary>
-    public interface IEsLifecycleTools
+    public interface IEsLifecyclePolicyTool
     {
         /// <summary>
         /// Creates or updates lifecycle
         /// </summary>
         /// <returns>Lifecycle deleter</returns>
-        public Task<IAsyncDisposable> PutLifecyclePolicyAsync(IPutLifecycleRequest lifecycleRequest, CancellationToken cancellationToken = default);
+        public Task<IAsyncDisposable> PutAsync(IPutLifecycleRequest lifecycleRequest, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Creates or updates lifecycle
         /// </summary>
         /// <returns>Lifecycle deleter</returns>
-        public Task<IAsyncDisposable> PutLifecyclePolicyAsync(string policyId, string jsonRequest, CancellationToken cancellationToken = default);
-        
+        public Task<IAsyncDisposable> PutAsync(string jsonRequest, CancellationToken cancellationToken = default);
+
         /// <summary>
         /// Tries get lifecycle policy
         /// </summary>
         /// <returns>lifecycle if exists or null</returns>
-        public Task<LifecyclePolicy> TryGetLifecyclePolicyAsync(string policyId, CancellationToken cancellationToken = default);
+        public Task<LifecyclePolicy> TryGetAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Deletes lifecycle
         /// </summary>
-        public Task DeleteLifecycleAsync(string policyId, CancellationToken cancellationToken = default);
+        public Task DeleteAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Gets whether the lifecycle policy exists
         /// </summary>
-        public Task<bool> IsLifecyclePolicyExistentAsync(string policyId, CancellationToken cancellationToken = default);
+        public Task<bool> ExistsAsync(CancellationToken cancellationToken = default);
     }
 }

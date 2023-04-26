@@ -1,15 +1,31 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
-using MyLab.Search.EsAdapter;
 using MyLab.Search.EsAdapter.Inter;
+using MyLab.Search.EsAdapter.Tools;
 using Nest;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace IntegrationTests
 {
-    public partial class SpecialEsIndexToolsBehavior : IClassFixture<TestClientFixture>
+    public class EsIndexToolBehavior : IClassFixture<TestClientFixture>
     {
+        private readonly ElasticClient _client;
+        private readonly IEsIndexTool _indexTool;
+        private readonly string _indexName;
+        private readonly SingleEsClientProvider _esClientProvider;
+
+        public EsIndexToolBehavior(TestClientFixture fxt, ITestOutputHelper output)
+        {
+            fxt.Output = output;
+            _client = fxt.Client;
+            _esClientProvider = new SingleEsClientProvider(_client);
+
+            _indexName = Guid.NewGuid().ToString("N");
+            _indexTool = new EsIndexTool(_indexName, _esClientProvider);
+        }
+
         [Fact]
         public async Task ShouldCreateIndexWithLambdaSettings()
         {
@@ -17,12 +33,13 @@ namespace IntegrationTests
             GetIndexResponse resp;
 
             //Act
-            await using var deleter = await _specialIndexTools.CreateIndexAsync( 
+            await using var deleter = await _indexTool.CreateAsync(
                 d => d.Map(md => md.Properties(p =>
                     p.Text(tpd => tpd.Name("foo")))));
             {
                 resp = await _client.Indices.GetAsync(_indexName);
             }
+
             resp.Indices.TryGetValue(_indexName, out var indexState);
 
             //Assert
@@ -41,7 +58,7 @@ namespace IntegrationTests
             GetIndexResponse resp;
 
             //Act
-            await using var deleter = await _specialIndexTools.CreateIndexAsync(settings);
+            await using var deleter = await _indexTool.CreateAsync(settings);
             {
                 resp = await _client.Indices.GetAsync(_indexName);
             }
@@ -61,8 +78,8 @@ namespace IntegrationTests
             //Arrange
 
             //Act
-            await _specialIndexTools.CreateIndexAsync();
-            await _specialIndexTools.DeleteIndexAsync();
+            await _indexTool.CreateAsync();
+            await _indexTool.DeleteAsync();
             
             var resp = await _client.Indices.GetAsync(_indexName);
 
@@ -73,6 +90,16 @@ namespace IntegrationTests
         }
 
         [Fact]
+        public async Task ShouldNotUpdateExistentIndex()
+        {
+            //Arrange
+            await _indexTool.CreateAsync();
+
+            //Act & Assert
+            await Assert.ThrowsAsync<EsException>(() => _indexTool.CreateAsync());
+        }
+
+        [Fact]
         public async Task ShouldFindExistentIndex()
         {
             //Arrange
@@ -80,9 +107,9 @@ namespace IntegrationTests
             bool exists;
 
             //Act
-            await using var deleter = await _specialIndexTools.CreateIndexAsync();
+            await using var deleter = await _indexTool.CreateAsync();
             {
-                exists = await _specialIndexTools.IsIndexExistentAsync();
+                exists = await _indexTool.ExistsAsync();
             }
 
             //Assert
@@ -95,7 +122,7 @@ namespace IntegrationTests
             //Arrange
 
             //Act
-            var exists = await _specialIndexTools.IsIndexExistentAsync();
+            var exists = await new EsIndexTool("absent", _esClientProvider).ExistsAsync();
 
             //Assert
             Assert.False(exists);
@@ -109,18 +136,18 @@ namespace IntegrationTests
 
             IIndexRequest<TestDoc> indexReq = new IndexDescriptor<TestDoc>(testDoc, _indexName);
 
-            await using var deleter = await _specialIndexTools.CreateIndexAsync();
+            await using var deleter = await _indexTool.CreateAsync();
 
             var indexResp = await _client.IndexAsync(indexReq);
             EsException.ThrowIfInvalid(indexResp);
             await Task.Delay(1000);
 
             //Act
-            await _specialIndexTools.PruneIndexAsync();
+            await _indexTool.PruneAsync(CancellationToken.None);
             await Task.Delay(1000);
 
             var searchResp = await _client.SearchAsync<TestDoc>(CreateSearch);
-
+            
             //Assert
             Assert.Equal(0, searchResp.Total);
 
