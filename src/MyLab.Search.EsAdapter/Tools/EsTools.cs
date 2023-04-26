@@ -9,12 +9,16 @@ namespace MyLab.Search.EsAdapter.Tools
     {
         private readonly IEsClientProvider _clientProvider;
 
+        /// <inheritdoc />
+        public IEsDeserializer Deserializer { get; }
+
         /// <summary>
         /// Initializes a new instance of <see cref="EsTools"/>
         /// </summary>
         public EsTools(IEsClientProvider clientProvider)
         {
             _clientProvider = clientProvider;
+            Deserializer = new EsDeserializer(clientProvider);
         }
 
         /// <inheritdoc />
@@ -42,9 +46,9 @@ namespace MyLab.Search.EsAdapter.Tools
         }
 
         /// <inheritdoc />
-        public IEsComponentTemplateTool IndexTemplate(string indexTemplateName)
+        public IEsIndexTemplateTool IndexTemplate(string indexTemplateName)
         {
-            return new EsComponentTemplateTool(indexTemplateName, _clientProvider);
+            return new EsIndexTemplateTool(indexTemplateName, _clientProvider);
         }
     }
 }

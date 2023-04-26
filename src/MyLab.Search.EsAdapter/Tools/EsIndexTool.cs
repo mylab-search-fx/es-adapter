@@ -63,7 +63,7 @@ namespace MyLab.Search.EsAdapter.Tools
             await _clientProvider.Provide().DeleteByQueryAsync(req, cancellationToken);
         }
 
-        public async Task<IndexState> TryGet(CancellationToken cancellationToken = default)
+        public async Task<IndexState> TryGetAsync(CancellationToken cancellationToken = default)
         {
             var resp = await _clientProvider.Provide().Indices.GetAsync(_indexName, s => s, cancellationToken);
 

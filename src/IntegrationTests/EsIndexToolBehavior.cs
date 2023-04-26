@@ -60,7 +60,7 @@ namespace IntegrationTests
                 d => d.Map(md => md.Properties(p =>
                     p.Text(tpd => tpd.Name("foo")))));
             {
-                indexInfo = await _indexTool.TryGet();
+                indexInfo = await _indexTool.TryGetAsync();
             }
 
             //Assert
@@ -154,7 +154,7 @@ namespace IntegrationTests
             //Arrange
 
             //Act
-            var indexInfo = await new EsIndexTool("absent", _esClientProvider).TryGet();
+            var indexInfo = await new EsIndexTool("absent", _esClientProvider).TryGetAsync();
 
             //Assert
             Assert.Null(indexInfo);

@@ -6,6 +6,11 @@
     public interface IEsTools
     {
         /// <summary>
+        /// Gets Elasticsearch component deserializer used es-client serializer
+        /// </summary>
+        IEsDeserializer Deserializer { get; }
+
+        /// <summary>
         /// Creates special index tool
         /// </summary>
         IEsIndexTool Index(string indexName);
@@ -28,6 +33,6 @@
         /// <summary>
         /// Creates special index template tool
         /// </summary>
-        IEsComponentTemplateTool IndexTemplate(string indexTemplateName);
+        IEsIndexTemplateTool IndexTemplate(string indexTemplateName);
     }
 }
