@@ -22,5 +22,20 @@ namespace MyLab.Search.EsAdapter.Tools
         /// Deserializes a component template
         /// </summary>
         ComponentTemplate DeserializeComponentTemplate(Stream stream);
+
+        /// <summary>
+        /// Deserializes a lifecycle policy
+        /// </summary>
+        void SerializeLifecyclePolicy(LifecyclePolicy policy, Stream stream);
+
+        /// <summary>
+        /// Deserializes an index template
+        /// </summary>
+        void SerializeIndexTemplate(IndexTemplate template, Stream stream);
+
+        /// <summary>
+        /// Serializes a component template
+        /// </summary>
+        void SerializeComponentTemplate(ComponentTemplate template, Stream stream);
     }
 }

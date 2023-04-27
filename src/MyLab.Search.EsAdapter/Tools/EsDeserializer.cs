@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using Elasticsearch.Net;
 using MyLab.Search.EsAdapter.Inter;
 using Nest;
 
@@ -30,6 +31,21 @@ namespace MyLab.Search.EsAdapter.Tools
         public ComponentTemplate DeserializeComponentTemplate(Stream stream)
         {
             return _client.SourceSerializer.Deserialize<ComponentTemplate>(stream);
+        }
+
+        public void SerializeLifecyclePolicy(LifecyclePolicy policy, Stream stream)
+        {
+            _client.SourceSerializer.Serialize(policy, stream);
+        }
+
+        public void SerializeIndexTemplate(IndexTemplate template, Stream stream)
+        {
+            _client.SourceSerializer.Serialize(template, stream);
+        }
+
+        public void SerializeComponentTemplate(ComponentTemplate template, Stream stream)
+        {
+            _client.SourceSerializer.Serialize(template, stream);
         }
     }
 }
