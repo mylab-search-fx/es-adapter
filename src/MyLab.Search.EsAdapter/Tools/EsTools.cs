@@ -10,7 +10,7 @@ namespace MyLab.Search.EsAdapter.Tools
         private readonly IEsClientProvider _clientProvider;
 
         /// <inheritdoc />
-        public IEsDeserializer Deserializer { get; }
+        public IEsSerializer Serializer { get; }
 
         /// <summary>
         /// Initializes a new instance of <see cref="EsTools"/>
@@ -18,7 +18,7 @@ namespace MyLab.Search.EsAdapter.Tools
         public EsTools(IEsClientProvider clientProvider)
         {
             _clientProvider = clientProvider;
-            Deserializer = new EsDeserializer(clientProvider);
+            Serializer = new EsSerializer(clientProvider);
         }
 
         /// <inheritdoc />

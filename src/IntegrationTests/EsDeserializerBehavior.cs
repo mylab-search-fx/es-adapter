@@ -9,14 +9,14 @@ namespace IntegrationTests
 {
     public class EsDeserializerBehavior : IClassFixture<TestClientFixture>
     {
-        private readonly IEsDeserializer _tools;
+        private readonly IEsSerializer _tools;
 
         public EsDeserializerBehavior(TestClientFixture fxt, ITestOutputHelper output)
         {
             fxt.Output = output;
             var clientProvider = new SingleEsClientProvider(fxt.Client);
 
-            _tools = new EsDeserializer(clientProvider);
+            _tools = new EsSerializer(clientProvider);
         }
 
         [Fact]

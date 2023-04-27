@@ -7,11 +7,11 @@ using Nest;
 
 namespace MyLab.Search.EsAdapter.Tools
 {
-    class EsDeserializer : IEsDeserializer
+    class EsSerializer : IEsSerializer
     {
         private readonly ElasticClient _client;
 
-        public EsDeserializer(IEsClientProvider clientProvider)
+        public EsSerializer(IEsClientProvider clientProvider)
         {
             if (clientProvider == null) throw new ArgumentNullException(nameof(clientProvider));
 

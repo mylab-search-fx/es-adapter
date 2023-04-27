@@ -6,7 +6,7 @@ namespace MyLab.Search.EsAdapter.Tools
     /// <summary>
     /// Deserializes Elasticsearch component used client serializer
     /// </summary>
-    public interface IEsDeserializer
+    public interface IEsSerializer
     {
         /// <summary>
         /// Deserializes a lifecycle policy

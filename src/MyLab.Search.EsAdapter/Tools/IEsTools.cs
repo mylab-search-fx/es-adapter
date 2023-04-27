@@ -8,7 +8,7 @@
         /// <summary>
         /// Gets Elasticsearch component deserializer used es-client serializer
         /// </summary>
-        IEsDeserializer Deserializer { get; }
+        IEsSerializer Serializer { get; }
 
         /// <summary>
         /// Creates special index tool
