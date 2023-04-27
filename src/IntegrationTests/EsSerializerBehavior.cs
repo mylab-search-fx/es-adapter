@@ -7,11 +7,11 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests
 {
-    public class EsDeserializerBehavior : IClassFixture<TestClientFixture>
+    public class EsSerializerBehavior : IClassFixture<TestClientFixture>
     {
         private readonly IEsSerializer _tools;
 
-        public EsDeserializerBehavior(TestClientFixture fxt, ITestOutputHelper output)
+        public EsSerializerBehavior(TestClientFixture fxt, ITestOutputHelper output)
         {
             fxt.Output = output;
             var clientProvider = new SingleEsClientProvider(fxt.Client);
@@ -30,6 +30,7 @@ namespace IntegrationTests
 
             //Assert
             Assert.NotNull(policy);
+            Assert.NotNull(policy.Policy);
             Assert.Contains(policy.Policy.Meta, p => p.Key == "ver" && (string)p.Value == "1");
         }
 
