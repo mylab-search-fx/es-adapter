@@ -16,6 +16,7 @@ namespace IntegrationTests
         private readonly string _cTemplateExampleJson;
         private readonly string _cTemplateExample2Json;
         private readonly SingleEsClientProvider _esClientProvider;
+        private readonly string _templateName;
 
         public EsComponentTemplateToolBehavior(
             TestClientFixture clientFxt,
@@ -26,9 +27,9 @@ namespace IntegrationTests
 
             _esClientProvider = new SingleEsClientProvider(client);
 
-            var templateName = Guid.NewGuid().ToString("N");
+            _templateName = Guid.NewGuid().ToString("N");
 
-            _ctTool = new EsComponentTemplateTool(templateName, _esClientProvider);
+            _ctTool = new EsComponentTemplateTool(_templateName, _esClientProvider);
 
             _cTemplateExampleJson = File.ReadAllText("Files\\component-template-example.json");
             _cTemplateExample2Json = File.ReadAllText("Files\\component-template-example-2.json");
@@ -115,6 +116,17 @@ namespace IntegrationTests
 
             //Assert
             Assert.Null(cTemplate);
+        }
+
+        [Fact]
+        public async Task ShouldFailWhenEsErrorResponse()
+        {
+            //Arrange 
+            var invalidTemplateRequest = new PutComponentTemplateRequest(_templateName);
+
+            //Act & Assert
+
+            await Assert.ThrowsAsync<EsException>(() => _ctTool.PutAsync(invalidTemplateRequest));
         }
     }
 }

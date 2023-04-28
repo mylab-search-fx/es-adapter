@@ -38,7 +38,9 @@ namespace MyLab.Search.EsAdapter.Tools
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
 
-            await _clientProvider.Provide().Indices.PutTemplateV2Async(request, cancellationToken);
+            var resp = await _clientProvider.Provide().Indices.PutTemplateV2Async(request, cancellationToken);
+
+            EsException.ThrowIfInvalid(resp, "Unable to put index template");
 
             return new IndexTemplateDeleter(this);
         }

@@ -16,6 +16,7 @@ namespace IntegrationTests
         private readonly string _cTemplateExampleJson;
         private readonly string _cTemplateExample2Json;
         private readonly SingleEsClientProvider _esClientProvider;
+        private readonly string _templateName;
 
         public EsIndexTemplateToolBehavior(
             TestClientFixture clientFxt,
@@ -26,11 +27,11 @@ namespace IntegrationTests
 
             _esClientProvider = new SingleEsClientProvider(client);
 
-            var templateName = nameof(EsIndexTemplateToolBehavior).ToLower() + "-" + Guid.NewGuid().ToString("N");
+            _templateName = nameof(EsIndexTemplateToolBehavior).ToLower() + "-" + Guid.NewGuid().ToString("N");
 
             _esClientProvider.Provide().Indices.DeleteTemplateV2(new DeleteIndexTemplateV2Request(nameof(EsIndexTemplateToolBehavior).ToLower() + "-*"));
 
-            _itTool = new EsIndexTemplateTool(templateName, _esClientProvider);
+            _itTool = new EsIndexTemplateTool(_templateName, _esClientProvider);
 
             _cTemplateExampleJson = File.ReadAllText("Files\\index-template-example.json");
             _cTemplateExample2Json = File.ReadAllText("Files\\index-template-example-2.json");
@@ -117,6 +118,17 @@ namespace IntegrationTests
 
             //Assert
             Assert.Null(cTemplate);
+        }
+
+        [Fact]
+        public async Task ShouldFailWhenEsErrorResponse()
+        {
+            //Arrange 
+            var invalidTemplateRequest = new PutIndexTemplateV2Request(_templateName);
+
+            //Act & Assert
+
+            await Assert.ThrowsAsync<EsException>(() => _itTool.PutAsync(invalidTemplateRequest));
         }
     }
 }

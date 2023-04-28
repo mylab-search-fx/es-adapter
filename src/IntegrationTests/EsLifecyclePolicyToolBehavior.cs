@@ -16,6 +16,7 @@ namespace IntegrationTests
         private readonly string _lifecycleExampleJson;
         private readonly string _lifecycleExample2Json;
         private readonly SingleEsClientProvider _esClientProvider;
+        private readonly string _lcId;
 
         public EsLifecyclePolicyToolBehavior(
             TestClientFixture clientFxt,
@@ -25,9 +26,9 @@ namespace IntegrationTests
             var client = clientFxt.Client;
 
             _esClientProvider = new SingleEsClientProvider(client);
-            var lcId = Guid.NewGuid().ToString("N");
+            _lcId = Guid.NewGuid().ToString("N");
 
-            _lcTool = new EsLifecyclePolicyTool(lcId, _esClientProvider);
+            _lcTool = new EsLifecyclePolicyTool(_lcId, _esClientProvider);
 
             _lifecycleExampleJson = File.ReadAllText("Files\\lifecycle-example.json");
             _lifecycleExample2Json = File.ReadAllText("Files\\lifecycle-example-2.json");
@@ -114,6 +115,17 @@ namespace IntegrationTests
             //Assert
             Assert.NotNull(lcPolicy);
             Assert.Contains(lcPolicy.Policy.Meta, pair => pair.Key == "ver" && (string)pair.Value == "2");
+        }
+
+        [Fact]
+        public async Task ShouldFailWhenEsErrorResponse()
+        {
+            //Arrange 
+            var invalidPolicyRequest = new PutLifecycleRequest(_lcId);
+
+            //Act & Assert
+
+            await Assert.ThrowsAsync<EsException>(() => _lcTool.PutAsync(invalidPolicyRequest));
         }
     }
 }

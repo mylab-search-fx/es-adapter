@@ -38,7 +38,9 @@ namespace MyLab.Search.EsAdapter.Tools
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
 
-            await _clientProvider.Provide().Cluster.PutComponentTemplateAsync(request, cancellationToken);
+            var resp = await _clientProvider.Provide().Cluster.PutComponentTemplateAsync(request, cancellationToken);
+
+            EsException.ThrowIfInvalid(resp, "Unable to put component template");
 
             return new ComponentTemplateDeleter(this);
         }
