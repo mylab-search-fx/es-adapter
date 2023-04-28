@@ -8,15 +8,16 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests
 {
-    public  class EsExceptionBehavior : IClassFixture<TestClientFixture>
+    public  class EsExceptionBehavior : IClassFixture<TestClientFixture>, IAsyncLifetime
     {
         private readonly EsIndexer _indexer;
+        private readonly ElasticClient _client;
 
         public EsExceptionBehavior(TestClientFixture fxt, ITestOutputHelper output)
         {
             fxt.Output = output;
-            var client = fxt.Client;
-            var esClientProvider = new SingleEsClientProvider(client);
+            _client = fxt.Client;
+            var esClientProvider = new SingleEsClientProvider(_client);
             
             _indexer = new EsIndexer(esClientProvider);
         }
@@ -67,6 +68,16 @@ namespace IntegrationTests
             //Assert
             Assert.NotNull(exception);
             Assert.True(exception.Response.HasIndexNotFound);
+        }
+
+        public Task InitializeAsync()
+        {
+            return _client.Indices.DeleteAsync("foo");
+        }
+
+        public Task DisposeAsync()
+        {
+            return Task.CompletedTask;
         }
     }
 }
