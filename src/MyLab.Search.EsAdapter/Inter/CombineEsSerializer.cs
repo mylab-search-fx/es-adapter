@@ -8,23 +8,31 @@ using Newtonsoft.Json;
 namespace MyLab.Search.EsAdapter.Inter
 {
     /// <summary>
-    /// Serializes user object with Newton.Json
+    /// Serializes user object with Newton.Json and core serializers
     /// </summary>
-    public class NewtonJsonEsSerializer : IElasticsearchSerializer
+    public class CombineEsSerializer : IElasticsearchSerializer
     {
+        private static readonly string NestLibName = typeof(Nest.AcknowledgeState).Assembly.GetName().Name;
+        private static readonly string ElasticsearchLibName = typeof(Elasticsearch.Net.ApiCallDetails).Assembly.GetName().Name;
+
         private readonly JsonSerializer _newtonSerializer;
+        private readonly IElasticsearchSerializer _coreSerializer;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="NewtonJsonEsSerializer"/>
+        /// Initializes a new instance of <see cref="CombineEsSerializer"/>
         /// </summary>
-        public NewtonJsonEsSerializer()
+        public CombineEsSerializer(IElasticsearchSerializer core)
         {
+            _coreSerializer = core;
             _newtonSerializer = new JsonSerializer();
         }
 
         /// <inheritdoc />
         public object Deserialize(Type type, Stream stream)
         {
+            if (IsCoreType(type))
+                return _coreSerializer.Deserialize(type, stream);
+
             TextReader txtReader = new StreamReader(stream);
             JsonReader jsonReader = new JsonTextReader(txtReader);
 
@@ -34,6 +42,9 @@ namespace MyLab.Search.EsAdapter.Inter
         /// <inheritdoc />
         public T Deserialize<T>(Stream stream)
         {
+            if (IsCoreType(typeof(T)))
+                return _coreSerializer.Deserialize<T>(stream);
+
             TextReader txtReader = new StreamReader(stream);
             JsonReader jsonReader = new JsonTextReader(txtReader);
 
@@ -43,6 +54,9 @@ namespace MyLab.Search.EsAdapter.Inter
         /// <inheritdoc />
         public Task<object> DeserializeAsync(Type type, Stream stream, CancellationToken cancellationToken = default)
         {
+            if (IsCoreType(type))
+                return _coreSerializer.DeserializeAsync(type, stream, cancellationToken);
+
             TextReader txtReader = new StreamReader(stream);
             JsonReader jsonReader = new JsonTextReader(txtReader);
 
@@ -54,6 +68,9 @@ namespace MyLab.Search.EsAdapter.Inter
         /// <inheritdoc />
         public Task<T> DeserializeAsync<T>(Stream stream, CancellationToken cancellationToken = default)
         {
+            if (IsCoreType(typeof(T)))
+                return _coreSerializer.DeserializeAsync<T>(stream, cancellationToken);
+
             TextReader txtReader = new StreamReader(stream);
             JsonReader jsonReader = new JsonTextReader(txtReader);
 
@@ -65,6 +82,12 @@ namespace MyLab.Search.EsAdapter.Inter
         /// <inheritdoc />
         public void Serialize<T>(T data, Stream stream, SerializationFormatting formatting = SerializationFormatting.None)
         {
+            if (IsCoreType(typeof(T)))
+            {
+                _coreSerializer.Serialize<T>(data, stream, formatting);
+                return;
+            }
+
             TextWriter txtWriter = new StreamWriter(stream);
             JsonWriter jsonWriter = new JsonTextWriter(txtWriter)
             {
@@ -81,6 +104,12 @@ namespace MyLab.Search.EsAdapter.Inter
         public async Task SerializeAsync<T>(T data, Stream stream, SerializationFormatting formatting = SerializationFormatting.None,
             CancellationToken cancellationToken = default)
         {
+            if (IsCoreType(typeof(T)))
+            {
+                await _coreSerializer.SerializeAsync<T>(data, stream, formatting, cancellationToken);
+                return;
+            }
+
             TextWriter txtWriter = new StreamWriter(stream);
             JsonWriter jsonWriter = new JsonTextWriter(txtWriter)
             {
@@ -92,6 +121,13 @@ namespace MyLab.Search.EsAdapter.Inter
             _newtonSerializer.Serialize(jsonWriter, data);
 
             await jsonWriter.FlushAsync(cancellationToken);
+        }
+
+        bool IsCoreType(Type type)
+        {
+            var assName = type.Assembly.GetName().Name;
+
+            return assName == NestLibName || assName == ElasticsearchLibName;
         }
     }
 }
