@@ -190,5 +190,27 @@ namespace IntegrationTests
                     .MatchAll();
             }
         }
+
+        [Fact]
+        public async Task ShouldPutMapping()
+        {
+            //Arrange
+            const string settings = "{\"mappings\":{\"properties\":{\"foo\":{\"type\":\"text\"}}}}";
+            const string newMapping = "{\"properties\":{\"bar\":{\"type\":\"text\"}}}";
+
+            IndexState idxState;
+
+            //Act
+            await using var deleter = await _indexTool.CreateAsync(settings);
+            {
+                await _indexTool.PutMapping(newMapping);
+                idxState = await _indexTool.TryGetAsync();
+            }
+            
+            //Assert
+            Assert.NotNull(idxState);
+            Assert.Single(idxState.Mappings.Properties);
+            Assert.True(idxState.Mappings.Properties.ContainsKey("bar"));
+        }
     }
 }

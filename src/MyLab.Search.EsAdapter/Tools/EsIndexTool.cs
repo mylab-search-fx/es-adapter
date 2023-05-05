@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MyLab.Search.EsAdapter.Inter;
@@ -78,6 +80,23 @@ namespace MyLab.Search.EsAdapter.Tools
             EsException.ThrowIfInvalid(resp);
 
             return null;
+        }
+
+        public async Task PutMapping(string mappingJson, CancellationToken cancellationToken = default)
+        {
+            if (mappingJson == null) throw new ArgumentNullException(nameof(mappingJson));
+
+            var cl = _clientProvider.Provide();
+
+            using var memStream = new MemoryStream(Encoding.UTF8.GetBytes(mappingJson));
+            var mappingPutReq = await cl.SourceSerializer.DeserializeAsync<PutMappingRequest>(memStream, cancellationToken);
+
+            await PutMapping(mappingPutReq, cancellationToken);
+        }
+
+        public Task PutMapping(IPutMappingRequest putMappingReq,  CancellationToken cancellationToken = default)
+        {
+            return _clientProvider.Provide().Indices.PutMappingAsync(putMappingReq, cancellationToken);
         }
 
         class IndexDeleter : IAsyncDisposable

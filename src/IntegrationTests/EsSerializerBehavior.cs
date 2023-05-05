@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using MyLab.Search.EsAdapter.Inter;
 using MyLab.Search.EsAdapter.Tools;
+using Nest;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -26,7 +27,7 @@ namespace IntegrationTests
             using var jsonStream = File.OpenRead("Files\\lifecycle-example.json");
 
             //Act
-            var policy = _tools.DeserializeLifecyclePolicy(jsonStream);
+            var policy = _tools.Deserialize<LifecyclePolicy>(jsonStream);
 
             //Assert
             Assert.NotNull(policy);
@@ -41,7 +42,7 @@ namespace IntegrationTests
             using var jsonStream = File.OpenRead("Files\\index-template-example.json");
 
             //Act
-            var template = _tools.DeserializeIndexTemplate(jsonStream);
+            var template = _tools.Deserialize<IndexTemplate>(jsonStream);
 
             //Assert
             Assert.NotNull(template);
@@ -55,7 +56,7 @@ namespace IntegrationTests
             using var jsonStream = File.OpenRead("Files\\component-template-example.json");
 
             //Act
-            var template = _tools.DeserializeComponentTemplate(jsonStream);
+            var template = _tools.Deserialize<ComponentTemplate>(jsonStream);
 
             //Assert
             Assert.NotNull(template);

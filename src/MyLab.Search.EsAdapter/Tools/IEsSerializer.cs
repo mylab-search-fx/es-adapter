@@ -9,33 +9,13 @@ namespace MyLab.Search.EsAdapter.Tools
     public interface IEsSerializer
     {
         /// <summary>
-        /// Deserializes a lifecycle policy
+        /// Deserializes an object
         /// </summary>
-        LifecyclePolicy DeserializeLifecyclePolicy(Stream stream);
-
+        T Deserialize<T>(Stream stream);
+        
         /// <summary>
-        /// Deserializes an index template
+        /// Serializes an object
         /// </summary>
-        IndexTemplate DeserializeIndexTemplate(Stream stream);
-
-        /// <summary>
-        /// Deserializes a component template
-        /// </summary>
-        ComponentTemplate DeserializeComponentTemplate(Stream stream);
-
-        /// <summary>
-        /// Deserializes a lifecycle policy
-        /// </summary>
-        void SerializeLifecyclePolicy(LifecyclePolicy policy, Stream stream);
-
-        /// <summary>
-        /// Deserializes an index template
-        /// </summary>
-        void SerializeIndexTemplate(IndexTemplate template, Stream stream);
-
-        /// <summary>
-        /// Serializes a component template
-        /// </summary>
-        void SerializeComponentTemplate(ComponentTemplate template, Stream stream);
+        void Serialize(object obj, Stream stream);
     }
 }

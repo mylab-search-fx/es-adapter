@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using MyLab.Search.EsAdapter.Inter;
 using Nest;
 
 namespace MyLab.Search.EsAdapter.Tools
@@ -16,7 +15,6 @@ namespace MyLab.Search.EsAdapter.Tools
         /// </summary>
         Task<IAsyncDisposable> CreateAsync(Func<CreateIndexDescriptor, ICreateIndexRequest> createDescriptor = null,
             CancellationToken cancellationToken = default);
-
         /// <summary>
         /// Creates new index with json request
         /// </summary>
@@ -33,12 +31,19 @@ namespace MyLab.Search.EsAdapter.Tools
         /// Prune index
         /// </summary>
         Task PruneAsync(CancellationToken cancellationToken = default);
-
         /// <summary>
         /// Tries to get index info
         /// </summary>
         /// <returns>Index info or null if not exists</returns>
         Task<IndexState> TryGetAsync(CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Creates or updates index mapping
+        /// </summary>
+        Task PutMapping(string mappingJson, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Creates or updates index mapping
+        /// </summary>
+        Task PutMapping(IPutMappingRequest putMappingReq, CancellationToken cancellationToken = default);
     }
     
 }
