@@ -91,6 +91,10 @@ namespace MyLab.Search.EsAdapter.Tools
             using var memStream = new MemoryStream(Encoding.UTF8.GetBytes(mappingJson));
             var mappingPutReq = await cl.SourceSerializer.DeserializeAsync<PutMappingRequest>(memStream, cancellationToken);
 
+            var req = (IRequest)mappingPutReq;
+
+            req.RouteValues.Add("index", (Indices)_indexName);
+
             await PutMapping(mappingPutReq, cancellationToken);
         }
 

@@ -77,7 +77,7 @@ namespace IntegrationTests
 
         public Task DisposeAsync()
         {
-            return Task.CompletedTask;
+            return _client.Indices.DeleteAsync("foo");
         }
     }
 }

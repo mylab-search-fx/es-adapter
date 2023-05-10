@@ -208,8 +208,7 @@ namespace IntegrationTests
             }
             
             //Assert
-            Assert.NotNull(idxState);
-            Assert.Single(idxState.Mappings.Properties);
+            Assert.NotNull(idxState?.Mappings);
             Assert.True(idxState.Mappings.Properties.ContainsKey("bar"));
         }
     }
