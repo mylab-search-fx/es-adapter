@@ -25,7 +25,7 @@ namespace MyLab.Search.EsAdapter
 
             if (call.RequestBodyInBytes != null)
             {
-                var formattedReqBody = DumpToString(call.RequestBodyInBytes);
+                var formattedReqBody = DumpToString(call.RequestBodyInBytes, "application/json");
                 sb.Append(formattedReqBody + "\n");
             }
             else
@@ -51,7 +51,7 @@ namespace MyLab.Search.EsAdapter
 
             if (call.ResponseBodyInBytes != null)
             {
-                var formattedRespBody = DumpToString(call.ResponseBodyInBytes);
+                var formattedRespBody = DumpToString(call.ResponseBodyInBytes, call.ResponseMimeType);
                 sb.Append(formattedRespBody+ "\n");
             }
             else
@@ -65,21 +65,28 @@ namespace MyLab.Search.EsAdapter
             return sb.ToString();
         }
 
-        private static string DumpToString(byte[] data)
+        private static string DumpToString(byte[] data, string mimeType)
         {
             var str = Encoding.UTF8.GetString(data);
+
+            if (mimeType != "application/json")
+                return str;
 
             try
             {
                 dynamic parsedJson = JsonConvert.DeserializeObject(str);
                 str = JsonConvert.SerializeObject(parsedJson, Formatting.Indented);
+
+                return str.Replace("\r\n", "\n");
             }
             catch (JsonReaderException)
             {
-                //ignore it
+                return str;
             }
-
-            return str.Replace("\r\n", "\n");
+            catch (JsonSerializationException)
+            {
+                return str;
+            }
         }
     }
 }

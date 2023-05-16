@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <Version>2.2.16</Version>
+    <Version>2.2.18</Version>
     <Authors>Andrey O.</Authors>
     <Company>Andrey O.</Company>
     <Description>Elastic search 7.15 + adapter based on official NEST</Description>
@@ -13,8 +13,8 @@
     <RepositoryUrl>https://github.com/mylab-search-fx/es-adapter.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>elasticsearch</PackageTags>
-    <AssemblyVersion>2.2.16.1005</AssemblyVersion>
-    <FileVersion>2.2.16.1005</FileVersion>
+    <AssemblyVersion>2.2.18.1505</AssemblyVersion>
+    <FileVersion>2.2.18.1505</FileVersion>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
 
