@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Elasticsearch.Net;
 using MyLab.Search.EsAdapter.Inter;
 using Nest;
 
@@ -21,9 +22,9 @@ namespace MyLab.Search.EsAdapter.Tools
             return _client.SourceSerializer.Deserialize<T>(stream);
         }
 
-        public void Serialize(object obj, Stream stream)
+        public void Serialize(object obj, Stream stream, SerializationFormatting serializationFormatting = SerializationFormatting.None)
         {
-            _client.SourceSerializer.Serialize(obj, stream);
+            _client.SourceSerializer.Serialize(obj, stream, serializationFormatting);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Nest;
 using System.IO;
+using Elasticsearch.Net;
 
 namespace MyLab.Search.EsAdapter.Tools
 {
@@ -16,6 +17,6 @@ namespace MyLab.Search.EsAdapter.Tools
         /// <summary>
         /// Serializes an object
         /// </summary>
-        void Serialize(object obj, Stream stream);
+        void Serialize(object obj, Stream stream, SerializationFormatting serializationFormatting = SerializationFormatting.None);
     }
 }
