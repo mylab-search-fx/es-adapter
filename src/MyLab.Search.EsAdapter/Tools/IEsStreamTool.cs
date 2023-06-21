@@ -24,6 +24,15 @@ namespace MyLab.Search.EsAdapter.Tools
         /// Gets whether the stream exists
         /// </summary>
         Task<bool> ExistsAsync(CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Deletes alias from stream
+        /// </summary>
+        Task DeleteAlias(string aliasName, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Provides tool sof specified stream alias
+        /// </summary>
+        IEsAliasTool Alias(string aliasName);
     }
 
     class EsStreamTool : IEsStreamTool
@@ -65,6 +74,22 @@ namespace MyLab.Search.EsAdapter.Tools
             EsException.ThrowIfInvalid(resp);
 
             return true;
+        }
+
+        public async Task DeleteAlias(string aliasName, CancellationToken cancellationToken = default)
+        {
+            if (aliasName == null) throw new ArgumentNullException(nameof(aliasName));
+
+            var resp = await _clientProvider.Provide().LowLevel
+                .DoRequestAsync<StringResponse>(HttpMethod.DELETE, $"{_streamName}/_alias/{aliasName}", cancellationToken);
+
+            EsException.ThrowIfInvalid(resp, "Unable to delete the alias");
+        }
+
+        public IEsAliasTool Alias(string aliasName)
+        {
+            if (aliasName == null) throw new ArgumentNullException(nameof(aliasName));
+            return new EsAliasTool(aliasName, _streamName, _clientProvider);
         }
 
         class StreamDeleter : IAsyncDisposable

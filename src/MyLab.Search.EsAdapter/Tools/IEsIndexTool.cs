@@ -42,11 +42,15 @@ namespace MyLab.Search.EsAdapter.Tools
         /// <summary>
         /// Creates or updates index mapping
         /// </summary>
-        Task PutMapping(string mappingJson, CancellationToken cancellationToken = default);
+        Task PutMappingAsync(string mappingJson, CancellationToken cancellationToken = default);
         /// <summary>
         /// Creates or updates index mapping
         /// </summary>
-        Task PutMapping(IPutMappingRequest putMappingReq, CancellationToken cancellationToken = default);
+        Task PutMappingAsync(IPutMappingRequest putMappingReq, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Provides tool sof specified index alias
+        /// </summary>
+        IEsAliasTool Alias(string aliasName);
     }
 
     class EsIndexTool : IEsIndexTool
@@ -123,7 +127,7 @@ namespace MyLab.Search.EsAdapter.Tools
             return null;
         }
 
-        public async Task PutMapping(string mappingJson, CancellationToken cancellationToken = default)
+        public async Task PutMappingAsync(string mappingJson, CancellationToken cancellationToken = default)
         {
             if (mappingJson == null) throw new ArgumentNullException(nameof(mappingJson));
 
@@ -136,12 +140,20 @@ namespace MyLab.Search.EsAdapter.Tools
 
             req.RouteValues.Add("index", (Indices)_indexName);
 
-            await PutMapping(mappingPutReq, cancellationToken);
+            await PutMappingAsync(mappingPutReq, cancellationToken);
         }
 
-        public Task PutMapping(IPutMappingRequest putMappingReq, CancellationToken cancellationToken = default)
+        public Task PutMappingAsync(IPutMappingRequest putMappingReq, CancellationToken cancellationToken = default)
         {
+            if (putMappingReq == null) throw new ArgumentNullException(nameof(putMappingReq));
+
             return _clientProvider.Provide().Indices.PutMappingAsync(putMappingReq, cancellationToken);
+        }
+
+        public IEsAliasTool Alias(string aliasName)
+        {
+            if (aliasName == null) throw new ArgumentNullException(nameof(aliasName));
+            return new EsAliasTool(aliasName, _indexName, _clientProvider);
         }
 
         class IndexDeleter : IAsyncDisposable

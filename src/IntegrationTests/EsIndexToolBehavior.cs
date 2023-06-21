@@ -203,7 +203,7 @@ namespace IntegrationTests
             //Act
             await using var deleter = await _indexTool.CreateAsync(settings);
             {
-                await _indexTool.PutMapping(newMapping);
+                await _indexTool.PutMappingAsync(newMapping);
                 idxState = await _indexTool.TryGetAsync();
             }
             
