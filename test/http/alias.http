@@ -1,0 +1,14 @@
+@baseurl = http://localhost:9200
+
+### Create index with alias
+PUT {{baseurl}}/my-index
+Content-Type: application/json
+
+{
+    "aliases": {
+        "my-index-alias": {}
+    }
+}
+
+### Get alias
+GET {{baseurl}}/my-index/_alias
