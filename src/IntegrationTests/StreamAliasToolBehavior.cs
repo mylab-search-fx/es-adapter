@@ -43,6 +43,8 @@ namespace IntegrationTests
 
         public async Task InitializeAsync()
         {
+            await DeleteComponentsAsync();
+
             var client = _esClientProvider.Provide();
 
             var resp = await client.Indices
@@ -60,7 +62,12 @@ namespace IntegrationTests
             await _streamTool.CreateAsync();
         }
 
-        public async Task DisposeAsync()
+        public Task DisposeAsync()
+        {
+            return DeleteComponentsAsync();
+        }
+
+        async Task DeleteComponentsAsync()
         {
             bool streamExists = await _streamTool.ExistsAsync();
             if (streamExists)
