@@ -17,7 +17,7 @@ namespace MyLab.Search.EsAdapter.Tools
         /// <summary>
         /// Gets selected indexes
         /// </summary>
-        Task<IEnumerable<FoundIndex>> GetIndexesAsync(
+        Task<IEnumerable<FoundIndex>> GetAsync(
                 Func<GetIndexDescriptor, IGetIndexRequest> selector = null, 
                 CancellationToken cancellationToken = default
             );
@@ -25,7 +25,7 @@ namespace MyLab.Search.EsAdapter.Tools
         /// <summary>
         /// Deleted selected indexes
         /// </summary>
-        Task DeleteIndexesAsync(
+        Task DeleteAsync(
                 Func<DeleteIndexDescriptor, IDeleteIndexRequest> selector = null, 
                 CancellationToken cancellationToken = default
             );
@@ -61,7 +61,7 @@ namespace MyLab.Search.EsAdapter.Tools
         {
             _clientProvider = clientProvider ?? throw new ArgumentNullException(nameof(clientProvider));
         }
-        public async Task<IEnumerable<FoundIndex>> GetIndexesAsync(
+        public async Task<IEnumerable<FoundIndex>> GetAsync(
                 Func<GetIndexDescriptor, IGetIndexRequest> selector = null, 
                 CancellationToken cancellationToken = default
             )
@@ -75,7 +75,7 @@ namespace MyLab.Search.EsAdapter.Tools
             );
         }
 
-        public async Task DeleteIndexesAsync(
+        public async Task DeleteAsync(
                 Func<DeleteIndexDescriptor, IDeleteIndexRequest> selector = null, 
                 CancellationToken cancellationToken = default
             )

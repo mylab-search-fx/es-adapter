@@ -73,7 +73,7 @@ namespace IntegrationTests
             await _testIndex.CreateAsync();
 
             //Act
-            var indexes = await _indexesTool.GetIndexesAsync();
+            var indexes = await _indexesTool.GetAsync();
             var indexesArray = indexes.ToArray();
 
             //Assert
@@ -87,7 +87,7 @@ namespace IntegrationTests
             await _testIndex.CreateAsync();
 
             //Act
-            var indexes = await _indexesTool.GetIndexesAsync(d => d.Index(_testIndexName));
+            var indexes = await _indexesTool.GetAsync(d => d.Index(_testIndexName));
             var indexesArray = indexes.ToArray();
 
             //Assert
@@ -101,7 +101,7 @@ namespace IntegrationTests
             await _testIndex.CreateAsync();
 
             //Act
-            await _indexesTool.DeleteIndexesAsync(d => d.Index(_testIndexName));
+            await _indexesTool.DeleteAsync(d => d.Index(_testIndexName));
 
             var exists = await _testIndex.ExistsAsync();
 

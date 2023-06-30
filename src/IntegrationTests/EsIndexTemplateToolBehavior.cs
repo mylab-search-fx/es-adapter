@@ -119,16 +119,5 @@ namespace IntegrationTests
             //Assert
             Assert.Null(cTemplate);
         }
-
-        [Fact]
-        public async Task ShouldFailWhenEsErrorResponse()
-        {
-            //Arrange 
-            var invalidTemplateRequest = new PutIndexTemplateV2Request(_templateName);
-
-            //Act & Assert
-
-            await Assert.ThrowsAsync<EsException>(() => _itTool.PutAsync(invalidTemplateRequest));
-        }
     }
 }

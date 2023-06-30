@@ -13,9 +13,14 @@ namespace MyLab.Search.EsAdapter.Tools
         IEsSerializer Serializer { get; }
 
         /// <summary>
-        /// Gets Indexes tool to work with indexes collection
+        /// Gets Indexes tool to work with index collection
         /// </summary>
         IEsIndexesTool Indexes { get; }
+
+        /// <summary>
+        /// Gets Streams tool to work with stream collection
+        /// </summary>
+        IEsStreamsTool Streams { get; }
 
         /// <summary>
         /// Creates special index tool
@@ -58,6 +63,12 @@ namespace MyLab.Search.EsAdapter.Tools
         /// <inheritdoc />
         public IEsSerializer Serializer { get; }
 
+        /// <inheritdoc />
+        public IEsIndexesTool Indexes { get; }
+
+        /// <inheritdoc />
+        public IEsStreamsTool Streams { get; }
+
         /// <summary>
         /// Initializes a new instance of <see cref="EsTools"/>
         /// </summary>
@@ -65,6 +76,8 @@ namespace MyLab.Search.EsAdapter.Tools
         {
             _clientProvider = clientProvider;
             Serializer = new EsSerializer(clientProvider);
+            Indexes = new EsIndexesTool(clientProvider);
+            Streams = new EsStreamsTool(clientProvider);
         }
 
         /// <inheritdoc />

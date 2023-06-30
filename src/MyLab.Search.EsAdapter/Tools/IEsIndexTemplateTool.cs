@@ -23,7 +23,7 @@ namespace MyLab.Search.EsAdapter.Tools
         /// Creates or updates index template
         /// </summary>
         /// <returns>index template deleter</returns>
-        Task<IAsyncDisposable> PutAsync(IPutIndexTemplateV2Request request, CancellationToken cancellationToken = default);
+        Task<IAsyncDisposable> PutAsync(Func<PutIndexTemplateV2Descriptor, IPutIndexTemplateV2Request> createDescriptor, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Tries get index template
@@ -68,11 +68,11 @@ namespace MyLab.Search.EsAdapter.Tools
             return new IndexTemplateDeleter(this);
         }
 
-        public async Task<IAsyncDisposable> PutAsync(IPutIndexTemplateV2Request request, CancellationToken cancellationToken)
+        public async Task<IAsyncDisposable> PutAsync(Func<PutIndexTemplateV2Descriptor, IPutIndexTemplateV2Request> createDescriptor, CancellationToken cancellationToken)
         {
-            if (request == null) throw new ArgumentNullException(nameof(request));
+            if (createDescriptor == null) throw new ArgumentNullException(nameof(createDescriptor));
 
-            var resp = await _clientProvider.Provide().Indices.PutTemplateV2Async(request, cancellationToken);
+            var resp = await _clientProvider.Provide().Indices.PutTemplateV2Async(_templateName, createDescriptor, cancellationToken);
 
             EsException.ThrowIfInvalid(resp, "Unable to put index template");
 

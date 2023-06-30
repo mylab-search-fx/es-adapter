@@ -8,14 +8,14 @@ using Xunit.Abstractions;
 
 namespace IntegrationTests
 {
-    public class StreamAliasToolBehavior : IClassFixture<TestClientFixture>, IAsyncLifetime
+    public class EsStreamAliasToolBehavior : IClassFixture<TestClientFixture>, IAsyncLifetime
     {
         private readonly IEsStreamTool _streamTool;
         private readonly IEsIndexTemplateTool _indexTemplateTool;
-        private readonly PutIndexTemplateV2Request _idxTemplateRequest;
+        private readonly Func<PutIndexTemplateV2Descriptor, IPutIndexTemplateV2Request> _idxTemplateRequestFactory;
         private readonly SingleEsClientProvider _esClientProvider;
 
-        public StreamAliasToolBehavior(TestClientFixture fxt, ITestOutputHelper output)
+        public EsStreamAliasToolBehavior(TestClientFixture fxt, ITestOutputHelper output)
         {
             fxt.Output = output;
             var client = fxt.Client;
@@ -27,18 +27,12 @@ namespace IntegrationTests
             var templateName = Guid.NewGuid().ToString("N");
             _indexTemplateTool = new EsIndexTemplateTool(templateName, _esClientProvider);
 
-            _idxTemplateRequest = new PutIndexTemplateV2Request(templateName)
-            {
-                IndexPatterns = new []{ streamName },
-                DataStream = new DataStream(),
-                Template = new Template
-                {
-                    Aliases = new Aliases
-                    {
-                        { "bar", new Alias() }
-                    }
-                }
-            };
+            _idxTemplateRequestFactory = d => d
+                .IndexPatterns(new[] { streamName })
+                .DataStream(new DataStream())
+                .Template(td => td
+                    .Aliases(asd => asd
+                        .Alias("bar", ad => ad)));
         }
 
         public async Task InitializeAsync()
@@ -58,7 +52,7 @@ namespace IntegrationTests
                 }
             }
 
-            await _indexTemplateTool.PutAsync(_idxTemplateRequest);
+            await _indexTemplateTool.PutAsync(_idxTemplateRequestFactory);
             await _streamTool.CreateAsync();
         }
 
