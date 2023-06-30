@@ -36,6 +36,11 @@ namespace MyLab.Search.EsAdapter.Tools
         /// Creates special index template tool
         /// </summary>
         IEsIndexTemplateTool IndexTemplate(string indexTemplateName);
+
+        /// <summary>
+        /// Create aliases tool
+        /// </summary>
+        IEsAliasesTool Aliases();
     }
 
     /// <summary>
@@ -85,6 +90,12 @@ namespace MyLab.Search.EsAdapter.Tools
         public IEsIndexTemplateTool IndexTemplate(string indexTemplateName)
         {
             return new EsIndexTemplateTool(indexTemplateName, _clientProvider);
+        }
+
+        /// <inheritdoc />
+        public IEsAliasesTool Aliases()
+        {
+            return new EsAliasesTool(_clientProvider);
         }
     }
 }
