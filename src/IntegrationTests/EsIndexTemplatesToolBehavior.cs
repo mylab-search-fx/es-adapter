@@ -123,7 +123,7 @@ namespace IntegrationTests
             await _testTemplate.PutAsync(_putDescriptor);
 
             //Act
-            await _templatesTool.DeleteByNameOrTemplateAsync(_testTemplateName);
+            await _templatesTool.DeleteByNameOrWildcardExpressionAsync(_testTemplateName);
 
             var exists = await _testTemplate.ExistsAsync();
 
@@ -139,7 +139,7 @@ namespace IntegrationTests
             var nameTemplate = _testTemplateName.Remove(_testTemplateName.Length - 3) + "*";
 
             //Act
-            await _templatesTool.DeleteByNameOrTemplateAsync(nameTemplate);
+            await _templatesTool.DeleteByNameOrWildcardExpressionAsync(nameTemplate);
 
             var exists = await _testTemplate.ExistsAsync();
 

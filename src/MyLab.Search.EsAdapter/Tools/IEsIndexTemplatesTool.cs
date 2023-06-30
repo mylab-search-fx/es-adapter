@@ -30,9 +30,9 @@ namespace MyLab.Search.EsAdapter.Tools
         );
 
         /// <summary>
-        /// Deleted index templates with specified name or name template
+        /// Deleted index templates by name or name wildcard expression
         /// </summary>
-        Task DeleteByNameOrTemplateAsync(string nameOrTemplate,
+        Task DeleteByNameOrWildcardExpressionAsync(string nameOrTemplate,
             CancellationToken cancellationToken = default
         );
 
@@ -92,7 +92,7 @@ namespace MyLab.Search.EsAdapter.Tools
             EsException.ThrowIfInvalid(response, "Unable to delete index templates");
         }
 
-        public async Task DeleteByNameOrTemplateAsync(string nameOrTemplate,
+        public async Task DeleteByNameOrWildcardExpressionAsync(string nameOrTemplate,
             CancellationToken cancellationToken = default
         )
         {

@@ -31,7 +31,11 @@ namespace IntegrationTests
 
         public Task InitializeAsync()
         {
-            return _indexTemplate.PutAsync(d => d.IndexPatterns(_testStreamName + "*"));
+            return _indexTemplate.PutAsync(
+                d => d
+                    .IndexPatterns(_testStreamName + "*")
+                    .DataStream(new DataStream())
+                );
         }
 
         public async Task DisposeAsync()
@@ -67,7 +71,7 @@ namespace IntegrationTests
         public async Task ShouldEnumerateStreams()
         {
             //Arrange
-            await _testStream.CreateAsync();
+            await using var streamDisposer = await _testStream.CreateAsync();
 
             //Act
             var streams = await _streamsTool.GetAsync();
@@ -81,7 +85,7 @@ namespace IntegrationTests
         public async Task ShouldFilterIndexes()
         {
             //Arrange
-            await _testStream.CreateAsync();
+            await using var streamDisposer = await _testStream.CreateAsync();
 
             //Act
             var streams = await _streamsTool.GetAsync(d => d.Name(_testStreamName));
@@ -92,13 +96,44 @@ namespace IntegrationTests
         }
 
         [Fact]
-        public async Task ShouldDeleteStreams()
+        public async Task ShouldDeleteStreamsByExactlyNames()
         {
             //Arrange
             await _testStream.CreateAsync();
 
             //Act
-            await _streamsTool.GetAsync(d => d.Name(_testStreamName));
+            await _streamsTool.DeleteByExactlyNamesAsync(new string[]{ _testStreamName });
+
+            var exists = await _testStream.ExistsAsync();
+
+            //Assert
+            Assert.False(exists);
+        }
+
+        [Fact]
+        public async Task ShouldDeleteStreamsByName()
+        {
+            //Arrange
+            await _testStream.CreateAsync();
+
+            //Act
+            await _streamsTool.DeleteByNameOrWildcardExpressionAsync(_testStreamName);
+
+            var exists = await _testStream.ExistsAsync();
+
+            //Assert
+            Assert.False(exists);
+        }
+
+        [Fact]
+        public async Task ShouldDeleteStreamsByWildcardExpression()
+        {
+            //Arrange
+            await _testStream.CreateAsync();
+            var wildcardExpression = _testStreamName.Remove(_testStreamName.Length - 1) + "*";
+
+            //Act
+            await _streamsTool.DeleteByNameOrWildcardExpressionAsync(wildcardExpression);
 
             var exists = await _testStream.ExistsAsync();
 

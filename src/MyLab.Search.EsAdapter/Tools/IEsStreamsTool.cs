@@ -23,10 +23,18 @@ namespace MyLab.Search.EsAdapter.Tools
         );
 
         /// <summary>
-        /// Delete selected streams
+        /// Deletes the streams by exactly names
         /// </summary>
-        Task DeleteAsync(
-            Func<DeleteDataStreamDescriptor, IDeleteDataStreamRequest> selector = null,
+        Task DeleteByExactlyNamesAsync(
+            string[] exactlyNames,
+            CancellationToken cancellationToken = default
+        );
+
+        /// <summary>
+        /// Deletes the stream by name or several streams by wildcard expressions
+        /// </summary>
+        Task DeleteByNameOrWildcardExpressionAsync(
+            string nameOrWildcardExpression,
             CancellationToken cancellationToken = default
         );
 
@@ -67,12 +75,27 @@ namespace MyLab.Search.EsAdapter.Tools
             );
         }
 
-        public async Task DeleteAsync(
-                Func<DeleteDataStreamDescriptor, IDeleteDataStreamRequest> selector = null, 
+        public async Task DeleteByExactlyNamesAsync(
+                string[] exactlyNames, 
                 CancellationToken cancellationToken = default
             )
         {
-            var response = await _clientProvider.Provide().Indices.DeleteDataStreamAsync("*", selector, cancellationToken);
+            if (exactlyNames == null) throw new ArgumentNullException(nameof(exactlyNames));
+            var oneName = string.Join(',', exactlyNames);
+
+            var response = await _clientProvider.Provide().Indices.DeleteDataStreamAsync(oneName, _ => _, cancellationToken);
+
+            EsException.ThrowIfInvalid(response, "Unable to delete streams");
+        }
+
+        public async Task DeleteByNameOrWildcardExpressionAsync(
+            string nameOrWildcardExpression,
+            CancellationToken cancellationToken = default
+        )
+        {
+            if (nameOrWildcardExpression == null) throw new ArgumentNullException(nameof(nameOrWildcardExpression));
+            
+            var response = await _clientProvider.Provide().Indices.DeleteDataStreamAsync(nameOrWildcardExpression, _ => _, cancellationToken);
 
             EsException.ThrowIfInvalid(response, "Unable to delete streams");
         }
