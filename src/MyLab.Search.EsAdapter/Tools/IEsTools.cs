@@ -13,6 +13,11 @@ namespace MyLab.Search.EsAdapter.Tools
         IEsSerializer Serializer { get; }
 
         /// <summary>
+        /// Gets Indexes tool to work with indexes collection
+        /// </summary>
+        IEsIndexesTool Indexes { get; }
+
+        /// <summary>
         /// Creates special index tool
         /// </summary>
         IEsIndexTool Index(string indexName);
@@ -38,7 +43,7 @@ namespace MyLab.Search.EsAdapter.Tools
         IEsIndexTemplateTool IndexTemplate(string indexTemplateName);
 
         /// <summary>
-        /// Create aliases tool
+        /// Creates aliases tool
         /// </summary>
         IEsAliasesTool Aliases();
     }
