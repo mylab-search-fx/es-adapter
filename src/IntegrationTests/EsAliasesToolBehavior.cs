@@ -42,6 +42,20 @@ namespace IntegrationTests
         }
 
         [Fact]
+        public async Task ShouldEnumerateEmptyWhenNotFound()
+        {
+            //Arrange
+            var absentAliasName = Guid.NewGuid().ToString("N");
+
+            //Act
+            var aliases = await _aliasesTool.GetAliasesAsync(a => a.Name(absentAliasName));
+            var aliasesArray = aliases.ToArray();
+
+            //Assert
+            Assert.Empty(aliasesArray);
+        }
+
+        [Fact]
         public async Task ShouldFilterAliases()
         {
             //Arrange

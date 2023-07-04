@@ -32,6 +32,9 @@ namespace MyLab.Search.EsAdapter.Tools
         {
             var resp = await _clientProvider.Provide().Indices.GetAliasAsync(null, selector, cancellationToken);
 
+            if (resp.ApiCall.HttpStatusCode == 404)
+                return Enumerable.Empty<IEsAliasTool>();
+
             EsException.ThrowIfInvalid(resp);
 
             return resp.Indices.SelectMany(idx =>
