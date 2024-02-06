@@ -36,8 +36,8 @@ namespace MyLab.Search.EsAdapter.Inter
                 ex = ex.AndFactIs("debug-info", response.DebugInformation);
             if(response.ServerError != null)
                 ex = ex.AndFactIs("server-error", response.ServerError);
-            if(response.ApiCall != null)
-                ex = ex.AndFactIs("dump", ApiCallDumper.ApiCallToDump(response.ApiCall));
+            //if(response.ApiCall != null)
+            //    ex = ex.AndFactIs("dump", ApiCallDumper.ApiCallToDump(response.ApiCall));
 
             throw ex;
         }
@@ -52,8 +52,8 @@ namespace MyLab.Search.EsAdapter.Inter
             var ex = new EsException(errorMessage ?? "Elasticsearch interaction error", EsResponseDescription.FromResponse(response));
             if (response.DebugInformation != null)
                 ex = ex.AndFactIs("debug-info", response.DebugInformation);
-            if (response.ApiCall != null)
-                ex = ex.AndFactIs("dump", ApiCallDumper.ApiCallToDump(response.ApiCall));
+            //if (response.ApiCall != null)
+            //    ex = ex.AndFactIs("dump", ApiCallDumper.ApiCallToDump(response.ApiCall));
 
             throw ex;
         }
