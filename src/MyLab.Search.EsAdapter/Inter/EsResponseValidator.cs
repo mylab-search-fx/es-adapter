@@ -20,20 +20,34 @@ namespace MyLab.Search.EsAdapter.Inter
         /// </summary>
         void Validate(ElasticsearchResponseBase response, string errorMessage = null);
     }
-    class EsResponseValidator : IEsResponseValidator
+
+    /// <summary>
+    /// Validates ES response
+    /// </summary>
+    public class EsResponseValidator : IEsResponseValidator
     {
+        /// <summary>
+        /// Get flag which determines response dumps body including
+        /// </summary>
         public bool IncludeBodyInDump { get; }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="EsResponseValidator"/>
+        /// </summary>
         public EsResponseValidator(IOptions<EsOptions> opts)
             :this(opts.Value.IncludeDumpBody)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="EsResponseValidator"/>
+        /// </summary>
         public EsResponseValidator(bool includeBodyInDump)
         {
             IncludeBodyInDump = includeBodyInDump;
         }
 
+        /// <inheritdoc />
         public void Validate(IResponse response, string errorMessage = null)
         {
             if (response.IsValid) return;
@@ -47,6 +61,7 @@ namespace MyLab.Search.EsAdapter.Inter
             throw ex;
         }
 
+        /// <inheritdoc />
         public void Validate(ElasticsearchResponseBase response, string errorMessage = null)
         {
             if (response.Success) return;
