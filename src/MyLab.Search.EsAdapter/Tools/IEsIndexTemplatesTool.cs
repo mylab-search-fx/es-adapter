@@ -62,10 +62,12 @@ namespace MyLab.Search.EsAdapter.Tools
     class EsIndexTemplatesTool : IEsIndexTemplatesTool
     {
         private readonly IEsClientProvider _clientProvider;
+        private readonly IEsResponseValidator _responseValidator;
 
-        public EsIndexTemplatesTool(IEsClientProvider clientProvider)
+        public EsIndexTemplatesTool(IEsClientProvider clientProvider, IEsResponseValidator responseValidator)
         {
             _clientProvider = clientProvider ?? throw new ArgumentNullException(nameof(clientProvider));
+            _responseValidator = responseValidator;
         }
         public async Task<IEnumerable<FoundIndexTemplate>> GetAsync(
                 Func<GetIndexTemplateV2Descriptor, IGetIndexTemplateV2Request> selector = null, 
@@ -74,10 +76,10 @@ namespace MyLab.Search.EsAdapter.Tools
         {
             var response = await _clientProvider.Provide().Indices.GetTemplateV2Async(null,  selector, cancellationToken);
             
-            EsException.ThrowIfInvalid(response, "Unable to get index templates");
+            _responseValidator.Validate(response, "Unable to get index templates");
 
             return response.IndexTemplates.Select(i =>
-                new FoundIndexTemplate(i.Name, i.IndexTemplate, new EsIndexTemplateTool(i.Name, _clientProvider))
+                new FoundIndexTemplate(i.Name, i.IndexTemplate, new EsIndexTemplateTool(i.Name, _clientProvider, _responseValidator))
             );
         }
 
@@ -89,7 +91,7 @@ namespace MyLab.Search.EsAdapter.Tools
             string oneName = string.Join(',', exactlyNames);
             var response = await _clientProvider.Provide().Indices.DeleteTemplateV2Async(oneName, _=>_, cancellationToken);
 
-            EsException.ThrowIfInvalid(response, "Unable to delete index templates");
+            _responseValidator.Validate(response, "Unable to delete index templates");
         }
 
         public async Task DeleteByNameOrWildcardExpressionAsync(string nameOrTemplate,
@@ -99,7 +101,7 @@ namespace MyLab.Search.EsAdapter.Tools
             if (nameOrTemplate == null) throw new ArgumentNullException(nameof(nameOrTemplate));
             var response = await _clientProvider.Provide().Indices.DeleteTemplateV2Async(nameOrTemplate, _ => _, cancellationToken);
 
-            EsException.ThrowIfInvalid(response, "Unable to delete index templates");
+            _responseValidator.Validate(response, "Unable to delete index templates");
         }
 
         public async Task<IEsIndexTemplateTool> PutAsync(
@@ -110,9 +112,9 @@ namespace MyLab.Search.EsAdapter.Tools
             var resp = await _clientProvider.Provide().Indices
                 .PutTemplateV2Async(putRequest, cancellationToken);
 
-            EsException.ThrowIfInvalid(resp, "Unable to create the index template");
+            _responseValidator.Validate(resp, "Unable to create the index template");
 
-            return new EsIndexTemplateTool(putRequest.Name.ToString(), _clientProvider);
+            return new EsIndexTemplateTool(putRequest.Name.ToString(), _clientProvider, _responseValidator);
         }
 
         public async Task<IEsIndexTemplateTool> PutAsync(
@@ -121,7 +123,7 @@ namespace MyLab.Search.EsAdapter.Tools
             CancellationToken cancellationToken = default
         )
         {
-            var tTool = new EsIndexTemplateTool(name, _clientProvider);
+            var tTool = new EsIndexTemplateTool(name, _clientProvider, _responseValidator);
             await tTool.PutAsync(jsonRequest, cancellationToken);
 
             return tTool;

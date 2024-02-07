@@ -29,7 +29,7 @@ namespace IntegrationTests
 
             _templateName = Guid.NewGuid().ToString("N");
 
-            _ctTool = new EsComponentTemplateTool(_templateName, _esClientProvider);
+            _ctTool = new EsComponentTemplateTool(_templateName, _esClientProvider, TestTools.ResponseValidator);
 
             _cTemplateExampleJson = File.ReadAllText("Files\\component-template-example.json");
             _cTemplateExample2Json = File.ReadAllText("Files\\component-template-example-2.json");
@@ -99,7 +99,7 @@ namespace IntegrationTests
             var randomName = Guid.NewGuid().ToString("N");
 
             //Act
-            var exists = await new EsComponentTemplateTool(randomName, _esClientProvider).ExistsAsync(CancellationToken.None);
+            var exists = await new EsComponentTemplateTool(randomName, _esClientProvider, TestTools.ResponseValidator).ExistsAsync(CancellationToken.None);
 
             //Assert
             Assert.False(exists);
@@ -112,7 +112,7 @@ namespace IntegrationTests
             var randomName = Guid.NewGuid().ToString("N");
 
             //Act
-            var cTemplate = await new EsComponentTemplateTool(randomName, _esClientProvider).TryGetAsync(CancellationToken.None);
+            var cTemplate = await new EsComponentTemplateTool(randomName, _esClientProvider, TestTools.ResponseValidator).TryGetAsync(CancellationToken.None);
 
             //Assert
             Assert.Null(cTemplate);

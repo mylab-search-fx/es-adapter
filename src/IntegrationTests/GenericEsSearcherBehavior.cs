@@ -24,7 +24,7 @@ namespace IntegrationTests
             var client = fxt.Client;
             var esClientProvider = new SingleEsClientProvider(client);
 
-            var baseSearcher = new EsSearcher(esClientProvider);
+            var baseSearcher = new EsSearcher(esClientProvider, TestTools.ResponseValidator);
 
             _searcher = new EsSearcher<TestDoc>(baseSearcher, new SingleIndexNameProvider(preindexFxt.IndexName));
         }

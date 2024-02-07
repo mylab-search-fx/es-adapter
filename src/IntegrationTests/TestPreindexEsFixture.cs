@@ -30,13 +30,13 @@ namespace IntegrationTests
         {
             var esClientProvider = new SingleEsClientProvider(_client);
 
-            var indexTool = new EsIndexTool(IndexName, esClientProvider);
+            var indexTool = new EsIndexTool(IndexName, esClientProvider, TestTools.ResponseValidator);
 
             _indexDeleter = await indexTool.CreateAsync(d => d.Map(md => md.AutoMap(typeof(TestDoc))));
 
             await Task.Delay(1000);
 
-            var indexer = new EsIndexer(esClientProvider);
+            var indexer = new EsIndexer(esClientProvider, TestTools.ResponseValidator);
 
             await indexer.BulkAsync(IndexName, new EsBulkIndexingRequest<TestDoc>
             {

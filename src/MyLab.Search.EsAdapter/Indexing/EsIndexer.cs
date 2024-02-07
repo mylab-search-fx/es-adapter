@@ -14,13 +14,15 @@ namespace MyLab.Search.EsAdapter.Indexing
     public class EsIndexer : IEsIndexer
     {
         private readonly IEsClientProvider _clientProvider;
+        private readonly IEsResponseValidator _responseValidator;
 
         /// <summary>
         /// Initializes a new instance of <see cref="EsIndexer"/>
         /// </summary>
-        public EsIndexer(IEsClientProvider clientProvider)
+        public EsIndexer(IEsClientProvider clientProvider, IEsResponseValidator responseValidator)
         {
             _clientProvider = clientProvider;
+            _responseValidator = responseValidator;
         }
 
         /// <inheritdoc />
@@ -28,14 +30,14 @@ namespace MyLab.Search.EsAdapter.Indexing
         {
             var resp = await _clientProvider.Provide().CreateAsync(doc, d => d.Index(indexName), cancellationToken);
 
-            EsException.ThrowIfInvalid(resp, "Unable to create document");
+            _responseValidator.Validate(resp, "Unable to create document");
         }
         /// <inheritdoc />
         public async Task IndexAsync<TDoc>(string indexName, TDoc doc, CancellationToken cancellationToken = default) where TDoc : class
         {
             var resp = await _clientProvider.Provide().IndexAsync(doc, d => d.Index(indexName), cancellationToken);
 
-            EsException.ThrowIfInvalid(resp, "Unable to index document");
+            _responseValidator.Validate(resp, "Unable to index document");
         }
         /// <inheritdoc />
         public async Task UpdateAsync<TDoc>(string indexName, Id id, Expression<Func<TDoc>> factoryExpression, CancellationToken cancellationToken = default) where TDoc : class
@@ -48,7 +50,7 @@ namespace MyLab.Search.EsAdapter.Indexing
 
             var resp = await _clientProvider.Provide().UpdateAsync(updateReq, cancellationToken);
 
-            EsException.ThrowIfInvalid(resp, "Unable to update document");
+            _responseValidator.Validate(resp, "Unable to update document");
         }
         /// <inheritdoc />
         public async Task UpdateAsync<TDoc>(string indexName, TDoc partialDocument, CancellationToken cancellationToken = default) where TDoc : class
@@ -61,7 +63,7 @@ namespace MyLab.Search.EsAdapter.Indexing
                     .DocAsUpsert(), 
                 cancellationToken);
 
-            EsException.ThrowIfInvalid(resp, "Unable to update document");
+            _responseValidator.Validate(resp, "Unable to update document");
         }
         /// <inheritdoc />
         public async Task DeleteAsync(string indexName, Id docId, CancellationToken cancellationToken = default)
@@ -69,7 +71,7 @@ namespace MyLab.Search.EsAdapter.Indexing
             IDeleteRequest deleteReq = new DeleteRequest(indexName, docId);
             var resp = await _clientProvider.Provide().DeleteAsync(deleteReq, cancellationToken);
 
-            EsException.ThrowIfInvalid(resp, "Unable to delete document");
+            _responseValidator.Validate(resp, "Unable to delete document");
         }
         /// <inheritdoc />
         public async Task BulkAsync<TDoc>(string indexName, EsBulkIndexingRequest<TDoc> request, CancellationToken cancellationToken = default) where TDoc : class
@@ -114,7 +116,7 @@ namespace MyLab.Search.EsAdapter.Indexing
         {
             var resp = await _clientProvider.Provide().BulkAsync(selector, cancellationToken);
 
-            EsException.ThrowIfInvalid(resp);
+            _responseValidator.Validate(resp);
         }
     }
 }

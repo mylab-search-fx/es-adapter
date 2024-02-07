@@ -19,7 +19,7 @@ namespace IntegrationTests
             _client = fxt.Client;
             var esClientProvider = new SingleEsClientProvider(_client);
             
-            _indexer = new EsIndexer(esClientProvider);
+            _indexer = new EsIndexer(esClientProvider, TestTools.ResponseValidator);
         }
 
         [Fact]

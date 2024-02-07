@@ -26,15 +26,15 @@ namespace IntegrationTests
 
             _indexName = Guid.NewGuid().ToString("N");
 
-            _indexer = new EsIndexer(esClientProvider);
-            _esTools = new EsTools(esClientProvider);
+            _indexer = new EsIndexer(esClientProvider, TestTools.ResponseValidator);
+            _esTools = new EsTools(esClientProvider, TestTools.ResponseValidator);
         }
 
         private async Task<TestDoc> SearchAsync(string id)
         {
             var res = await _client.SearchAsync(GetSearchFunc());
 
-            EsException.ThrowIfInvalid(res);
+            TestTools.ResponseValidator.Validate(res);
 
             return res.Hits.FirstOrDefault()?.Source;
 

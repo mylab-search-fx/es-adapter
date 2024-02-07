@@ -31,7 +31,7 @@ namespace IntegrationTests
 
             _esClientProvider.Provide().Indices.DeleteTemplateV2(new DeleteIndexTemplateV2Request(nameof(EsIndexTemplateToolBehavior).ToLower() + "-*"));
 
-            _itTool = new EsIndexTemplateTool(_templateName, _esClientProvider);
+            _itTool = new EsIndexTemplateTool(_templateName, _esClientProvider, TestTools.ResponseValidator);
 
             _cTemplateExampleJson = File.ReadAllText("Files\\index-template-example.json");
             _cTemplateExample2Json = File.ReadAllText("Files\\index-template-example-2.json");
@@ -101,7 +101,7 @@ namespace IntegrationTests
             var randomName = Guid.NewGuid().ToString("N");
 
             //Act
-            var exists = await new EsIndexTemplateTool(randomName, _esClientProvider).ExistsAsync(CancellationToken.None);
+            var exists = await new EsIndexTemplateTool(randomName, _esClientProvider, TestTools.ResponseValidator).ExistsAsync(CancellationToken.None);
 
             //Assert
             Assert.False(exists);
@@ -114,7 +114,7 @@ namespace IntegrationTests
             var randomName = Guid.NewGuid().ToString("N");
 
             //Act
-            var cTemplate = await new EsIndexTemplateTool(randomName, _esClientProvider).TryGetAsync(CancellationToken.None);
+            var cTemplate = await new EsIndexTemplateTool(randomName, _esClientProvider, TestTools.ResponseValidator).TryGetAsync(CancellationToken.None);
 
             //Assert
             Assert.Null(cTemplate);

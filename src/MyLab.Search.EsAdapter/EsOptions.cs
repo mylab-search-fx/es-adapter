@@ -25,6 +25,11 @@
         /// Serializer factory
         /// </summary>
         public IEsSerializerFactory SerializerFactory { get; set; }
+
+        /// <summary>
+        /// Determines whether the request and response body will be added to the dumps 
+        /// </summary>
+        public bool IncludeDumpBody { get; set; } = true;
     }
 
     /// <summary>

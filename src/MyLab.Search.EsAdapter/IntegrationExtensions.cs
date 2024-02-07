@@ -31,7 +31,8 @@ namespace MyLab.Search.EsAdapter
                 .AddSingleton<IEsIndexer, EsIndexer>()
                 .AddSingleton<IEsSearcher, EsSearcher>()
                 .AddSingleton(typeof(IEsIndexer<>), typeof(EsIndexer<>))
-                .AddSingleton(typeof(IEsSearcher<>), typeof(EsSearcher<>));
+                .AddSingleton(typeof(IEsSearcher<>), typeof(EsSearcher<>))
+                .AddSingleton<IEsResponseValidator, EsResponseValidator>();
 
             if (configure != null)
                 srv.Configure(configure);

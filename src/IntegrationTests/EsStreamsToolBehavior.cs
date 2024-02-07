@@ -21,12 +21,12 @@ namespace IntegrationTests
         {
             fxt.Output = output;
             var esClientProvider = new SingleEsClientProvider(fxt.Client);
-            _streamsTool = new EsStreamsTool(esClientProvider);
+            _streamsTool = new EsStreamsTool(esClientProvider, TestTools.ResponseValidator);
 
             _testStreamName = Guid.NewGuid().ToString("N");
-            _testStream = new EsStreamTool(_testStreamName, esClientProvider);
+            _testStream = new EsStreamTool(_testStreamName, esClientProvider, TestTools.ResponseValidator);
 
-            _indexTemplate = new EsIndexTemplateTool(Guid.NewGuid().ToString("N"), esClientProvider);
+            _indexTemplate = new EsIndexTemplateTool(Guid.NewGuid().ToString("N"), esClientProvider, TestTools.ResponseValidator);
         }
 
         public Task InitializeAsync()

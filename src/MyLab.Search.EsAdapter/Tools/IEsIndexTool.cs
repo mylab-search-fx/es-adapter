@@ -57,18 +57,20 @@ namespace MyLab.Search.EsAdapter.Tools
     {
         private readonly string _indexName;
         private readonly IEsClientProvider _clientProvider;
+        private readonly IEsResponseValidator _responseValidator;
 
-        public EsIndexTool(string indexName, IEsClientProvider clientProvider)
+        public EsIndexTool(string indexName, IEsClientProvider clientProvider, IEsResponseValidator responseValidator)
         {
             _indexName = indexName ?? throw new ArgumentNullException(nameof(indexName));
             _clientProvider = clientProvider ?? throw new ArgumentNullException(nameof(clientProvider));
+            _responseValidator = responseValidator;
         }
 
         public async Task<IAsyncDisposable> CreateAsync(Func<CreateIndexDescriptor, ICreateIndexRequest> createDescriptor = null, CancellationToken cancellationToken = default)
         {
             var resp = await _clientProvider.Provide().Indices.CreateAsync(_indexName, createDescriptor, cancellationToken);
 
-            EsException.ThrowIfInvalid(resp, "Unable to create the index");
+            _responseValidator.Validate(resp, "Unable to create the index");
 
             return new IndexDeleter(this);
         }
@@ -77,7 +79,7 @@ namespace MyLab.Search.EsAdapter.Tools
         {
             var resp = await _clientProvider.Provide().LowLevel.Indices.CreateAsync<CreateIndexResponse>(_indexName, jsonSettings, null, cancellationToken);
 
-            EsException.ThrowIfInvalid(resp, "Unable to create the index");
+            _responseValidator.Validate(resp, "Unable to create the index");
 
             return new IndexDeleter(this);
         }
@@ -86,7 +88,7 @@ namespace MyLab.Search.EsAdapter.Tools
         {
             var resp = await _clientProvider.Provide().Indices.DeleteAsync(_indexName, ct: cancellationToken);
 
-            EsException.ThrowIfInvalid(resp, "Unable to delete the index");
+            _responseValidator.Validate(resp, "Unable to delete the index");
         }
 
         public async Task<bool> ExistsAsync(CancellationToken cancellationToken = default)
@@ -96,7 +98,7 @@ namespace MyLab.Search.EsAdapter.Tools
             if (!resp.IsValid && resp.ServerError.Status == 404)
                 return false;
 
-            EsException.ThrowIfInvalid(resp);
+            _responseValidator.Validate(resp);
 
             return resp.Indices.ContainsKey(_indexName);
         }
@@ -122,7 +124,7 @@ namespace MyLab.Search.EsAdapter.Tools
             if (resp.ApiCall.HttpStatusCode == 404)
                 return null;
 
-            EsException.ThrowIfInvalid(resp);
+            _responseValidator.Validate(resp);
 
             return null;
         }
@@ -153,7 +155,7 @@ namespace MyLab.Search.EsAdapter.Tools
         public IEsAliasTool Alias(string aliasName)
         {
             if (aliasName == null) throw new ArgumentNullException(nameof(aliasName));
-            return new EsAliasTool(aliasName, _indexName, _clientProvider);
+            return new EsAliasTool(aliasName, _indexName, _clientProvider, _responseValidator);
         }
 
         class IndexDeleter : IAsyncDisposable

@@ -39,11 +39,13 @@ namespace MyLab.Search.EsAdapter.Tools
     {
         private readonly string _streamName;
         private readonly IEsClientProvider _clientProvider;
+        private readonly IEsResponseValidator _responseValidator;
 
-        public EsStreamTool(string streamName, IEsClientProvider clientProvider)
+        public EsStreamTool(string streamName, IEsClientProvider clientProvider, IEsResponseValidator responseValidator)
         {
             _streamName = streamName ?? throw new ArgumentNullException(nameof(streamName));
             _clientProvider = clientProvider ?? throw new ArgumentNullException(nameof(clientProvider));
+            _responseValidator = responseValidator;
         }
 
         public async Task<IAsyncDisposable> CreateAsync(CancellationToken cancellationToken = default)
@@ -51,7 +53,7 @@ namespace MyLab.Search.EsAdapter.Tools
             var resp = await _clientProvider.Provide().LowLevel
                 .DoRequestAsync<StringResponse>(HttpMethod.PUT, $"_data_stream/{_streamName}", cancellationToken);
 
-            EsException.ThrowIfInvalid(resp, "Unable to create the stream");
+            _responseValidator.Validate(resp, "Unable to create the stream");
 
             return new StreamDeleter(this);
         }
@@ -61,7 +63,7 @@ namespace MyLab.Search.EsAdapter.Tools
             var resp = await _clientProvider.Provide().LowLevel
                 .DoRequestAsync<StringResponse>(HttpMethod.DELETE, $"_data_stream/{_streamName}", cancellationToken);
 
-            EsException.ThrowIfInvalid(resp, "Unable to delete the stream");
+            _responseValidator.Validate(resp, "Unable to delete the stream");
         }
 
         public async Task<bool> ExistsAsync(CancellationToken cancellationToken = default)
@@ -71,7 +73,7 @@ namespace MyLab.Search.EsAdapter.Tools
 
             if (resp.HttpStatusCode == 404) return false;
 
-            EsException.ThrowIfInvalid(resp);
+            _responseValidator.Validate(resp);
 
             return true;
         }
@@ -83,13 +85,13 @@ namespace MyLab.Search.EsAdapter.Tools
             var resp = await _clientProvider.Provide().LowLevel
                 .DoRequestAsync<StringResponse>(HttpMethod.DELETE, $"{_streamName}/_alias/{aliasName}", cancellationToken);
 
-            EsException.ThrowIfInvalid(resp, "Unable to delete the alias");
+            _responseValidator.Validate(resp, "Unable to delete the alias");
         }
 
         public IEsAliasTool Alias(string aliasName)
         {
             if (aliasName == null) throw new ArgumentNullException(nameof(aliasName));
-            return new EsAliasTool(aliasName, _streamName, _clientProvider);
+            return new EsAliasTool(aliasName, _streamName, _clientProvider, _responseValidator);
         }
 
         class StreamDeleter : IAsyncDisposable

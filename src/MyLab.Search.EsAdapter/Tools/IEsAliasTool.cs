@@ -42,15 +42,17 @@ namespace MyLab.Search.EsAdapter.Tools
     class EsAliasTool : IEsAliasTool
     {
         private readonly IEsClientProvider _clientProvider;
+        private readonly IEsResponseValidator _responseValidator;
 
         public string TargetName { get; }
         public string AliasName { get; }
 
-        public EsAliasTool(string aliasName, string targetName, IEsClientProvider clientProvider)
+        public EsAliasTool(string aliasName, string targetName, IEsClientProvider clientProvider, IEsResponseValidator responseValidator)
         {
             TargetName = targetName ?? throw new ArgumentNullException(nameof(targetName));
             AliasName = aliasName ?? throw new ArgumentNullException(nameof(aliasName));
             _clientProvider = clientProvider ?? throw new ArgumentNullException(nameof(clientProvider));
+            _responseValidator = responseValidator;
         }
 
         public async Task<bool> ExistsAsync(CancellationToken cancellationToken = default)
@@ -61,7 +63,7 @@ namespace MyLab.Search.EsAdapter.Tools
             if (!resp.IsValid && resp.ServerError.Status == 404)
                 return false;
 
-            EsException.ThrowIfInvalid(resp);
+            _responseValidator.Validate(resp);
 
             return resp.Indices.TryGetValue(TargetName, out var aliases) && aliases.Aliases.ContainsKey(AliasName);
         }
@@ -71,7 +73,7 @@ namespace MyLab.Search.EsAdapter.Tools
             var resp = await _clientProvider.Provide().Indices
                 .DeleteAliasAsync(new DeleteAliasRequest(TargetName, AliasName), cancellationToken);
             
-            EsException.ThrowIfInvalid(resp);
+            _responseValidator.Validate(resp);
         }
 
         public async Task<AliasDefinition> GetAsync(CancellationToken cancellationToken = default)
@@ -79,7 +81,7 @@ namespace MyLab.Search.EsAdapter.Tools
             var resp = await _clientProvider.Provide().Indices
                 .GetAliasAsync(TargetName, d => d.Name(AliasName), cancellationToken);
 
-            EsException.ThrowIfInvalid(resp);
+            _responseValidator.Validate(resp);
 
             if(!resp.Indices.TryGetValue(TargetName, out var index))
                 throw new InvalidOperationException("Index not found")
@@ -97,7 +99,7 @@ namespace MyLab.Search.EsAdapter.Tools
         {
             var resp = await _clientProvider.Provide().Indices.PutAliasAsync(TargetName, AliasName, selector, cancellationToken);
 
-            EsException.ThrowIfInvalid(resp);
+            _responseValidator.Validate(resp);
 
             return new AliasDeleter(this);
         }

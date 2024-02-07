@@ -18,7 +18,7 @@ namespace IntegrationTests
             var esClientProvider = new SingleEsClientProvider(client);
 
             var indexName = Guid.NewGuid().ToString("N");
-            _indexTool = new EsIndexTool(indexName, esClientProvider);
+            _indexTool = new EsIndexTool(indexName, esClientProvider, TestTools.ResponseValidator);
         }
 
         public async Task InitializeAsync()

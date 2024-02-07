@@ -20,7 +20,7 @@ namespace IntegrationTests
             var esClientProvider = new SingleEsClientProvider(_client);
 
             var indexName = Guid.NewGuid().ToString("N");
-            _indexTool = new EsIndexTool(indexName, esClientProvider);
+            _indexTool = new EsIndexTool(indexName, esClientProvider, TestTools.ResponseValidator);
         }
     }
 }

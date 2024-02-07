@@ -19,10 +19,10 @@ namespace IntegrationTests
         {
             fxt.Output = output;
             var esClientProvider = new SingleEsClientProvider(fxt.Client);
-            _aliasesTool = new EsAliasesTool(esClientProvider);
+            _aliasesTool = new EsAliasesTool(esClientProvider, TestTools.ResponseValidator);
 
             var indexName = Guid.NewGuid().ToString("N");
-            _indexTool = new EsIndexTool(indexName, esClientProvider);
+            _indexTool = new EsIndexTool(indexName, esClientProvider, TestTools.ResponseValidator);
         }
 
         [Fact]

@@ -21,10 +21,10 @@ namespace IntegrationTests
         {
             fxt.Output = output;
             var esClientProvider = new SingleEsClientProvider(fxt.Client);
-            _templatesTool = new EsIndexTemplatesTool(esClientProvider);
+            _templatesTool = new EsIndexTemplatesTool(esClientProvider, TestTools.ResponseValidator);
 
             _testTemplateName = Guid.NewGuid().ToString("N");
-            _testTemplate = new EsIndexTemplateTool(_testTemplateName, esClientProvider);
+            _testTemplate = new EsIndexTemplateTool(_testTemplateName, esClientProvider, TestTools.ResponseValidator);
 
             _putDescriptor = d => d.IndexPatterns(Guid.NewGuid().ToString("N"));
         }

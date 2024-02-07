@@ -56,10 +56,12 @@ namespace MyLab.Search.EsAdapter.Tools
     class EsIndexesTool : IEsIndexesTool
     {
         private readonly IEsClientProvider _clientProvider;
+        private readonly IEsResponseValidator _responseValidator;
 
-        public EsIndexesTool(IEsClientProvider clientProvider)
+        public EsIndexesTool(IEsClientProvider clientProvider, IEsResponseValidator responseValidator)
         {
             _clientProvider = clientProvider ?? throw new ArgumentNullException(nameof(clientProvider));
+            _responseValidator = responseValidator;
         }
         public async Task<IEnumerable<FoundIndex>> GetAsync(
                 Func<GetIndexDescriptor, IGetIndexRequest> selector = null, 
@@ -68,10 +70,10 @@ namespace MyLab.Search.EsAdapter.Tools
         {
             var response = await _clientProvider.Provide().Indices.GetAsync(Indices.All, selector, cancellationToken);
             
-            EsException.ThrowIfInvalid(response, "Unable to get indexes");
+            _responseValidator.Validate(response, "Unable to get indexes");
 
             return response.Indices.Select(i =>
-                new FoundIndex(i.Key.Name, i.Value, new EsIndexTool(i.Key.Name, _clientProvider))
+                new FoundIndex(i.Key.Name, i.Value, new EsIndexTool(i.Key.Name, _clientProvider, _responseValidator))
             );
         }
 
@@ -82,7 +84,7 @@ namespace MyLab.Search.EsAdapter.Tools
         {
             var response = await _clientProvider.Provide().Indices.DeleteAsync(Indices.All, selector, cancellationToken);
 
-            EsException.ThrowIfInvalid(response, "Unable to delete indexes");
+            _responseValidator.Validate(response, "Unable to delete indexes");
         }
 
         public async Task<IEsIndexTool> CreateAsync(
@@ -93,9 +95,9 @@ namespace MyLab.Search.EsAdapter.Tools
             var resp = await _clientProvider.Provide().Indices
                 .CreateAsync(createRequest.Index, _ => createRequest, cancellationToken);
 
-            EsException.ThrowIfInvalid(resp, "Unable to create the index");
+            _responseValidator.Validate(resp, "Unable to create the index");
 
-            return new EsIndexTool(createRequest.Index.Name, _clientProvider);
+            return new EsIndexTool(createRequest.Index.Name, _clientProvider, _responseValidator);
         }
 
         public async Task<IEsIndexTool> CreateAsync(
@@ -107,9 +109,9 @@ namespace MyLab.Search.EsAdapter.Tools
             var resp = await _clientProvider.Provide().LowLevel.Indices.CreateAsync<CreateIndexResponse>(
                 indexName, jsonSettings, null, cancellationToken);
 
-            EsException.ThrowIfInvalid(resp, "Unable to create the index");
+            _responseValidator.Validate(resp, "Unable to create the index");
 
-            return new EsIndexTool(indexName, _clientProvider);
+            return new EsIndexTool(indexName, _clientProvider, _responseValidator);
         }
     }
 }
