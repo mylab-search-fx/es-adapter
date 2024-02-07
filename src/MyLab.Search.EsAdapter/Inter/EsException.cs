@@ -32,12 +32,10 @@ namespace MyLab.Search.EsAdapter.Inter
             if(response.IsValid) return;
 
             var ex = new EsException(errorMessage ?? "Elasticsearch interaction error", EsResponseDescription.FromResponse(response));
-            if (response.DebugInformation != null)
-                ex = ex.AndFactIs("debug-info", response.DebugInformation);
             if(response.ServerError != null)
                 ex = ex.AndFactIs("server-error", response.ServerError);
-            //if(response.ApiCall != null)
-            //    ex = ex.AndFactIs("dump", ApiCallDumper.ApiCallToDump(response.ApiCall));
+            if (response.ApiCall != null)
+                ex = ex.AndFactIs("dump", ApiCallDumper.ApiCallToDump(response.ApiCall, includeBody: false));
 
             throw ex;
         }
@@ -50,10 +48,8 @@ namespace MyLab.Search.EsAdapter.Inter
             if (response.Success) return;
 
             var ex = new EsException(errorMessage ?? "Elasticsearch interaction error", EsResponseDescription.FromResponse(response));
-            if (response.DebugInformation != null)
-                ex = ex.AndFactIs("debug-info", response.DebugInformation);
-            //if (response.ApiCall != null)
-            //    ex = ex.AndFactIs("dump", ApiCallDumper.ApiCallToDump(response.ApiCall));
+            if (response.ApiCall != null)
+                ex = ex.AndFactIs("dump", ApiCallDumper.ApiCallToDump(response.ApiCall, includeBody: false));
 
             throw ex;
         }
