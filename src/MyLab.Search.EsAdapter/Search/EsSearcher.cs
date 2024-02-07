@@ -7,15 +7,22 @@ using Nest;
 
 namespace MyLab.Search.EsAdapter.Search
 {
+    /// <summary>
+    /// Default implementation for <see cref="IEsSearcher"/>
+    /// </summary>
     public class EsSearcher : IEsSearcher
     {
         private readonly IEsClientProvider _clientProvider;
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="EsSearcher"/>
+        /// </summary>
         public EsSearcher(IEsClientProvider clientProvider)
         {
             _clientProvider = clientProvider;
         }
 
+        /// <inheritdoc />
         public async Task<EsFound<TDoc>> SearchAsync<TDoc>(
             string indexName, 
             EsSearchParams<TDoc> searchParams, 
@@ -29,6 +36,7 @@ namespace MyLab.Search.EsAdapter.Search
             return EsFound<TDoc>.FromSearchResponse(resp);
         }
 
+        /// <inheritdoc />
         public async Task<EsHlFound<TDoc>> SearchAsync<TDoc>(
             string indexName, 
             EsSearchParams<TDoc> searchParams, 
