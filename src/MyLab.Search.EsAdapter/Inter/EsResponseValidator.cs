@@ -42,7 +42,7 @@ namespace MyLab.Search.EsAdapter.Inter
             if (response.ServerError != null)
                 ex = ex.AndFactIs("server-error", response.ServerError);
             if (response.ApiCall != null)
-                ex = ex.AndFactIs("dump", ApiCallDumper.ApiCallToDump(response.ApiCall, includeBody: false));
+                ex = ex.AndFactIs("dump", ApiCallDumper.ApiCallToDump(response.ApiCall, includeBody: IncludeBodyInDump));
 
             throw ex;
         }
@@ -53,7 +53,7 @@ namespace MyLab.Search.EsAdapter.Inter
 
             var ex = new EsException(errorMessage ?? "Elasticsearch interaction error", EsResponseDescription.FromResponse(response));
             if (response.ApiCall != null)
-                ex = ex.AndFactIs("dump", ApiCallDumper.ApiCallToDump(response.ApiCall, includeBody: false));
+                ex = ex.AndFactIs("dump", ApiCallDumper.ApiCallToDump(response.ApiCall, includeBody: IncludeBodyInDump));
 
             throw ex;
         }
