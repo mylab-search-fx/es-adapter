@@ -14,7 +14,7 @@ namespace MyLab.Search.EsAdapter.Indexing
         /// <summary>
         /// Creates new document in the index
         /// </summary>
-        Task CreateAsync<TDoc>(string indexName, TDoc doc, CancellationToken cancellationToken = default)
+        Task<CreateResponse> CreateAsync<TDoc>(string indexName, TDoc doc, CancellationToken cancellationToken = default)
             where TDoc : class;
         /// <summary>
         /// Creates or replaces document in the index
@@ -27,7 +27,7 @@ namespace MyLab.Search.EsAdapter.Indexing
         /// </summary>
         Task UpdateAsync<TDoc>(string indexName, Id id, Expression<Func<TDoc>> factoryExpression, CancellationToken cancellationToken = default)
             where TDoc : class;
-
+            
         /// <summary>
         /// Update indexed document partially
         /// </summary>
@@ -42,11 +42,11 @@ namespace MyLab.Search.EsAdapter.Indexing
         /// <summary>
         /// Process bulk indexing request
         /// </summary>
-        Task BulkAsync<TDoc>(string indexName, EsBulkIndexingRequest<TDoc> request, CancellationToken cancellationToken = default) where TDoc : class;
+        Task<BulkResponse> BulkAsync<TDoc>(string indexName, EsBulkIndexingRequest<TDoc> request, CancellationToken cancellationToken = default) where TDoc : class;
 
         /// <summary>
         /// Process bulk indexing request
         /// </summary>
-        Task BulkAsync<TDoc>(string indexName, Func<BulkDescriptor, IBulkRequest> selector, CancellationToken cancellationToken = default) where TDoc : class;
+        Task<BulkResponse> BulkAsync<TDoc>(string indexName, Func<BulkDescriptor, IBulkRequest> selector, CancellationToken cancellationToken = default) where TDoc : class;
     }
 }

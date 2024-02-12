@@ -17,9 +17,11 @@ namespace IntegrationTests
         private readonly string _indexName;
         private readonly IEsTools _esTools;
         private IAsyncDisposable _indexDeleter;
+        private readonly ITestOutputHelper _output;
 
         public EsIndexerBehavior(TestClientFixture fxt, ITestOutputHelper output)
         {
+            _output = output;
             fxt.Output = output;
             _client = fxt.Client;
             var esClientProvider = new SingleEsClientProvider(_client);

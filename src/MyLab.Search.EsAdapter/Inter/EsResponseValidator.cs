@@ -50,7 +50,7 @@ namespace MyLab.Search.EsAdapter.Inter
         /// <inheritdoc />
         public void Validate(IResponse response, string errorMessage = null)
         {
-            if (response.IsValid) return;
+            if (response.ApiCall.Success) return;
 
             var ex = new EsException(errorMessage ?? "Elasticsearch interaction error", EsResponseDescription.FromResponse(response));
             if (response.ServerError != null)

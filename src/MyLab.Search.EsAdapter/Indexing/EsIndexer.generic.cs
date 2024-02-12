@@ -68,12 +68,12 @@ namespace MyLab.Search.EsAdapter.Indexing
             return _baseIndexer.DeleteAsync(_indexName, docId, cancellationToken);
         }
         /// <inheritdoc />
-        public Task BulkAsync(EsBulkIndexingRequest<TDoc> request, CancellationToken cancellationToken = default)
+        public Task<BulkResponse> BulkAsync(EsBulkIndexingRequest<TDoc> request, CancellationToken cancellationToken = default)
         {
             return _baseIndexer.BulkAsync(_indexName, request, cancellationToken);
         }
         /// <inheritdoc />
-        public Task BulkAsync(Func<BulkDescriptor, IBulkRequest> selector, CancellationToken cancellationToken = default)
+        public Task<BulkResponse> BulkAsync(Func<BulkDescriptor, IBulkRequest> selector, CancellationToken cancellationToken = default)
         {
             return _baseIndexer.BulkAsync<TDoc>(_indexName, selector, cancellationToken);
         }

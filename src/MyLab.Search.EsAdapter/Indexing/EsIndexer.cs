@@ -26,11 +26,13 @@ namespace MyLab.Search.EsAdapter.Indexing
         }
 
         /// <inheritdoc />
-        public async Task CreateAsync<TDoc>(string indexName, TDoc doc, CancellationToken cancellationToken = default) where TDoc : class
+        public async Task<CreateResponse> CreateAsync<TDoc>(string indexName, TDoc doc, CancellationToken cancellationToken = default) where TDoc : class
         {
             var resp = await _clientProvider.Provide().CreateAsync(doc, d => d.Index(indexName), cancellationToken);
 
             _responseValidator.Validate(resp, "Unable to create document");
+
+            return resp;
         }
         /// <inheritdoc />
         public async Task IndexAsync<TDoc>(string indexName, TDoc doc, CancellationToken cancellationToken = default) where TDoc : class
@@ -74,7 +76,7 @@ namespace MyLab.Search.EsAdapter.Indexing
             _responseValidator.Validate(resp, "Unable to delete document");
         }
         /// <inheritdoc />
-        public async Task BulkAsync<TDoc>(string indexName, EsBulkIndexingRequest<TDoc> request, CancellationToken cancellationToken = default) where TDoc : class
+        public Task<BulkResponse> BulkAsync<TDoc>(string indexName, EsBulkIndexingRequest<TDoc> request, CancellationToken cancellationToken = default) where TDoc : class
         {
             if (request.IsEmpty())
                 throw new InvalidOperationException("Bulk request is empty");
@@ -97,11 +99,11 @@ namespace MyLab.Search.EsAdapter.Indexing
             if (request.DeleteList != null)
                 req.Operations.AddRange(request.DeleteList.Select(d => new BulkDeleteOperation<TDoc>(d)));
 
-            await BulkCoreAsync(_ => req, cancellationToken);
+            return BulkCoreAsync(_ => req, cancellationToken);
         }
 
         /// <inheritdoc />
-        public Task BulkAsync<TDoc>(string indexName, Func<BulkDescriptor, IBulkRequest> selector, CancellationToken cancellationToken = default) where TDoc : class
+        public Task<BulkResponse> BulkAsync<TDoc>(string indexName, Func<BulkDescriptor, IBulkRequest> selector, CancellationToken cancellationToken = default) where TDoc : class
         {
             var resSelector = new Func<BulkDescriptor, IBulkRequest>(d =>
             {
@@ -112,11 +114,12 @@ namespace MyLab.Search.EsAdapter.Indexing
             return BulkCoreAsync(resSelector, cancellationToken);
         }
 
-        async Task BulkCoreAsync(Func<BulkDescriptor, IBulkRequest> selector, CancellationToken cancellationToken)
+        async Task<BulkResponse> BulkCoreAsync(Func<BulkDescriptor, IBulkRequest> selector, CancellationToken cancellationToken)
         {
             var resp = await _clientProvider.Provide().BulkAsync(selector, cancellationToken);
 
             _responseValidator.Validate(resp);
+            return resp;
         }
     }
 }
