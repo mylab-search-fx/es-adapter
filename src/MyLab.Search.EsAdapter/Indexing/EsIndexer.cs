@@ -26,13 +26,11 @@ namespace MyLab.Search.EsAdapter.Indexing
         }
 
         /// <inheritdoc />
-        public async Task<CreateResponse> CreateAsync<TDoc>(string indexName, TDoc doc, CancellationToken cancellationToken = default) where TDoc : class
+        public async Task CreateAsync<TDoc>(string indexName, TDoc doc, CancellationToken cancellationToken = default) where TDoc : class
         {
             var resp = await _clientProvider.Provide().CreateAsync(doc, d => d.Index(indexName), cancellationToken);
 
             _responseValidator.Validate(resp, "Unable to create document");
-
-            return resp;
         }
         /// <inheritdoc />
         public async Task IndexAsync<TDoc>(string indexName, TDoc doc, CancellationToken cancellationToken = default) where TDoc : class
@@ -118,7 +116,7 @@ namespace MyLab.Search.EsAdapter.Indexing
         {
             var resp = await _clientProvider.Provide().BulkAsync(selector, cancellationToken);
 
-            _responseValidator.Validate(resp);
+            _responseValidator.Validate(resp, httpOnly: true);
             return resp;
         }
     }

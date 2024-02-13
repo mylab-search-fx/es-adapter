@@ -26,14 +26,24 @@ namespace IntegrationTests
         public async Task ShouldDetectIndexNotFoundWhenIndexing()
         {
             //Arrange
+            EsException exception = null;
+
             var doc = TestDoc.Generate();
 
             //Act
-            var bulkResp = await _indexer.CreateAsync("foo", doc);
-            var respDesc = EsResponseDescription.FromResponse(bulkResp);
+            
+            try
+            {
+                await _indexer.CreateAsync("foo", doc);
+            }
+            catch (EsException e)
+            {
+                exception = e;
+            }
 
             //Assert
-            Assert.True(respDesc.HasIndexNotFound);
+            Assert.NotNull(exception);
+            Assert.True(exception.Response.HasIndexNotFound);
         }
 
         [Fact]

@@ -13,7 +13,7 @@ namespace MyLab.Search.EsAdapter.Inter
         /// <summary>
         /// Validates a response and throws an exception if response is invalid
         /// </summary>
-        void Validate(IResponse response, string errorMessage = null);
+        void Validate(IResponse response, string errorMessage = null, bool httpOnly = false);
 
         /// <summary>
         /// Validates a response and throws an exception if response is invalid
@@ -48,9 +48,16 @@ namespace MyLab.Search.EsAdapter.Inter
         }
 
         /// <inheritdoc />
-        public void Validate(IResponse response, string errorMessage = null)
+        public void Validate(IResponse response, string errorMessage = null, bool httpOnly = false)
         {
-            if (response.ApiCall.Success) return;
+            if (httpOnly)
+            {
+                if (response.ApiCall.Success) return;
+            }
+            else
+            {
+                if (response.IsValid) return;
+            }
 
             var ex = new EsException(errorMessage ?? "Elasticsearch interaction error", EsResponseDescription.FromResponse(response));
             if (response.ServerError != null)

@@ -14,7 +14,7 @@ namespace MyLab.Search.EsAdapter.Indexing
         /// <summary>
         /// Creates new document in the index
         /// </summary>
-        Task<CreateResponse> CreateAsync<TDoc>(string indexName, TDoc doc, CancellationToken cancellationToken = default)
+        Task CreateAsync<TDoc>(string indexName, TDoc doc, CancellationToken cancellationToken = default)
             where TDoc : class;
         /// <summary>
         /// Creates or replaces document in the index

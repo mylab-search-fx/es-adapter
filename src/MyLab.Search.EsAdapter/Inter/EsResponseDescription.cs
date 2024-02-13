@@ -8,8 +8,6 @@ namespace MyLab.Search.EsAdapter.Inter
     /// <summary>
     /// Describe Elasticsearch response
     /// </summary>
-    /// todo: To remove
-    [Obsolete("Will be removed in next versions")]
     public class EsResponseDescription
     {
         /// <summary>
