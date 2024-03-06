@@ -21,10 +21,10 @@ namespace MyLab.Search.EsAdapter.Inter
         /// <summary>
         /// Initializes a new instance of <see cref="CombineEsSerializer"/>
         /// </summary>
-        public CombineEsSerializer(IElasticsearchSerializer core)
+        public CombineEsSerializer(IElasticsearchSerializer core, JsonSerializer jsonSerializer)
         {
-            _coreSerializer = core;
-            _newtonSerializer = new JsonSerializer();
+            _coreSerializer = core ?? throw new ArgumentNullException(nameof(core));
+            _newtonSerializer =  jsonSerializer ?? throw new ArgumentNullException(nameof(jsonSerializer));
         }
 
         /// <inheritdoc />
