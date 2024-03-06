@@ -13,12 +13,14 @@ namespace MyLab.Search.EsAdapter.Inter
     public class NewtonJsonEsSerializer : IElasticsearchSerializer
     {
         private readonly JsonSerializer _newtonSerializer;
-
+        
         /// <summary>
         /// Initializes a new instance of <see cref="NewtonJsonEsSerializer"/>
         /// </summary>
-        public NewtonJsonEsSerializer()
+        public NewtonJsonEsSerializer(JsonSerializer jsonSerializer)
         {
+            if (jsonSerializer == null) throw new ArgumentNullException(nameof(jsonSerializer));
+
             _newtonSerializer = new JsonSerializer();
         }
 
