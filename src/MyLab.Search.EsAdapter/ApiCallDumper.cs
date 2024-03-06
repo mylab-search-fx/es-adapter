@@ -13,7 +13,7 @@ namespace MyLab.Search.EsAdapter
         /// <summary>
         /// Creates string dump from <see cref="IApiCallDetails"/>
         /// </summary>
-        public static string ApiCallToDump(IApiCallDetails apiCall)
+        public static string ApiCallToDump(IApiCallDetails apiCall, bool includeBody = true)
         {
             var call = apiCall;
             var sb = new StringBuilder();
@@ -25,7 +25,9 @@ namespace MyLab.Search.EsAdapter
 
             if (call.RequestBodyInBytes != null)
             {
-                var formattedReqBody = DumpToString(call.RequestBodyInBytes, "application/json");
+                var formattedReqBody = includeBody 
+                    ? DumpToString(call.RequestBodyInBytes, "application/json")
+                    : "[body was excluded]";
                 sb.Append(formattedReqBody + "\n");
             }
             else
@@ -51,7 +53,9 @@ namespace MyLab.Search.EsAdapter
 
             if (call.ResponseBodyInBytes != null)
             {
-                var formattedRespBody = DumpToString(call.ResponseBodyInBytes, call.ResponseMimeType);
+                var formattedRespBody = includeBody 
+                    ? DumpToString(call.ResponseBodyInBytes, call.ResponseMimeType)
+                    : "[body was excluded]";
                 sb.Append(formattedRespBody+ "\n");
             }
             else

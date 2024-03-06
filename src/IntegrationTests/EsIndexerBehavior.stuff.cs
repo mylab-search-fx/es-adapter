@@ -17,24 +17,26 @@ namespace IntegrationTests
         private readonly string _indexName;
         private readonly IEsTools _esTools;
         private IAsyncDisposable _indexDeleter;
+        private readonly ITestOutputHelper _output;
 
         public EsIndexerBehavior(TestClientFixture fxt, ITestOutputHelper output)
         {
+            _output = output;
             fxt.Output = output;
             _client = fxt.Client;
             var esClientProvider = new SingleEsClientProvider(_client);
 
             _indexName = Guid.NewGuid().ToString("N");
 
-            _indexer = new EsIndexer(esClientProvider);
-            _esTools = new EsTools(esClientProvider);
+            _indexer = new EsIndexer(esClientProvider, TestTools.ResponseValidator);
+            _esTools = new EsTools(esClientProvider, TestTools.ResponseValidator);
         }
 
         private async Task<TestDoc> SearchAsync(string id)
         {
             var res = await _client.SearchAsync(GetSearchFunc());
 
-            EsException.ThrowIfInvalid(res);
+            TestTools.ResponseValidator.Validate(res);
 
             return res.Hits.FirstOrDefault()?.Source;
 

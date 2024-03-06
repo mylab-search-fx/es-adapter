@@ -26,7 +26,7 @@ namespace IntegrationTests
 
             _indexName = preindexFxt.IndexName;
 
-            _searcher = new EsSearcher(esClientProvider);
+            _searcher = new EsSearcher(esClientProvider, TestTools.ResponseValidator);
         }
 
         [Fact]

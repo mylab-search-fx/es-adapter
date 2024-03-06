@@ -65,6 +65,7 @@ namespace MyLab.Search.EsAdapter.Tools
     public class EsTools : IEsTools
     {
         private readonly IEsClientProvider _clientProvider;
+        private readonly IEsResponseValidator _responseValidator;
 
         /// <inheritdoc />
         public IEsSerializer Serializer { get; }
@@ -81,49 +82,50 @@ namespace MyLab.Search.EsAdapter.Tools
         /// <summary>
         /// Initializes a new instance of <see cref="EsTools"/>
         /// </summary>
-        public EsTools(IEsClientProvider clientProvider)
+        public EsTools(IEsClientProvider clientProvider, IEsResponseValidator responseValidator)
         {
             _clientProvider = clientProvider;
+            _responseValidator = responseValidator;
             Serializer = new EsSerializer(clientProvider);
-            Indexes = new EsIndexesTool(clientProvider);
-            Streams = new EsStreamsTool(clientProvider);
-            IndexTemplates = new EsIndexTemplatesTool(clientProvider);
+            Indexes = new EsIndexesTool(clientProvider, responseValidator);
+            Streams = new EsStreamsTool(clientProvider, responseValidator);
+            IndexTemplates = new EsIndexTemplatesTool(clientProvider, responseValidator);
         }
 
         /// <inheritdoc />
         public IEsIndexTool Index(string indexName)
         {
-            return new EsIndexTool(indexName, _clientProvider);
+            return new EsIndexTool(indexName, _clientProvider, _responseValidator);
         }
 
         /// <inheritdoc />
         public IEsStreamTool Stream(string streamName)
         {
-            return new EsStreamTool(streamName, _clientProvider);
+            return new EsStreamTool(streamName, _clientProvider, _responseValidator);
         }
 
         /// <inheritdoc />
         public IEsLifecyclePolicyTool LifecyclePolicy(string lifecyclePolicyId)
         {
-            return new EsLifecyclePolicyTool(lifecyclePolicyId, _clientProvider);
+            return new EsLifecyclePolicyTool(lifecyclePolicyId, _clientProvider, _responseValidator);
         }
 
         /// <inheritdoc />
         public IEsComponentTemplateTool ComponentTemplate(string componentTemplateName)
         {
-            return new EsComponentTemplateTool(componentTemplateName, _clientProvider);
+            return new EsComponentTemplateTool(componentTemplateName, _clientProvider, _responseValidator);
         }
 
         /// <inheritdoc />
         public IEsIndexTemplateTool IndexTemplate(string indexTemplateName)
         {
-            return new EsIndexTemplateTool(indexTemplateName, _clientProvider);
+            return new EsIndexTemplateTool(indexTemplateName, _clientProvider, _responseValidator);
         }
 
         /// <inheritdoc />
         public IEsAliasesTool Aliases()
         {
-            return new EsAliasesTool(_clientProvider);
+            return new EsAliasesTool(_clientProvider, _responseValidator);
         }
     }
 }

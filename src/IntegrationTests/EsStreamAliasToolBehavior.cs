@@ -22,10 +22,10 @@ namespace IntegrationTests
             _esClientProvider = new SingleEsClientProvider(client);
 
             var streamName = Guid.NewGuid().ToString("N");
-            _streamTool = new EsStreamTool(streamName, _esClientProvider);
+            _streamTool = new EsStreamTool(streamName, _esClientProvider, TestTools.ResponseValidator);
 
             var templateName = Guid.NewGuid().ToString("N");
-            _indexTemplateTool = new EsIndexTemplateTool(templateName, _esClientProvider);
+            _indexTemplateTool = new EsIndexTemplateTool(templateName, _esClientProvider, TestTools.ResponseValidator);
 
             _idxTemplateRequestFactory = d => d
                 .IndexPatterns(new[] { streamName })

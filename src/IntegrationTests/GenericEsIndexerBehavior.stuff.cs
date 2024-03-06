@@ -27,8 +27,8 @@ namespace IntegrationTests
             _indexName = Guid.NewGuid().ToString("N");
             
 
-            _esTools = new EsTools(esClientProvider);
-            var baseIndexer = new EsIndexer(esClientProvider);
+            _esTools = new EsTools(esClientProvider, TestTools.ResponseValidator);
+            var baseIndexer = new EsIndexer(esClientProvider, TestTools.ResponseValidator);
             _indexer = new EsIndexer<TestDoc>(baseIndexer, new SingleIndexNameProvider(_indexName));
         }
 
@@ -36,7 +36,7 @@ namespace IntegrationTests
         {
             var res = await _client.SearchAsync(GetSearchFunc());
 
-            EsException.ThrowIfInvalid(res);
+            TestTools.ResponseValidator.Validate(res);
 
             return res.Hits.FirstOrDefault()?.Source;
 

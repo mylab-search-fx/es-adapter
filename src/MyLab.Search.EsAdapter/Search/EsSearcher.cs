@@ -7,15 +7,24 @@ using Nest;
 
 namespace MyLab.Search.EsAdapter.Search
 {
+    /// <summary>
+    /// Default implementation for <see cref="IEsSearcher"/>
+    /// </summary>
     public class EsSearcher : IEsSearcher
     {
         private readonly IEsClientProvider _clientProvider;
+        private readonly IEsResponseValidator _responseValidator;
 
-        public EsSearcher(IEsClientProvider clientProvider)
+        /// <summary>
+        /// Initializes a new instance of <see cref="EsSearcher"/>
+        /// </summary>
+        public EsSearcher(IEsClientProvider clientProvider, IEsResponseValidator responseValidator)
         {
             _clientProvider = clientProvider;
+            _responseValidator = responseValidator;
         }
 
+        /// <inheritdoc />
         public async Task<EsFound<TDoc>> SearchAsync<TDoc>(
             string indexName, 
             EsSearchParams<TDoc> searchParams, 
@@ -24,11 +33,12 @@ namespace MyLab.Search.EsAdapter.Search
         {
             var resp = await _clientProvider.Provide().SearchAsync(GetSearchFunc(indexName, searchParams, null), cancellationToken);
 
-            EsException.ThrowIfInvalid(resp);
+            _responseValidator.Validate(resp);
 
             return EsFound<TDoc>.FromSearchResponse(resp);
         }
 
+        /// <inheritdoc />
         public async Task<EsHlFound<TDoc>> SearchAsync<TDoc>(
             string indexName, 
             EsSearchParams<TDoc> searchParams, 
@@ -38,7 +48,7 @@ namespace MyLab.Search.EsAdapter.Search
         {
             var resp = await _clientProvider.Provide().SearchAsync(GetSearchFunc(indexName, searchParams, highlight), cancellationToken);
 
-            EsException.ThrowIfInvalid(resp);
+            _responseValidator.Validate(resp);
 
             return EsHlFound<TDoc>.FromSearchResponse(resp);
         }

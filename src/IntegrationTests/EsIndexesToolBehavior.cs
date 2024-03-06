@@ -20,10 +20,10 @@ namespace IntegrationTests
         {
             fxt.Output = output;
             var esClientProvider = new SingleEsClientProvider(fxt.Client);
-            _indexesTool = new EsIndexesTool(esClientProvider);
+            _indexesTool = new EsIndexesTool(esClientProvider, TestTools.ResponseValidator);
 
             _testIndexName = Guid.NewGuid().ToString("N");
-            _testIndex = new EsIndexTool(_testIndexName, esClientProvider);
+            _testIndex = new EsIndexTool(_testIndexName, esClientProvider, TestTools.ResponseValidator);
         }
 
         [Fact]

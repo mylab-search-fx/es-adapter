@@ -1,7 +1,4 @@
 ﻿using System;
-using Elasticsearch.Net;
-using MyLab.Log;
-using Nest;
 
 namespace MyLab.Search.EsAdapter.Inter
 {
@@ -22,40 +19,6 @@ namespace MyLab.Search.EsAdapter.Inter
             : base(message, response.BaseException)
         {
             Response = response;
-        }
-
-        /// <summary>
-        /// Checks the response and throws an exception if response is invalid
-        /// </summary>
-        public static void ThrowIfInvalid(IResponse response, string errorMessage = null)
-        {
-            if(response.IsValid) return;
-
-            var ex = new EsException(errorMessage ?? "Elasticsearch interaction error", EsResponseDescription.FromResponse(response));
-            if (response.DebugInformation != null)
-                ex = ex.AndFactIs("debug-info", response.DebugInformation);
-            if(response.ServerError != null)
-                ex = ex.AndFactIs("server-error", response.ServerError);
-            //if(response.ApiCall != null)
-            //    ex = ex.AndFactIs("dump", ApiCallDumper.ApiCallToDump(response.ApiCall));
-
-            throw ex;
-        }
-
-        /// <summary>
-        /// Checks the response and throws an exception if response is invalid
-        /// </summary>
-        public static void ThrowIfInvalid(ElasticsearchResponseBase response, string errorMessage = null)
-        {
-            if (response.Success) return;
-
-            var ex = new EsException(errorMessage ?? "Elasticsearch interaction error", EsResponseDescription.FromResponse(response));
-            if (response.DebugInformation != null)
-                ex = ex.AndFactIs("debug-info", response.DebugInformation);
-            //if (response.ApiCall != null)
-            //    ex = ex.AndFactIs("dump", ApiCallDumper.ApiCallToDump(response.ApiCall));
-
-            throw ex;
         }
     }
 }

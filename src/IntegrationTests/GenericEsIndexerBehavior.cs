@@ -214,7 +214,7 @@ namespace IntegrationTests
 
             var searchResp = await _client.SearchAsync<TestDoc>(searchReq);
 
-            EsException.ThrowIfInvalid(searchResp);
+            TestTools.ResponseValidator.Validate(searchResp);
 
             var actualCreatedDoc = searchResp.Hits.FirstOrDefault(h => h.Id == docForCreate.Id)?.Source;
             var actualReplacedDoc = searchResp.Hits.FirstOrDefault(h => h.Id == docForReplace.Id)?.Source;
@@ -285,7 +285,7 @@ namespace IntegrationTests
 
             var searchResp = await _client.SearchAsync<TestDoc>(searchReq);
 
-            EsException.ThrowIfInvalid(searchResp);
+            TestTools.ResponseValidator.Validate(searchResp);
 
             var actualCreatedDoc = searchResp.Hits.FirstOrDefault(h => h.Id == docForCreate.Id)?.Source;
             var actualReplacedDoc = searchResp.Hits.FirstOrDefault(h => h.Id == docForReplace.Id)?.Source;

@@ -215,7 +215,7 @@ namespace IntegrationTests
 
             var searchResp = await _client.SearchAsync<TestDoc>(searchReq);
 
-            EsException.ThrowIfInvalid(searchResp);
+            TestTools.ResponseValidator.Validate(searchResp);
 
             var actualCreatedDoc = searchResp.Hits.FirstOrDefault(h => h.Id == docForCreate.Id)?.Source;
             var actualReplacedDoc = searchResp.Hits.FirstOrDefault(h => h.Id == docForReplace.Id)?.Source;
@@ -286,7 +286,7 @@ namespace IntegrationTests
 
             var searchResp = await _client.SearchAsync<TestDoc>(searchReq);
 
-            EsException.ThrowIfInvalid(searchResp);
+            TestTools.ResponseValidator.Validate(searchResp);
 
             var actualCreatedDoc = searchResp.Hits.FirstOrDefault(h => h.Id == docForCreate.Id)?.Source;
             var actualReplacedDoc = searchResp.Hits.FirstOrDefault(h => h.Id == docForReplace.Id)?.Source;
@@ -306,6 +306,87 @@ namespace IntegrationTests
             Assert.NotNull(actualUpdatedDoc);
             Assert.Equal(docUpdater.Content, actualUpdatedDoc.Content);
             Assert.Equal(docForUpdate.Content2, actualUpdatedDoc.Content2);
+        }
+
+        [Fact]
+        public async Task ShouldReturnBulkResult()
+        {
+            //Arrange
+            var docForCreate = TestDoc.Generate();
+            
+            var initialBulkReq = new EsBulkIndexingRequest<TestDoc>
+            {
+                CreateList = new[] { docForCreate }
+            };
+
+            //Act
+            var bulkResp = await _indexer.BulkAsync(_indexName, initialBulkReq);
+            
+            //Assert
+            Assert.NotNull(bulkResp);
+            Assert.False(bulkResp.Errors);
+            Assert.Contains(bulkResp.Items, itm => itm.Id == docForCreate.Id && itm.Operation == "create");
+        }
+
+        [Fact]
+        public async Task ShouldReturnBulkResultWithError()
+        {
+            //Arrange
+
+            var docForCreate = new WrongModel
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                Property = "some-value"
+            };
+            
+            var initialBulkReq = new EsBulkIndexingRequest<WrongModel>
+            {
+                CreateList = new[] { docForCreate }
+            };
+
+            var indexName = Guid.NewGuid().ToString("N");
+            var createIndexRequest = new CreateIndexRequest(indexName)
+            {
+                Mappings = new TypeMappingDescriptor<WrongModel>()
+                    .Properties(d => d.Keyword(kd => kd.Name(nameof(WrongModel.Id).ToLower())))
+                    .Properties(d => d.Number(od => od.Name(nameof(WrongModel.Property).ToLower())))
+            };
+
+            var indexer = new EsIndexer<WrongModel>(_indexer, new SingleIndexNameProvider(indexName));
+
+            BulkResponse bulkResp;
+
+            try
+            {
+                await _esTools.Indexes.CreateAsync(createIndexRequest);
+                
+                //Act
+                bulkResp = await indexer.BulkAsync(initialBulkReq);
+
+            }
+            finally
+            {
+                await _esTools.Indexes.DeleteAsync(d => d.Index(indexName));
+            }
+
+            var expectedWrongItem = bulkResp.ItemsWithErrors.SingleOrDefault(itm => itm.Id == docForCreate.Id);
+
+            //Assert
+            Assert.NotNull(bulkResp);
+            Assert.True(bulkResp.Errors);
+            Assert.Contains(bulkResp.Items, itm => itm.Id == docForCreate.Id && itm.Operation == "create");
+            Assert.Contains(bulkResp.ItemsWithErrors, itm => itm.Id == docForCreate.Id && itm.Operation == "create");
+            Assert.NotNull(expectedWrongItem);
+            Assert.False(expectedWrongItem.IsValid);
+            Assert.NotNull(expectedWrongItem.Error);
+        }
+
+        class WrongModel
+        {
+            [Keyword] 
+            public string Id { get; set; }
+            [Keyword]
+            public string Property { get; set; }
         }
     }
 }

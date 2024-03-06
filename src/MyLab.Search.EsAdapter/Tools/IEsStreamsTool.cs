@@ -55,10 +55,12 @@ namespace MyLab.Search.EsAdapter.Tools
     class EsStreamsTool : IEsStreamsTool
     {
         private readonly IEsClientProvider _clientProvider;
+        private readonly IEsResponseValidator _responseValidator;
 
-        public EsStreamsTool(IEsClientProvider clientProvider)
+        public EsStreamsTool(IEsClientProvider clientProvider, IEsResponseValidator responseValidator)
         {
             _clientProvider = clientProvider ?? throw new ArgumentNullException(nameof(clientProvider));
+            _responseValidator = responseValidator;
         }
         public async Task<IEnumerable<FoundStream>> GetAsync(
                 Func<GetDataStreamDescriptor, IGetDataStreamRequest> selector = null, 
@@ -68,10 +70,10 @@ namespace MyLab.Search.EsAdapter.Tools
             var response = await _clientProvider.Provide().Indices
                 .GetDataStreamAsync(null, selector, cancellationToken);
             
-            EsException.ThrowIfInvalid(response, "Unable to get streams");
+            _responseValidator.Validate(response, "Unable to get streams");
 
             return response.DataStreams.Select(i =>
-                new FoundStream(i.Name, i, new EsStreamTool(i.Name, _clientProvider))
+                new FoundStream(i.Name, i, new EsStreamTool(i.Name, _clientProvider, _responseValidator))
             );
         }
 
@@ -85,7 +87,7 @@ namespace MyLab.Search.EsAdapter.Tools
 
             var response = await _clientProvider.Provide().Indices.DeleteDataStreamAsync(oneName, _ => _, cancellationToken);
 
-            EsException.ThrowIfInvalid(response, "Unable to delete streams");
+            _responseValidator.Validate(response, "Unable to delete streams");
         }
 
         public async Task DeleteByNameOrWildcardExpressionAsync(
@@ -97,7 +99,7 @@ namespace MyLab.Search.EsAdapter.Tools
             
             var response = await _clientProvider.Provide().Indices.DeleteDataStreamAsync(nameOrWildcardExpression, _ => _, cancellationToken);
 
-            EsException.ThrowIfInvalid(response, "Unable to delete streams");
+            _responseValidator.Validate(response, "Unable to delete streams");
         }
 
         public async Task<IEsStreamTool> CreateAsync(
@@ -108,9 +110,9 @@ namespace MyLab.Search.EsAdapter.Tools
             var resp = await _clientProvider.Provide().Indices
                 .CreateDataStreamAsync(createRequest, cancellationToken);
 
-            EsException.ThrowIfInvalid(resp, "Unable to create the stream");
+            _responseValidator.Validate(resp, "Unable to create the stream");
 
-            return new EsStreamTool(createRequest.Name.ToString(), _clientProvider);
+            return new EsStreamTool(createRequest.Name.ToString(), _clientProvider, _responseValidator);
         }
     }
 }

@@ -44,18 +44,20 @@ namespace MyLab.Search.EsAdapter.Tools
     {
         private readonly string _policyId;
         private readonly IEsClientProvider _clientProvider;
+        private readonly IEsResponseValidator _responseValidator;
 
-        public EsLifecyclePolicyTool(string policyId, IEsClientProvider clientProvider)
+        public EsLifecyclePolicyTool(string policyId, IEsClientProvider clientProvider, IEsResponseValidator responseValidator)
         {
             _policyId = policyId;
             _clientProvider = clientProvider;
+            _responseValidator = responseValidator;
         }
 
         public async Task<IAsyncDisposable> PutAsync(IPutLifecycleRequest lifecycleRequest, CancellationToken cancellationToken)
         {
             var resp = await _clientProvider.Provide().IndexLifecycleManagement.PutLifecycleAsync(lifecycleRequest, cancellationToken);
 
-            EsException.ThrowIfInvalid(resp, "Unable to put the lifecycle");
+            _responseValidator.Validate(resp, "Unable to put the lifecycle");
 
             return new LifecycleDeleter(this);
         }
@@ -68,7 +70,7 @@ namespace MyLab.Search.EsAdapter.Tools
                 .DoRequestAsync<StringResponse>(HttpMethod.PUT, "_ilm/policy/" + _policyId, cancellationToken,
                     jsonRequest);
 
-            EsException.ThrowIfInvalid(resp, "Unable to put the lifecycle");
+            _responseValidator.Validate(resp, "Unable to put the lifecycle");
 
             return new LifecycleDeleter(this);
         }
@@ -80,7 +82,7 @@ namespace MyLab.Search.EsAdapter.Tools
             if (resp.ApiCall.HttpStatusCode == 404)
                 return null;
 
-            EsException.ThrowIfInvalid(resp, "Unable to get lifecycle");
+            _responseValidator.Validate(resp, "Unable to get lifecycle");
 
             return resp.Policies[_policyId];
         }
@@ -89,7 +91,7 @@ namespace MyLab.Search.EsAdapter.Tools
         {
             var resp = await _clientProvider.Provide().IndexLifecycleManagement.DeleteLifecycleAsync(_policyId, d => d, cancellationToken);
 
-            EsException.ThrowIfInvalid(resp, "Unable to delete lifecycle");
+            _responseValidator.Validate(resp, "Unable to delete lifecycle");
         }
 
         public async Task<bool> ExistsAsync(CancellationToken cancellationToken)
@@ -100,7 +102,7 @@ namespace MyLab.Search.EsAdapter.Tools
             if (resp.ApiCall.HttpStatusCode == 404)
                 return false;
 
-            EsException.ThrowIfInvalid(resp, "Unable to get lifecycle info");
+            _responseValidator.Validate(resp, "Unable to get lifecycle info");
 
             return true;
         }

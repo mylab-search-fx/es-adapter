@@ -19,7 +19,7 @@ namespace IntegrationTests
             _client = fxt.Client;
             var esClientProvider = new SingleEsClientProvider(_client);
             
-            _indexer = new EsIndexer(esClientProvider);
+            _indexer = new EsIndexer(esClientProvider, TestTools.ResponseValidator);
         }
 
         [Fact]
@@ -50,24 +50,14 @@ namespace IntegrationTests
         public async Task ShouldDetectIndexNotFoundWhenBulk()
         {
             //Arrange
-            EsException exception = null;
-
             var doc = TestDoc.Generate();
 
             //Act
-
-            try
-            {
-                await _indexer.BulkAsync<TestDoc>("foo", d => d.AddOperation(new BulkCreateOperation<TestDoc>(doc)));
-            }
-            catch (EsException e)
-            {
-                exception = e;
-            }
+            var bulkResp = await _indexer.BulkAsync<TestDoc>("foo", d => d.AddOperation(new BulkCreateOperation<TestDoc>(doc)));
+            var respDesc = EsResponseDescription.FromResponse(bulkResp);
 
             //Assert
-            Assert.NotNull(exception);
-            Assert.True(exception.Response.HasIndexNotFound);
+            Assert.True(respDesc.HasIndexNotFound);
         }
 
         public Task InitializeAsync()

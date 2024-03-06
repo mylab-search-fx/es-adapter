@@ -28,7 +28,7 @@ namespace IntegrationTests
             _esClientProvider = new SingleEsClientProvider(client);
             _lcId = Guid.NewGuid().ToString("N");
 
-            _lcTool = new EsLifecyclePolicyTool(_lcId, _esClientProvider);
+            _lcTool = new EsLifecyclePolicyTool(_lcId, _esClientProvider, TestTools.ResponseValidator);
 
             _lifecycleExampleJson = File.ReadAllText("Files\\lifecycle-example.json");
             _lifecycleExample2Json = File.ReadAllText("Files\\lifecycle-example-2.json");
@@ -83,7 +83,7 @@ namespace IntegrationTests
             var randomId = Guid.NewGuid().ToString("N");
 
             //Act
-            var exists = await new EsLifecyclePolicyTool(randomId, _esClientProvider).ExistsAsync(CancellationToken.None);
+            var exists = await new EsLifecyclePolicyTool(randomId, _esClientProvider, TestTools.ResponseValidator).ExistsAsync(CancellationToken.None);
 
             //Assert
             Assert.False(exists);
@@ -96,7 +96,7 @@ namespace IntegrationTests
             var randomId = Guid.NewGuid().ToString("N");
 
             //Act
-            var lifecycle = await new EsLifecyclePolicyTool(randomId, _esClientProvider).TryGetAsync(CancellationToken.None);
+            var lifecycle = await new EsLifecyclePolicyTool(randomId, _esClientProvider, TestTools.ResponseValidator).TryGetAsync(CancellationToken.None);
 
             //Assert
             Assert.Null(lifecycle);

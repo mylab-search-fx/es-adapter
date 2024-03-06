@@ -40,11 +40,11 @@ namespace MyLab.Search.EsAdapter.Indexing
         /// <summary>
         /// Process bulk indexing request
         /// </summary>
-        Task BulkAsync(EsBulkIndexingRequest<TDoc> request, CancellationToken cancellationToken = default);
+        Task<BulkResponse> BulkAsync(EsBulkIndexingRequest<TDoc> request, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Process bulk indexing request
         /// </summary>
-        Task BulkAsync(Func<BulkDescriptor, IBulkRequest> selector, CancellationToken cancellationToken = default);
+        Task<BulkResponse> BulkAsync(Func<BulkDescriptor, IBulkRequest> selector, CancellationToken cancellationToken = default);
     }
 }

@@ -22,10 +22,12 @@ namespace MyLab.Search.EsAdapter.Tools
     class EsAliasesTool : IEsAliasesTool
     {
         private readonly IEsClientProvider _clientProvider;
+        private readonly IEsResponseValidator _responseValidator;
 
-        public EsAliasesTool(IEsClientProvider clientProvider)
+        public EsAliasesTool(IEsClientProvider clientProvider, IEsResponseValidator responseValidator)
         {
             _clientProvider = clientProvider ?? throw new ArgumentNullException(nameof(clientProvider));
+            _responseValidator = responseValidator;
         }
 
         public async Task<IEnumerable<IEsAliasTool>> GetAliasesAsync(Func<GetAliasDescriptor, IGetAliasRequest> selector = null, CancellationToken cancellationToken = default)
@@ -35,11 +37,11 @@ namespace MyLab.Search.EsAdapter.Tools
             if (resp.ApiCall.HttpStatusCode == 404)
                 return Enumerable.Empty<IEsAliasTool>();
 
-            EsException.ThrowIfInvalid(resp);
+            _responseValidator.Validate(resp);
 
             return resp.Indices.SelectMany(idx =>
                 idx.Value.Aliases.Select(a =>
-                    new EsAliasTool(a.Key, idx.Key.Name, _clientProvider)
+                    new EsAliasTool(a.Key, idx.Key.Name, _clientProvider, _responseValidator)
                 )
             );
         }

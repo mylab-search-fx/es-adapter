@@ -27,7 +27,7 @@ namespace IntegrationTests
             _esClientProvider = new SingleEsClientProvider(client);
             var streamName = indexTemplateFxt.NamePrefix + "-" + Guid.NewGuid().ToString("N");
             
-            _strmTool = new EsStreamTool(streamName, _esClientProvider);
+            _strmTool = new EsStreamTool(streamName, _esClientProvider, TestTools.ResponseValidator);
 
             output.WriteLine("Index template: " + indexTemplateFxt.TemplateName);
             output.WriteLine("Name prefix: " + indexTemplateFxt.NamePrefix);
@@ -78,7 +78,7 @@ namespace IntegrationTests
             string randomStreamName = Guid.NewGuid().ToString("N");
 
             //Act
-            var exists = await new EsStreamTool(randomStreamName, _esClientProvider).ExistsAsync();
+            var exists = await new EsStreamTool(randomStreamName, _esClientProvider, TestTools.ResponseValidator).ExistsAsync();
 
             //Assert
             Assert.False(exists);

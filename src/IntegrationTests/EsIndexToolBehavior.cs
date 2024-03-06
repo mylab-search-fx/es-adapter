@@ -23,7 +23,7 @@ namespace IntegrationTests
             _esClientProvider = new SingleEsClientProvider(_client);
 
             _indexName = Guid.NewGuid().ToString("N");
-            _indexTool = new EsIndexTool(_indexName, _esClientProvider);
+            _indexTool = new EsIndexTool(_indexName, _esClientProvider, TestTools.ResponseValidator);
         }
 
         [Fact]
@@ -142,7 +142,7 @@ namespace IntegrationTests
             //Arrange
 
             //Act
-            var exists = await new EsIndexTool("absent", _esClientProvider).ExistsAsync();
+            var exists = await new EsIndexTool("absent", _esClientProvider, TestTools.ResponseValidator).ExistsAsync();
 
             //Assert
             Assert.False(exists);
@@ -154,7 +154,7 @@ namespace IntegrationTests
             //Arrange
 
             //Act
-            var indexInfo = await new EsIndexTool("absent", _esClientProvider).TryGetAsync();
+            var indexInfo = await new EsIndexTool("absent", _esClientProvider, TestTools.ResponseValidator).TryGetAsync();
 
             //Assert
             Assert.Null(indexInfo);
@@ -171,7 +171,7 @@ namespace IntegrationTests
             await using var deleter = await _indexTool.CreateAsync();
 
             var indexResp = await _client.IndexAsync(indexReq);
-            EsException.ThrowIfInvalid(indexResp);
+            TestTools.ResponseValidator.Validate(indexResp);
             await Task.Delay(1000);
 
             //Act
