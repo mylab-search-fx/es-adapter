@@ -9,8 +9,8 @@ namespace IntegrationTests
     class TestDoc
     {
         [Keyword(Name = "id")] public string Id { get; set; }
-        [Text(Name = "content")] public string Content { get; set; }
-        [Text(Name = "content2")] public string Content2 { get; set; }
+        [Text(Name = "content_1")] public string Content { get; set; }
+        [Text(Name = "Content_2")] public string Content2 { get; set; }
 
         public static TestDoc Generate(string id = null)
         {
