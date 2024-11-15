@@ -8,9 +8,13 @@ namespace IntegrationTests
     [ElasticsearchType(IdProperty = nameof(Id))]
     class TestDoc
     {
-        [Keyword(Name = "id")] public string Id { get; set; }
-        [Text(Name = "content_1")] public string Content { get; set; }
-        [Text(Name = "Content_2")] public string Content2 { get; set; }
+        public const string IdName = "id";
+        public const string ContentName = "content_1";
+        public const string Content2Name = "Content_2";
+
+        [Keyword(Name = IdName)] public string Id { get; set; }
+        [Text(Name = ContentName)] public string Content { get; set; }
+        [Text(Name = Content2Name)] public string Content2 { get; set; }
 
         public static TestDoc Generate(string id = null)
         {

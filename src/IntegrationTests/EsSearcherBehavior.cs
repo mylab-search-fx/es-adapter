@@ -110,7 +110,7 @@ namespace IntegrationTests
             //Act
             var found = await _searcher.SearchAsync(_indexName, request, highlight);
             var foundHl = found.FirstOrDefault()?.Highlights;
-            foundHl?.TryGetValue("content", out foundHlValue);
+            foundHl?.TryGetValue(TestDoc.ContentName, out foundHlValue);
 
             //Assert
             Assert.Equal("foo-<em>content</em>-0", foundHlValue);
